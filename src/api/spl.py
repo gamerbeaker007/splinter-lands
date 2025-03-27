@@ -95,3 +95,17 @@ def get_land_region_details(region):
         deeds = pd.DataFrame(result["deeds"])
         return  deeds, worksite_details, staking_details
     return pd.DataFrame()
+
+
+def get_land_resources_pools():
+    result =  fetch_api_data(f'{API_URLS['land']}land/liquidity/landpools', data_key='data')
+    if result:
+        return pd.DataFrame(result)
+    return pd.DataFrame()
+
+
+def get_prices():
+    result =  fetch_api_data(f'{API_URLS['prices']}prices')
+    if result:
+        return pd.DataFrame(result, index=[0])
+    return pd.DataFrame()

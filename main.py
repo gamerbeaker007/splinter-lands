@@ -1,4 +1,6 @@
+import importlib
 import logging
+import sys
 
 import streamlit as st
 from st_pages import get_nav_from_toml, add_page_title
@@ -6,15 +8,15 @@ from st_pages import get_nav_from_toml, add_page_title
 from src.pages import resource_metrics_page, region_metrics_page
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
 
-# def reload_all():
-#     """Reload all imported modules. workaround for streamlit to load also changed modules"""
-#     for module_name in list(sys.modules.keys()):
-#         # Reload only modules that are not built-in and not part of the standard library
-#         if module_name.startswith("src"):
-#             importlib.reload(sys.modules[module_name])
-#
-#
-# reload_all()
+def reload_all():
+    """Reload all imported modules. workaround for streamlit to load also changed modules"""
+    for module_name in list(sys.modules.keys()):
+        # Reload only modules that are not built-in and not part of the standard library
+        if module_name.startswith("src"):
+            importlib.reload(sys.modules[module_name])
+
+
+reload_all()
 
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level
@@ -49,8 +51,9 @@ else:
 placeholder = st.empty()
 
 # Dynamically call the page-specific function based on the selected page
-if pg.title == "SplinterLands":
+if pg.title == "Resource Metrics":
     with placeholder.container():
         resource_metrics_page.get_page()
+if pg.title == "Region Metrics":
     with placeholder.container():
         region_metrics_page.get_page()

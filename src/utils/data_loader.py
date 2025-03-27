@@ -17,7 +17,7 @@ LOCK_FILE =  os.path.join(DATA_BASE_DIR, 'refresh.lock')
 async def fetch_all_region_data():
     all_deeds = []
     all_worksite_details = []
-    all_staked_details = []
+    all_staking_details = []
 
     for region_number in range(1, 151):
         log.info(f'fetching data for region: {region_number}')
@@ -25,16 +25,16 @@ async def fetch_all_region_data():
 
         all_deeds.append(deed)
         all_worksite_details.append(worksite_details)
-        all_staked_details.append(staked_details)
+        all_staking_details.append(staked_details)
 
     # Combine the individual DataFrames into one for each category
     deeds_df = pd.concat(all_deeds, ignore_index=True)
     worksite_df = pd.concat(all_worksite_details, ignore_index=True)
-    staked_df = pd.concat(all_staked_details, ignore_index=True)
+    staking_df = pd.concat(all_staking_details, ignore_index=True)
     data_dict = {
         'deeds': deeds_df,
         'worksite_details': worksite_df,
-        'staked_details': staked_df,
+        'staking_details': staking_df,
 
     }
     save_data(data_dict)
