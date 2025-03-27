@@ -1,0 +1,7 @@
+venv
+.venv
+.idea
+data
+/.streamlit/secrets.toml
+/**/.coverage
+/**/coverage.xml
