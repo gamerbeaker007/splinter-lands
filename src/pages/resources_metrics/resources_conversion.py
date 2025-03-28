@@ -31,7 +31,12 @@ def resource_input(resource: str, icon_url: str):
 
 # Helper to show image and output label
 def resource_output(resource: str, icon_url: str, value: str):
-    st.image(icon_url, width=default_width/2.5)
+    st.markdown(f'''
+        <div style="text-align: left;">
+            <img src="{icon_url}" width="{default_width/2}" tabindex="-1">
+        </div>
+    ''', unsafe_allow_html=True)
+
     st.markdown(f"**{resource}: {value}**")
 
 
