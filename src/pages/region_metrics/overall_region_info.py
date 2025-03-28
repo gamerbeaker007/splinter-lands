@@ -36,8 +36,7 @@ def get_page(df):
                 f"Deeds: {token_df.index.size} ({total_active_deeds.index.size} Active)<br>" +
                 f"Active w/o Type: {active_empty.index.size}<br>" +
                 f"RAW PP: {total_raw_pp}<br>" +
-                f"BOOSTED PP: {total_boosted_pp}<br>" +
-                f"",
+                f"BOOSTED PP: {total_boosted_pp}<br>",
                 icon_map.get(token)
             )
 

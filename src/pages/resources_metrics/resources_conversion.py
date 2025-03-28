@@ -16,13 +16,22 @@ sing_style = """
 
 
 def resource_input(resource: str, icon_url: str):
-    st.image(icon_url, width=default_width)
-    return st.number_input(f"{resource}", min_value=0.0, step=1.0, key=f"input_{resource.lower()}")
+    st.markdown(f'''
+        <div style="text-align: center;">
+            <img src="{icon_url}" width="{default_width}" tabindex="-1">
+        </div>
+    ''', unsafe_allow_html=True)
+    return st.number_input(
+        "",
+        min_value=0.0,
+        step=1.0,
+        key=f"input_{resource.lower()}",
+    )
 
 
 # Helper to show image and output label
 def resource_output(resource: str, icon_url: str, value: str):
-    st.image(icon_url, width=default_width/2)
+    st.image(icon_url, width=default_width/2.5)
     st.markdown(f"**{resource}: {value}**")
 
 
@@ -32,19 +41,19 @@ def get_container(metrics_df, prices_df):
     with cols[0]:
         grain = resource_input("GRAIN", grain_icon_url)
     with cols[1]:
-        st.markdown(f'<p style="{sing_style}">+</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="{sing_style}" tabindex="-1">+</div>', unsafe_allow_html=True)
     with cols[2]:
         wood = resource_input("WOOD", wood_icon_url)
     with cols[3]:
-        st.markdown(f'<div style="{sing_style}">+</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="{sing_style}" tabindex="-1">+</div>', unsafe_allow_html=True)
     with cols[4]:
         stone = resource_input("STONE", stone_icon_url)
     with cols[5]:
-        st.markdown(f'<div style="{sing_style}">+</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="{sing_style}" tabindex="-1">+</div>', unsafe_allow_html=True)
     with cols[6]:
         iron = resource_input("IRON", iron_icon_url)
     with cols[7]:
-        st.markdown(f'<div style="{sing_style}">=</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="{sing_style}" tabindex="-1">=</div>', unsafe_allow_html=True)
     with cols[8]:
         # Perform conversion
         if not metrics_df.empty and not prices_df.empty:

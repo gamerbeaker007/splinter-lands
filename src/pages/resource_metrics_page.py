@@ -25,5 +25,4 @@ def get_page():
     Prices updated: {timestamp}
     """)
 
-    with st.container(height=300):
-        resources_conversion.get_container(metrics_df, prices_df)
+    resources_conversion.get_container(metrics_df, prices_df)
