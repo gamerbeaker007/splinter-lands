@@ -8,6 +8,7 @@ from st_pages import get_nav_from_toml, add_page_title
 from src.pages import resource_metrics_page, region_metrics_page
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
 
+
 def reload_all():
     """Reload all imported modules. workaround for streamlit to load also changed modules"""
     for module_name in list(sys.modules.keys()):
@@ -44,8 +45,6 @@ elif is_data_stale():
     st.sidebar.markdown(":large_orange_circle: Data Stale")
 else:
     st.sidebar.markdown(":large_green_circle: Data Ready")
-
-
 
 
 placeholder = st.empty()

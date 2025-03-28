@@ -1,13 +1,9 @@
-import streamlit as st
-
 import datetime
+
 import streamlit as st
-import pandas as pd
 
 from src.api import spl
 from src.pages.resources_metrics import resources_conversion
-from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, sps_icon_url
-
 
 
 # Initial load for metrics & prices
@@ -28,7 +24,6 @@ def get_page():
     Convert your resources to DEC/SPS.
     Prices updated: {timestamp}
     """)
-    
+
     with st.container(height=300):
         resources_conversion.get_container(metrics_df, prices_df)
-

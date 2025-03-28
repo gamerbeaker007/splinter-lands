@@ -1,9 +1,8 @@
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 import pandas as pd
 import requests
-import streamlit as st
 from requests.adapters import HTTPAdapter
 
 from src.api.logRetry import LogRetry
@@ -72,6 +71,7 @@ def fetch_api_data(address: str, params: Optional[Dict[str, Any]] = None,
         log.error(f"Error fetching {address}: {e}")
         return pd.DataFrame()
 
+
 def get_nested_value(response_dict: dict, key_path: str) -> Any:
     """
     Retrieve a nested value from a dictionary using dot-separated keys.
@@ -87,25 +87,25 @@ def get_nested_value(response_dict: dict, key_path: str) -> Any:
 
 
 def get_land_region_details(region):
-    result =  fetch_api_data(f'{API_URLS['land']}land/deeds', params={ "region_number": region}, data_key='data')
+    result = fetch_api_data(f'{API_URLS['land']}land/deeds', params={"region_number": region}, data_key='data')
 
     if result:
         worksite_details = pd.DataFrame(result["worksite_details"])
         staking_details = pd.DataFrame(result["staking_details"])
         deeds = pd.DataFrame(result["deeds"])
-        return  deeds, worksite_details, staking_details
+        return deeds, worksite_details, staking_details
     return pd.DataFrame()
 
 
 def get_land_resources_pools():
-    result =  fetch_api_data(f'{API_URLS['land']}land/liquidity/landpools', data_key='data')
+    result = fetch_api_data(f'{API_URLS['land']}land/liquidity/landpools', data_key='data')
     if result:
         return pd.DataFrame(result)
     return pd.DataFrame()
 
 
 def get_prices():
-    result =  fetch_api_data(f'{API_URLS['prices']}prices')
+    result = fetch_api_data(f'{API_URLS['prices']}prices')
     if result:
         return pd.DataFrame(result, index=[0])
     return pd.DataFrame()

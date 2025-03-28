@@ -12,7 +12,8 @@ log = logging.getLogger('Data Loader')
 
 DATA_BASE_DIR = 'data'
 TIMESTAMP_PATH = os.path.join(DATA_BASE_DIR, 'last_updated.txt')
-LOCK_FILE =  os.path.join(DATA_BASE_DIR, 'refresh.lock')
+LOCK_FILE = os.path.join(DATA_BASE_DIR, 'refresh.lock')
+
 
 async def fetch_all_region_data():
     all_deeds = []

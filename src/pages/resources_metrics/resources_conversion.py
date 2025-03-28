@@ -14,14 +14,17 @@ sing_style = """
     font-weight: bold;
 """
 
+
 def resource_input(resource: str, icon_url: str):
-        st.image(icon_url, width=default_width)
-        return st.number_input(f"{resource}", min_value=0.0, step=1.0, key=f"input_{resource.lower()}")
+    st.image(icon_url, width=default_width)
+    return st.number_input(f"{resource}", min_value=0.0, step=1.0, key=f"input_{resource.lower()}")
+
 
 # Helper to show image and output label
 def resource_output(resource: str, icon_url: str, value: str):
     st.image(icon_url, width=default_width/2)
     st.markdown(f"**{resource}: {value}**")
+
 
 def get_container(metrics_df, prices_df):
     # Inputs

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ExtendedEnum(Enum):
 
     @classmethod
@@ -14,5 +15,3 @@ class ExtendedEnum(Enum):
 class Format(ExtendedEnum):
     wild = 'wild'
     modern = 'modern'
-
-
