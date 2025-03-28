@@ -109,28 +109,32 @@ def prepare_data():
 
 
 def get_page():
-    st.title("Region")
-    all_region_date_df = prepare_data()
     date_str = get_last_updated()
+    if date_str:
+        st.title(f"Region from: {date_str.strftime('%Y-%m-%d')}")
 
-    df = get_overall_production_for_region(all_region_date_df)
+        all_region_date_df = prepare_data()
+        df = get_overall_production_for_region(all_region_date_df)
 
-    region_header.get_page(all_region_date_df)
-    overall_region_info.get_page(all_region_date_df)
+        region_header.get_page(all_region_date_df)
+        overall_region_info.get_page(all_region_date_df)
 
-    filter_regions = st.multiselect('Filter Regions', options=all_region_date_df.region_uid.unique().tolist())
-    if filter_regions:
-        df = df.loc[df.region_uid.isin(filter_regions)]
+        filter_regions = st.multiselect('Filter Regions', options=all_region_date_df.region_uid.unique().tolist())
+        if filter_regions:
+            df = df.loc[df.region_uid.isin(filter_regions)]
 
-    tab1, tab2 = st.tabs(['Active', 'Production'])
-    with tab1:
-        if not df.empty:
-            region_graphs.create_land_region_active_graph(df, date_str)
-    with tab2:
-        if not df.empty:
-            raw_cols = [col for col in df.columns if col.endswith("_raw_pp")]
-            resources = [col.replace("_raw_pp", "") for col in raw_cols]
-            selected_resource = st.selectbox("Select a resource", resources)
-            region_graphs.create_land_region_production_graph(df, selected_resource)
+        tab1, tab2, tab3 = st.tabs(['Active', 'Production', 'Overall Production'])
+        with tab1:
+            if not df.empty:
+                region_graphs.create_land_region_active_graph(df, date_str)
+            with tab2:
+                if not df.empty:
+                    raw_cols = [col for col in df.columns if col.endswith("_raw_pp")]
+                    resources = [col.replace("_raw_pp", "") for col in raw_cols]
+                    selected_resource = st.selectbox("Select a resource", resources)
+                    region_graphs.create_land_region_production_graph(df, selected_resource)
+        with tab3:
+            if not df.empty:
+                region_graphs.create_land_region_production_sum_graph(all_region_date_df, date_str)
 
-    st.dataframe(df, hide_index=True)
+        st.dataframe(df, hide_index=True)
