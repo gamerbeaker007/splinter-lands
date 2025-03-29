@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 
 from src.api import spl
+from src.api.db import region_resource_tracking, resource_metrics
 
 log = logging.getLogger('Data Loader')
 
@@ -36,8 +37,15 @@ async def fetch_all_region_data():
         'deeds': deeds_df,
         'worksite_details': worksite_df,
         'staking_details': staking_df,
-
     }
+
+    # store pp tracking (resource on daily bases)
+    df = merge_with_details(deeds_df, worksite_df, staking_df)
+    region_resource_tracking.upload_daily_resource_metrics(df)
+
+    # store daily resource metrics
+    resource_metrics.upload_land_resources_info()
+
     save_data(data_dict)
 
 
@@ -61,7 +69,7 @@ def is_data_stale():
     last_updated = get_last_updated()
     if not last_updated:
         return True
-    return (datetime.now() - last_updated).days >= 1
+    return datetime.now().date() > last_updated.date()
 
 
 def load_cached_data(name):
@@ -100,3 +108,13 @@ def safe_refresh_data():
         asyncio.run(fetch_all_region_data())
     finally:
         clear_refresh_lock()
+
+
+def merge_with_details(deeds, worksite_details, staking_details):
+    df = pd.merge(deeds, worksite_details, how='left', on='deed_uid', suffixes=('', '_worksite_details'))
+    df = pd.merge(df, staking_details, how='left', on='deed_uid', suffixes=('', '_staking_details'))
+
+    matching_columns = df.columns[df.columns.str.endswith(('_worksite_details', '_staking_details'))].tolist()
+    log.info(f'Reminder watch these columns: {matching_columns}')
+
+    return df.reindex(sorted(df.columns), axis=1)

@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 import streamlit as st
 
+from src.api.db import region_resource_tracking
 from src.graphs import region_graphs
 from src.pages.region_metrics import overall_region_info, region_header
 from src.utils.data_loader import load_cached_data, get_last_updated
@@ -104,7 +105,7 @@ def prepare_data():
 
     suffixes = ('_worksite_details', '_staking_details')
     matching_columns = [col for col in df.columns if col.endswith(suffixes)]
-    logging.info(f'Reminder whatch these columns {matching_columns}')
+    logging.info(f'Reminder watch these columns {matching_columns}')
     return df
 
 
@@ -135,6 +136,7 @@ def get_page():
                     region_graphs.create_land_region_production_graph(df, selected_resource)
         with tab3:
             if not df.empty:
-                region_graphs.create_land_region_production_sum_graph(all_region_date_df, date_str)
+                df = region_resource_tracking.get_latest_resources()
+                region_graphs.create_land_region_production_sum_graph(df, date_str)
 
         st.dataframe(df, hide_index=True)

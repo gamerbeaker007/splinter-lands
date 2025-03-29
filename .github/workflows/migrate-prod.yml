@@ -1,0 +1,36 @@
+name: Run Alembic Migration on Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  migrate:
+    name: Run Alembic Migrations
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🔍 Test DB connection
+        run: |
+          python -c "import sqlalchemy; print('Connected:', sqlalchemy.create_engine('${{ secrets.DATABASE_URL }}').connect().closed == 0)"
+
+      - name: 🛠 Run Alembic migrations
+        run: |
+          alembic upgrade head

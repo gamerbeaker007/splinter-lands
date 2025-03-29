@@ -3,6 +3,8 @@ import datetime
 import streamlit as st
 
 from src.api import spl
+from src.api.db import resource_metrics
+from src.graphs import resources_graphs
 from src.pages.resources_metrics import resources_conversion
 
 
@@ -26,3 +28,9 @@ def get_page():
     """)
 
     resources_conversion.get_container(metrics_df, prices_df)
+
+    resource_metrics.upload_land_resources_info()
+    df = resource_metrics.get_historical_data()
+    resources_graphs.create_land_resources_graph(df, False)
+    resources_graphs.create_land_resources_dec_graph(df, False)
+    resources_graphs.create_land_resources_factor_graph(df, False)

@@ -1,4 +1,3 @@
-import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -68,31 +67,8 @@ def create_land_region_production_graph(df, selected_resource):
 
 
 def create_land_region_production_sum_graph(df, date_str):
-    # 1. Prepare non-tax data
-    none_tax_df = df[df.token_symbol != 'TAX']
-    grouped_non_tax = none_tax_df.groupby('token_symbol').agg({
-        'total_harvest_pp': 'sum',
-        'total_base_pp_after_cap': 'sum'
-    }).reset_index()
-    grouped_non_tax['resource'] = grouped_non_tax['token_symbol']
-
-    # 2. Prepare tax data (split by worksite_type)
-    tax_df = df[df.token_symbol == 'TAX']
-    grouped_tax = tax_df.groupby('worksite_type').agg({
-        'total_harvest_pp': 'sum',
-        'total_base_pp_after_cap': 'sum'
-    }).reset_index()
-    grouped_tax['resource'] = 'TAX ' + grouped_tax['worksite_type'].str.replace('TAX ', '', regex=False)
-
-    # 3. Combine both
-    combined_df = pd.concat([
-        grouped_non_tax[['resource', 'total_harvest_pp', 'total_base_pp_after_cap']],
-        grouped_tax[['resource', 'total_harvest_pp', 'total_base_pp_after_cap']]
-    ], ignore_index=True)
-
-    # 4. Convert to millions
-    combined_df['total_harvest_pp_m'] = combined_df['total_harvest_pp'] / 1_000_000
-    combined_df['total_base_pp_after_cap_m'] = combined_df['total_base_pp_after_cap'] / 1_000_000
+    df['total_harvest_pp_m'] = df['total_harvest_pp'] / 1_000_000
+    df['total_base_pp_after_cap_m'] = df['total_base_pp_after_cap'] / 1_000_000
 
     # 5. Plot
     st.write('Active and inactive based on PP')
@@ -100,15 +76,15 @@ def create_land_region_production_sum_graph(df, date_str):
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
-        x=combined_df['resource'],
-        y=combined_df['total_base_pp_after_cap_m'],
+        x=df['resource'],
+        y=df['total_base_pp_after_cap_m'],
         name='RAW PP (M)',
         marker_color='steelblue',
     ))
 
     fig.add_trace(go.Bar(
-        x=combined_df['resource'],
-        y=combined_df['total_harvest_pp_m'],
+        x=df['resource'],
+        y=df['total_harvest_pp_m'],
         name='BOOSTED PP (M)',
         marker_color='lightgray',
     ))
@@ -123,4 +99,4 @@ def create_land_region_production_sum_graph(df, date_str):
     st.plotly_chart(fig, use_container_width=True)
 
     with st.expander("DATA", expanded=False):
-        st.dataframe(combined_df, hide_index=True)
+        st.dataframe(df, hide_index=True)

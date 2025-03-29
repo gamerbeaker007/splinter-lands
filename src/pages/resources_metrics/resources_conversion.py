@@ -22,10 +22,11 @@ def resource_input(resource: str, icon_url: str):
         </div>
     ''', unsafe_allow_html=True)
     return st.number_input(
-        "",
+        f'{resource}',
         min_value=0.0,
         step=1.0,
         key=f"input_{resource.lower()}",
+        label_visibility='hidden'
     )
 
 
