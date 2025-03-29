@@ -49,7 +49,8 @@ def upload_land_resources_info():
 
     # 5. Insert into DB
     if not engine.dialect.has_table(engine.connect(), RESOURCE_METRICS_TABLE_NAME):
-        raise RuntimeError(f"Table {RESOURCE_METRICS_TABLE_NAME} does not exist. Did you forget to run Alembic migrations?")
+        raise RuntimeError(f"Table {RESOURCE_METRICS_TABLE_NAME} does not exist."
+                           f" Did you forget to run Alembic migrations?")
 
     try:
         resources_df.to_sql(
