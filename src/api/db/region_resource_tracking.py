@@ -43,7 +43,7 @@ def upload_daily_resource_metrics(df):
     combined_df.insert(0, "date", date.today())
 
     if not engine.dialect.has_table(engine.connect(), PP_TRACKING_TABLE_NAME):
-        raise RuntimeError("Table 'resource_tracking' does not exist. Did you forget to run Alembic migrations?")
+        raise RuntimeError(f"Table {PP_TRACKING_TABLE_NAME} does not exist. Did you forget to run Alembic migrations?")
 
     # 5. Insert into DB
     try:
@@ -54,7 +54,7 @@ def upload_daily_resource_metrics(df):
             index=False,
             method="multi"  # batch insert for performance
         )
-        log.info(f"✅ Uploaded {len(combined_df)} records to 'resource_tracking'")
+        log.info(f"✅ Uploaded {len(combined_df)} records to {PP_TRACKING_TABLE_NAME}")
     except sqlalchemy.exc.IntegrityError as e:
         # This usually happens when a UNIQUE constraint is violated
         log.warning("⚠️ Duplicate entry detected. Likely already inserted.")

@@ -48,6 +48,9 @@ def upload_land_resources_info():
         resources_df.insert(0, "date", date.today())
 
     # 5. Insert into DB
+    if not engine.dialect.has_table(engine.connect(), RESOURCE_METRICS_TABLE_NAME):
+        raise RuntimeError(f"Table {RESOURCE_METRICS_TABLE_NAME} does not exist. Did you forget to run Alembic migrations?")
+
     try:
         resources_df.to_sql(
             name=RESOURCE_METRICS_TABLE_NAME,
@@ -56,7 +59,7 @@ def upload_land_resources_info():
             index=False,
             method="multi"  # batch insert for performance
         )
-        log.info(f"✅ Uploaded {len(resources_df)} records to 'resource_tracking'")
+        log.info(f"✅ Uploaded {len(resources_df)} records to {RESOURCE_METRICS_TABLE_NAME}")
     except sqlalchemy.exc.IntegrityError as e:
         # This usually happens when a UNIQUE constraint is violated
         log.warning("⚠️ Duplicate entry detected. Likely already inserted.")
