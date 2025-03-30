@@ -167,7 +167,7 @@ def get_page():
                     region_graphs.create_land_region_production_graph(df, selected_resource)
         with tab3:
             if not df.empty:
-                st.write('This all region data not filtered')
+                st.write('This is always all region data not filtered')
 
                 df_1 = pp_tracking.get_latest_resources()
                 region_graphs.create_land_region_production_sum_graph(df_1, date_str)
