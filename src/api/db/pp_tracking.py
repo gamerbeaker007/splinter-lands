@@ -44,11 +44,13 @@ def upload_daily_resource_metrics(df):
     upload.commit(combined_df, PP_TRACKING_TABLE_NAME)
 
 
+@st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
     query = f"SELECT * FROM {PP_TRACKING_TABLE_NAME}"
     return pd.read_sql(query, engine)
 
 
+@st.cache_data(ttl="1h")
 def get_latest_resources() -> pd.DataFrame:
     query = f"""
         SELECT *

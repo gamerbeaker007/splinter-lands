@@ -50,6 +50,7 @@ def upload_land_resources_info():
     upload.commit(resources_df, RESOURCE_METRICS_TABLE_NAME)
 
 
+@st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
     engine.dispose()
     query = f"SELECT * FROM public.{RESOURCE_METRICS_TABLE_NAME}"

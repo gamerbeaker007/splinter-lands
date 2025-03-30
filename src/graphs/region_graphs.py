@@ -1,5 +1,17 @@
 import plotly.graph_objects as go
 import streamlit as st
+import plotly.express as px
+
+COLOR_MAP = {
+    'GRAIN': "orange",
+    'IRON': "olive",
+    'RESEARCH': "lightblue",
+    'SPS': "yellow",
+    'STONE': "gray",
+    'WOOD': "saddlebrown",
+    'TAX CASTLE': "purple",
+    'TAX KEEP': "lightsalmon",
+}
 
 
 def create_land_region_active_graph(df, date_str):
@@ -122,32 +134,51 @@ def create_pp_per_source_type(df):
         st.dataframe(df, hide_index=True)
 
 
-def create_land_region_production_sum_graph(df, date_str):
-    df['total_harvest_pp_m'] = df['total_harvest_pp'] / 1_000_000
-    df['total_base_pp_after_cap_m'] = df['total_base_pp_after_cap'] / 1_000_000
+def create_land_region_production_sum_graph(df):
 
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
         x=df['resource'],
-        y=df['total_base_pp_after_cap_m'],
-        name='RAW PP (M)',
+        y=df['total_base_pp_after_cap'],
+        name='RAW PP',
         marker=dict(color='steelblue'),
     ))
 
     fig.add_trace(go.Bar(
         x=df['resource'],
-        y=df['total_harvest_pp_m'],
-        name='BOOSTED PP (M)',
+        y=df['total_harvest_pp'],
+        name='BOOSTED PP',
         marker=dict(color='lightgray'),
     ))
 
     fig.update_layout(
         barmode='group',
-        yaxis_title="PP (in Millions)",
-        xaxis_title="Resource / Worksite",
-        title="PP Comparison by Token and Worksite",
+        yaxis_title="PP",
+        xaxis_title="Resource",
+        title="Production Power (PP) by resource",
     )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("DATA", expanded=False):
+        st.dataframe(df, hide_index=True)
+
+
+def create_land_region_historical(df, log_y=True):
+    fig = px.line(
+        df,
+        x="date",
+        y="total_harvest_pp",
+        log_y=True if log_y else False,
+        color="resource",
+        title="Resource RAW PP history",
+        color_discrete_map=COLOR_MAP,
+        labels={"total_harvest_pp": "BOOSTED PP", "date": "Date"},
+        hover_data=["resource", "total_harvest_pp"],
+        height=600,
+    )
+    fig.for_each_trace(lambda t: t.update(mode="lines+markers"))
 
     st.plotly_chart(fig, use_container_width=True)
 

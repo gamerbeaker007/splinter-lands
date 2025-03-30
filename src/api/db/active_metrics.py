@@ -27,11 +27,13 @@ def upload_daily_active_metrics(df):
     upload.commit(result_df, ACTIVE_TABLE_NAME)
 
 
+@st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
     query = f"SELECT * FROM {ACTIVE_TABLE_NAME}"
     return pd.read_sql(query, engine)
 
 
+@st.cache_data(ttl="1h")
 def get_latest_active() -> pd.DataFrame:
     query = f"""
         SELECT *
