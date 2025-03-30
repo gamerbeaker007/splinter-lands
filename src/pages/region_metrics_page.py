@@ -108,6 +108,30 @@ def prepare_data():
     df = df.reindex(sorted(df.columns), axis=1)
     return df
 
+def group_by_resource(df, group_field):
+    return df.groupby(group_field).agg({
+        'total_harvest_pp': 'sum',
+        'total_base_pp_after_cap': 'sum'
+    }).reset_index()
+
+
+def get_per_resource_data(df):
+    # Non-tax resources
+    none_tax_df = df[df.token_symbol != 'TAX']
+    grouped_non_tax = group_by_resource(none_tax_df, 'token_symbol')
+    grouped_non_tax['resource'] = grouped_non_tax['token_symbol']
+
+    # Tax resources
+    tax_df = df[df.token_symbol == 'TAX']
+    grouped_tax = group_by_resource(tax_df, 'worksite_type')
+    grouped_tax['resource'] = 'TAX ' + grouped_tax['worksite_type'].str.removeprefix('TAX ')
+
+    # Combine
+    combined_df = pd.concat([
+        grouped_non_tax[['resource', 'total_harvest_pp', 'total_base_pp_after_cap']],
+        grouped_tax[['resource', 'total_harvest_pp', 'total_base_pp_after_cap']]
+    ], ignore_index=True)
+    return combined_df
 
 def get_page():
     date_str = get_last_updated()
@@ -158,13 +182,25 @@ def get_page():
 
             with tab2:
                 if not filtered_all_data.empty:
+                    col1, col2 = st.columns([1, 3])
+                    df = get_per_resource_data(filtered_all_data)
+                    with col1:
+                        st.write("TODO TOTAL SUM")
+                    # # total_harvest_pp, total_base_pp_after_cap
+                    # df = df.agg({'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum'}).reset_index()
+                    # region_graphs.create_total_production_power(df)
+                    with col2:
+                        region_graphs.create_pp_per_source_type(df)
+
+
                     df = get_production(filtered_all_data)
                     raw_cols = [col for col in df.columns if col.endswith("_raw_pp")]
 
                     resources = [col.replace("_raw_pp", "") for col in raw_cols]
                     selected_resource = st.selectbox("Select a resource", resources)
-
                     region_graphs.create_land_region_production_graph(df, selected_resource)
+
+
         with tab3:
             if not df.empty:
                 st.write('This is always all region data not filtered')

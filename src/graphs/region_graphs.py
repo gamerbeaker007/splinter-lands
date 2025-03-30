@@ -5,10 +5,8 @@ import streamlit as st
 def create_land_region_active_graph(df, date_str):
     df = df.copy()
 
-    # Step 4: Sort by active ascending
     df = df.sort_values(by='active', ascending=False)
 
-    # Step 5: Create the stacked bar chart
     fig = go.Figure(data=[
         go.Bar(name='Active', x=df['region_uid'], y=df['active']),
         go.Bar(name='Inactive', x=df['region_uid'], y=df['inactive'])
@@ -69,6 +67,57 @@ def create_land_region_production_graph(df, selected_resource):
 
     with st.expander("DATA", expanded=False):
         st.dataframe(df, hide_index=True)
+
+
+def create_total_production_power(df):
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        x=df['index'],
+        y=df['o'],
+        name='RAW PP',
+        marker_color='steelblue',
+    ))
+
+    fig.update_layout(
+        barmode='group',
+        yaxis_title="PP",
+        xaxis_title="Resource / Worksite",
+        title="PP Comparison by Token and Worksite",
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def create_pp_per_source_type(df):
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        x=df['resource'],
+        y=df['total_base_pp_after_cap'],
+        name='RAW PP',
+        marker_color='steelblue',
+    ))
+
+    fig.add_trace(go.Bar(
+        x=df['resource'],
+        y=df['total_harvest_pp'],
+        name='BOOSTED PP',
+        marker_color='lightgray',
+    ))
+
+    fig.update_layout(
+        barmode='group',
+        yaxis_title="PP",
+        xaxis_title="Resource / Worksite",
+        title="PP Comparison by Token and Worksite",
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("DATA", expanded=False):
+        st.dataframe(df, hide_index=True)
+
 
 
 def create_land_region_production_sum_graph(df, date_str):
