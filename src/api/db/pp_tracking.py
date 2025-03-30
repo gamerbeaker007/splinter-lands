@@ -2,10 +2,10 @@ import logging
 from datetime import date
 
 import pandas as pd
-import sqlalchemy
 import streamlit as st
 from sqlalchemy import create_engine
 
+from src.api.db import upload
 from src.models.models import PP_TRACKING_TABLE_NAME
 
 # Same URL as in alembic.ini
@@ -41,28 +41,7 @@ def upload_daily_resource_metrics(df):
 
     # Finalize
     combined_df.insert(0, "date", date.today())
-
-    if not engine.dialect.has_table(engine.connect(), PP_TRACKING_TABLE_NAME):
-        raise RuntimeError(f"Table {PP_TRACKING_TABLE_NAME} does not exist. Did you forget to run Alembic migrations?")
-
-    # 5. Insert into DB
-    try:
-        combined_df.to_sql(
-            name=PP_TRACKING_TABLE_NAME,
-            con=engine,
-            if_exists="append",  # append rows to existing table
-            index=False,
-            method="multi"  # batch insert for performance
-        )
-        log.info(f"✅ Uploaded {len(combined_df)} records to {PP_TRACKING_TABLE_NAME}")
-    except sqlalchemy.exc.IntegrityError as e:
-        # This usually happens when a UNIQUE constraint is violated
-        log.warning("⚠️ Duplicate entry detected. Likely already inserted.")
-        log.debug("Details:", exc_info=e)
-    except sqlalchemy.exc.OperationalError as e:
-        log.error("❌ Database operational error (e.g. table does not exist)", exc_info=e)
-    except Exception as e:
-        log.error("❌ Unexpected failure during database upload", exc_info=e)
+    upload.commit(combined_df, PP_TRACKING_TABLE_NAME)
 
 
 def get_historical_data() -> pd.DataFrame:

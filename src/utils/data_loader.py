@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 from src.api import spl
-from src.api.db import region_resource_tracking, resource_metrics
+from src.api.db import pp_tracking, resource_metrics, active_metrics
 
 log = logging.getLogger('Data Loader')
 
@@ -41,10 +41,13 @@ async def fetch_all_region_data():
 
     # store pp tracking (resource on daily bases)
     df = merge_with_details(deeds_df, worksite_df, staking_df)
-    region_resource_tracking.upload_daily_resource_metrics(df)
+    pp_tracking.upload_daily_resource_metrics(df)
 
     # store daily resource metrics
     resource_metrics.upload_land_resources_info()
+
+    # store daily active metrics
+    active_metrics.upload_daily_active_metrics(df)
 
     save_data(data_dict)
 

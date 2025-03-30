@@ -1,13 +1,12 @@
 import logging
-
-import sqlalchemy
-import streamlit as st
 from datetime import date
 
 import pandas as pd
+import streamlit as st
 from sqlalchemy import create_engine
 
 from src.api import spl
+from src.api.db import upload
 from src.models.models import RESOURCE_METRICS_TABLE_NAME
 
 # Same URL as in alembic.ini
@@ -39,7 +38,8 @@ def upload_land_resources_info():
     resources_df = spl.get_land_resources_pools()
 
     if not resources_df.empty:
-        resources_df['dec_usd_value'] = spl.get_prices()['dec']
+        dec_price = spl.get_prices()['dec'].values[0]
+        resources_df['dec_usd_value'] = float(dec_price)
         grain_price = resources_df[resources_df['token_symbol'] == 'GRAIN']['resource_price'].values[0]
 
         resources_df[['grain_equivalent', 'factor']] = resources_df.apply(
@@ -47,30 +47,10 @@ def upload_land_resources_info():
         )
         resources_df.insert(0, "date", date.today())
 
-    # 5. Insert into DB
-    if not engine.dialect.has_table(engine.connect(), RESOURCE_METRICS_TABLE_NAME):
-        raise RuntimeError(f"Table {RESOURCE_METRICS_TABLE_NAME} does not exist."
-                           f" Did you forget to run Alembic migrations?")
-
-    try:
-        resources_df.to_sql(
-            name=RESOURCE_METRICS_TABLE_NAME,
-            con=engine,
-            if_exists="append",  # append rows to existing table
-            index=False,
-            method="multi"  # batch insert for performance
-        )
-        log.info(f"✅ Uploaded {len(resources_df)} records to {RESOURCE_METRICS_TABLE_NAME}")
-    except sqlalchemy.exc.IntegrityError as e:
-        # This usually happens when a UNIQUE constraint is violated
-        log.warning("⚠️ Duplicate entry detected. Likely already inserted.")
-        log.debug("Details:", exc_info=e)
-    except sqlalchemy.exc.OperationalError as e:
-        log.error("❌ Database operational error (e.g. table does not exist)", exc_info=e)
-    except Exception as e:
-        log.error("❌ Unexpected failure during database upload", exc_info=e)
+    upload.commit(resources_df, RESOURCE_METRICS_TABLE_NAME)
 
 
 def get_historical_data() -> pd.DataFrame:
-    query = f"SELECT * FROM {RESOURCE_METRICS_TABLE_NAME}"
+    engine.dispose()
+    query = f"SELECT * FROM public.{RESOURCE_METRICS_TABLE_NAME}"
     return pd.read_sql(query, engine)

@@ -7,6 +7,7 @@ Base = declarative_base()
 
 PP_TRACKING_TABLE_NAME = "pp_tracking"
 RESOURCE_METRICS_TABLE_NAME = "resource_metrics"
+ACTIVE_TABLE_NAME = "active_metrics"
 
 
 class PPTracking(Base):
@@ -15,6 +16,13 @@ class PPTracking(Base):
     resource = Column(String, primary_key=True)
     total_harvest_pp = Column(BigInteger)
     total_base_pp_after_cap = Column(BigInteger)
+
+
+class Active(Base):
+    __tablename__ = ACTIVE_TABLE_NAME
+    date = Column(Date, primary_key=True)
+    active_based_on_pp = Column(BigInteger)
+    active_based_on_in_use = Column(BigInteger)
 
 
 class ResourceMetrics(Base):

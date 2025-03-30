@@ -4,7 +4,6 @@ import streamlit as st
 
 def create_land_region_active_graph(df, date_str):
     df = df.copy()
-    df['inactive'] = 1000 - df['active']
 
     # Step 4: Sort by active ascending
     df = df.sort_values(by='active', ascending=False)
@@ -25,6 +24,9 @@ def create_land_region_active_graph(df, date_str):
         legend=dict(x=0.85, y=0.95),
     )
     st.plotly_chart(fig, theme="streamlit")
+
+    with st.expander("DATA", expanded=False):
+        st.dataframe(df, hide_index=True)
 
 
 def create_land_region_production_graph(df, selected_resource):
@@ -65,13 +67,13 @@ def create_land_region_production_graph(df, selected_resource):
 
     st.plotly_chart(fig, use_container_width=True)
 
+    with st.expander("DATA", expanded=False):
+        st.dataframe(df, hide_index=True)
+
 
 def create_land_region_production_sum_graph(df, date_str):
     df['total_harvest_pp_m'] = df['total_harvest_pp'] / 1_000_000
     df['total_base_pp_after_cap_m'] = df['total_base_pp_after_cap'] / 1_000_000
-
-    # 5. Plot
-    st.write('Active and inactive based on PP')
 
     fig = go.Figure()
 
