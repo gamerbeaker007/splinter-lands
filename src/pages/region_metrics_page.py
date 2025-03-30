@@ -108,6 +108,7 @@ def prepare_data():
     df = df.reindex(sorted(df.columns), axis=1)
     return df
 
+
 def group_by_resource(df, group_field):
     return df.groupby(group_field).agg({
         'total_harvest_pp': 'sum',
@@ -132,6 +133,7 @@ def get_per_resource_data(df):
         grouped_tax[['resource', 'total_harvest_pp', 'total_base_pp_after_cap']]
     ], ignore_index=True)
     return combined_df
+
 
 def get_page():
     date_str = get_last_updated()

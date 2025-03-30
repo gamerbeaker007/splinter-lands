@@ -122,7 +122,6 @@ def create_pp_per_source_type(df):
         st.dataframe(df, hide_index=True)
 
 
-
 def create_land_region_production_sum_graph(df, date_str):
     df['total_harvest_pp_m'] = df['total_harvest_pp'] / 1_000_000
     df['total_base_pp_after_cap_m'] = df['total_base_pp_after_cap'] / 1_000_000

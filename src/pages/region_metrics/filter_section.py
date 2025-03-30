@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 def get_page(df):
     with st.container(border=True):
         st.subheader("Filter Options:")
@@ -59,7 +60,4 @@ def get_page(df):
             if filter_plot_status:
                 filtered_all_data = filtered_all_data.loc[filtered_all_data.plot_status.isin(filter_plot_status)]
 
-
-
     return filtered_all_data
-
