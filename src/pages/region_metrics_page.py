@@ -5,7 +5,7 @@ import streamlit as st
 
 from src.api.db import pp_tracking
 from src.graphs import region_graphs
-from src.pages.region_metrics import overall_region_info, region_header
+from src.pages.region_metrics import overall_region_info, region_header, filter_section
 from src.utils.data_loader import load_cached_data, get_last_updated
 
 transaction_fee = 0.90  # 10% fee
@@ -142,22 +142,7 @@ def get_page():
         region_header.get_page(all_df)
         overall_region_info.get_page(all_df)
 
-        with st.container(border=True):
-            st.subheader("Filter Options:")
-            col1, col2, col3 = st.columns(3)
-            filtered_all_data = all_df.copy()
-            with col1:
-                filter_regions = st.multiselect('Regions', options=filtered_all_data.region_uid.unique().tolist())
-                if filter_regions:
-                    filtered_all_data = filtered_all_data.loc[filtered_all_data.region_uid.isin(filter_regions)]
-            with col2:
-                filter_tract = st.multiselect('Tracts', options=filtered_all_data.tract_number.unique().tolist())
-                if filter_tract:
-                    filtered_all_data = filtered_all_data.loc[filtered_all_data.tract_number.isin(filter_tract)]
-            with col3:
-                filter_plot = st.multiselect('Plots', options=filtered_all_data.plot_number.unique().tolist())
-                if filter_plot:
-                    filtered_all_data = filtered_all_data.loc[filtered_all_data.plot_number.isin(filter_plot)]
+        filtered_all_data = filter_section.get_page(all_df)
 
         tab1, tab2, tab3 = st.tabs(['Active', 'Production', 'Region Production Overview'])
         with tab1:
@@ -184,29 +169,31 @@ def get_page():
                 if not filtered_all_data.empty:
                     col1, col2 = st.columns([1, 3])
                     df = get_per_resource_data(filtered_all_data)
-                    with col1:
-                        st.write("TODO TOTAL SUM")
-                    # # total_harvest_pp, total_base_pp_after_cap
-                    # df = df.agg({'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum'}).reset_index()
-                    # region_graphs.create_total_production_power(df)
-                    with col2:
-                        region_graphs.create_pp_per_source_type(df)
+                    if not df.empty:
+                        with col1:
+                            totals = {
+                                'RAW PP': df['total_base_pp_after_cap'].sum(),
+                                'BOOSTED PP': df['total_harvest_pp'].sum()
+                            }
+                            df_1 = pd.DataFrame(list(totals.items()), columns=['Type', 'Total PP'])
+                            region_graphs.create_total_production_power(df_1)
+                        with col2:
+                            region_graphs.create_pp_per_source_type(df)
 
+                        df = get_production(filtered_all_data)
+                        raw_cols = [col for col in df.columns if col.endswith("_raw_pp")]
 
-                    df = get_production(filtered_all_data)
-                    raw_cols = [col for col in df.columns if col.endswith("_raw_pp")]
-
-                    resources = [col.replace("_raw_pp", "") for col in raw_cols]
-                    selected_resource = st.selectbox("Select a resource", resources)
-                    region_graphs.create_land_region_production_graph(df, selected_resource)
-
+                        resources = [col.replace("_raw_pp", "") for col in raw_cols]
+                        selected_resource = st.selectbox("Select a resource", resources)
+                        region_graphs.create_land_region_production_graph(df, selected_resource)
+                    else:
+                        st.warning("No active deed found")
 
         with tab3:
-            if not df.empty:
-                st.write('This is always all region data not filtered')
+            st.write('This is always all region data not filtered')
 
-                df_1 = pp_tracking.get_latest_resources()
-                region_graphs.create_land_region_production_sum_graph(df_1, date_str)
+            df_1 = pp_tracking.get_latest_resources()
+            region_graphs.create_land_region_production_sum_graph(df_1, date_str)
 
 
 def get_active_df(df):

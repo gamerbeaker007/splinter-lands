@@ -42,7 +42,7 @@ def create_land_region_production_graph(df, selected_resource):
         x=plot_df[raw_col],
         name='Raw PP',
         orientation='h',
-        marker_color='steelblue',
+        marker=dict(color='steelblue'),
         offsetgroup=0
     ))
 
@@ -51,7 +51,7 @@ def create_land_region_production_graph(df, selected_resource):
         x=plot_df[boosted_col],
         name='Boosted PP',
         orientation='h',
-        marker_color='orange',
+        marker=dict(color='lightgray'),
         offsetgroup=1
     ))
 
@@ -73,20 +73,23 @@ def create_total_production_power(df):
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
-        x=df['index'],
-        y=df['o'],
+        x=df['Type'],
+        y=df['Total PP'],
         name='RAW PP',
-        marker_color='steelblue',
+        marker=dict(color=['steelblue', 'lightgray'])
     ))
 
     fig.update_layout(
         barmode='group',
         yaxis_title="PP",
-        xaxis_title="Resource / Worksite",
-        title="PP Comparison by Token and Worksite",
+        xaxis_title="Resource",
+        title="Total PP",
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("DATA"):
+        st.dataframe(df)
 
 
 def create_pp_per_source_type(df):
@@ -96,21 +99,21 @@ def create_pp_per_source_type(df):
         x=df['resource'],
         y=df['total_base_pp_after_cap'],
         name='RAW PP',
-        marker_color='steelblue',
+        marker=dict(color='steelblue'),
     ))
 
     fig.add_trace(go.Bar(
         x=df['resource'],
         y=df['total_harvest_pp'],
         name='BOOSTED PP',
-        marker_color='lightgray',
+        marker=dict(color='lightgray'),
     ))
 
     fig.update_layout(
         barmode='group',
         yaxis_title="PP",
-        xaxis_title="Resource / Worksite",
-        title="PP Comparison by Token and Worksite",
+        xaxis_title="Resource",
+        title="PP Comparison by resource",
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -130,14 +133,14 @@ def create_land_region_production_sum_graph(df, date_str):
         x=df['resource'],
         y=df['total_base_pp_after_cap_m'],
         name='RAW PP (M)',
-        marker_color='steelblue',
+        marker=dict(color='steelblue'),
     ))
 
     fig.add_trace(go.Bar(
         x=df['resource'],
         y=df['total_harvest_pp_m'],
         name='BOOSTED PP (M)',
-        marker_color='lightgray',
+        marker=dict(color='lightgray'),
     ))
 
     fig.update_layout(
