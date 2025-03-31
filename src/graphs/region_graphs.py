@@ -104,7 +104,7 @@ def create_total_production_power(df):
         st.dataframe(df)
 
 
-def create_pp_per_source_type(df, key=None, title=None):
+def create_pp_per_source_type(df, key=None, title=None, slim=False):
     fig = go.Figure()
 
     custom_order = ["GRAIN", "IRON", "WOOD", "STONE", "SPS", "RESEARCH", "TAX KEEP", "TAX CASTLE"]
@@ -135,19 +135,21 @@ def create_pp_per_source_type(df, key=None, title=None):
 
     plot_title = "PP Comparison by resource"
     if title:
-        plot_title = f'{plot_title} ({title})'
+        plot_title = f'{title}'
 
     fig.update_layout(
         barmode='group',
         yaxis_title="PP",
         xaxis_title="Resource",
         title=plot_title,
+        showlegend=False if slim else True
     )
 
     st.plotly_chart(fig, use_container_width=True, key=key)
 
-    with st.expander("DATA", expanded=False):
-        st.dataframe(df, hide_index=True)
+    if not slim:
+        with st.expander("DATA", expanded=False):
+            st.dataframe(df, hide_index=True)
 
 
 def create_land_region_production_sum_graph(df):
