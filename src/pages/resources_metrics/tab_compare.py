@@ -37,7 +37,6 @@ def plot_by_group(filtered_df, group_col, label_prefix):
         else:
             combined_df = combined_df.join(renamed, how='outer')
 
-
     with st.expander("DATA"):
         st.dataframe(combined_df)
 
@@ -45,12 +44,14 @@ def plot_by_group(filtered_df, group_col, label_prefix):
 def get_page(filtered_all_data):
     plot_by = st.radio("Select compare method", options=["By Region", "By Tract"])
 
-    st.markdown(f"""
+    st.markdown("""
     ### PP comparison by resource
-    <span style="display: inline-block; width: 12px; height: 12px; background-color: steelblue; margin-right: 6px;"></span>
+    <span style="display: inline-block;
+    width: 12px; height: 12px; background-color: steelblue; margin-right: 6px;"></span>
     RAW PP
-    <span style="display: inline-block; width: 20px; height: 3px; background-color: lightgray; margin-right: 6px; vertical-align: middle;"></span>
-    BOOSTED PP    
+    <span style="display: inline-block;
+    width: 20px; height: 3px; background-color: lightgray; margin-right: 6px; vertical-align: middle;"></span>
+    BOOSTED PP
     """, unsafe_allow_html=True)
 
     st.markdown("""
