@@ -104,8 +104,19 @@ def create_total_production_power(df):
         st.dataframe(df)
 
 
-def create_pp_per_source_type(df):
+def create_pp_per_source_type(df, key=None, title=None):
     fig = go.Figure()
+
+    custom_order = ["GRAIN", "IRON", "WOOD", "STONE", "SPS", "RESEARCH", "TAX KEEP", "TAX CASTLE"]
+
+    # Create a mapping from resource to order index
+    order_map = {name: i for i, name in enumerate(custom_order)}
+
+    # Apply the mapping, unknowns get a large number to push them to the end
+    df['sort_order'] = df['resource'].map(order_map).fillna(len(custom_order))
+
+    # Sort by this order
+    df = df.sort_values('sort_order').drop(columns='sort_order').reset_index(drop=True)
 
     fig.add_trace(go.Bar(
         x=df['resource'],
@@ -114,21 +125,26 @@ def create_pp_per_source_type(df):
         marker=dict(color='steelblue'),
     ))
 
-    fig.add_trace(go.Bar(
+    fig.add_trace(go.Scatter(
         x=df['resource'],
         y=df['total_harvest_pp'],
         name='BOOSTED PP',
+        mode='lines',
         marker=dict(color='lightgray'),
     ))
+
+    plot_title = "PP Comparison by resource"
+    if title:
+        plot_title = f'{plot_title} ({title})'
 
     fig.update_layout(
         barmode='group',
         yaxis_title="PP",
         xaxis_title="Resource",
-        title="PP Comparison by resource",
+        title=plot_title,
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key=key)
 
     with st.expander("DATA", expanded=False):
         st.dataframe(df, hide_index=True)
