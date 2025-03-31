@@ -7,14 +7,21 @@ from src.pages.resources_metrics.tab_production import get_per_resource_data
 
 log = logging.getLogger("Tab - production")
 
+MAX_NUMBER_OF_PLOTS = 6
+
 
 def plot_by_group(filtered_df, group_col, label_prefix):
     groups = filtered_df[group_col].unique().tolist()
     cols = st.columns(3)  # create 3 columns
 
     combined_df = None  # This will hold all data side-by-side
+    if len(groups) > MAX_NUMBER_OF_PLOTS:
+        st.warning(f"Refine filters to many plot limited to {MAX_NUMBER_OF_PLOTS}")
 
     for i, group in enumerate(groups):
+        if i == MAX_NUMBER_OF_PLOTS:
+            break
+
         group_df = filtered_df.loc[filtered_df[group_col] == group]
         title = f"{label_prefix}: {group}"
         group_df = get_per_resource_data(group_df)
