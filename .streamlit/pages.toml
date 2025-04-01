@@ -1,0 +1,11 @@
+[[pages]]
+path = 'src/pages/resource_metrics_page.py'
+name = 'Resource Metrics'
+icon = ':coin:'
+
+[[pages]]
+path = 'src/pages/region_metrics_page.py'
+name = 'Region Metrics'
+icon = ':coin:'
+
+
