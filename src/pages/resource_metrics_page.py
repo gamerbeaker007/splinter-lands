@@ -30,6 +30,6 @@ def get_page():
     resources_conversion.get_container(metrics_df, prices_df)
 
     df = resource_metrics.get_historical_data()
-    resources_graphs.create_land_resources_graph(df, False)
-    resources_graphs.create_land_resources_dec_graph(df, False)
+    resources_graphs.create_land_resources_graph(df, True)
+    resources_graphs.create_land_resources_dec_graph(df, True)
     resources_graphs.create_land_resources_factor_graph(df, False)
