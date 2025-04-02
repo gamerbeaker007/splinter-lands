@@ -1,4 +1,5 @@
 
+SPL_WEB_URL = 'https://next.splinterlands.com/'
 WEB_URL = 'https://d36mxiodymuqjm.cloudfront.net/'
 
 
