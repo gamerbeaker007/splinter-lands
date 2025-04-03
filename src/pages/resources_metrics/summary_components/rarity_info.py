@@ -40,12 +40,16 @@ def print_rarity(df):
     for _, row in rarities.iterrows():
         rarity = row['rarity']
         count = row['count']
+
+        path = "assets/lands/sideMenu/"
+        extra_style = """style="width: 50px; min-height: 50px" """
+
         if rarity == 'Unknown':
-            image_html = '<div style="font-size: 24px;">❓</div>'
+            image_html = '<div style="font-size: 30px;">❓</div>'
         elif rarity == 'mythic':
-            image_html = f"""<img src="{SPL_WEB_URL}assets/lands/sideMenu/legendaryOff.svg" alt="{rarity}">"""
+            image_html = f"""<img src="{SPL_WEB_URL}{path}legendaryOff.svg" alt="{rarity}" {extra_style}>"""
         else:
-            image_html = f"""<img src="{SPL_WEB_URL}assets/lands/sideMenu/{rarity.lower()}Off.svg" alt="{rarity}">"""
+            image_html = f"""<img src="{SPL_WEB_URL}{path}{rarity.lower()}Off.svg" alt="{rarity}" {extra_style}>"""
 
         html_blocks += f"""
         <div class="rarity-item">

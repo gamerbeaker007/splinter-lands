@@ -33,8 +33,8 @@ def print_plot_status(df):
             box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
         .plot-status-item img {
-            max-width: 80px;
-            height: auto;
+            width: 50px;
+            max-height: 50px;
         }
         </style>
         <div class="plot-status-grid">
@@ -46,7 +46,7 @@ def print_plot_status(df):
         count = row['count']
 
         if plot_status == 'Unknown':
-            image_html = '<div style="font-size: 24px;">❓</div>'
+            image_html = '<div style="font-size: 30px;">❓</div>'
         else:
             image_url = f"{SPL_WEB_URL}assets/lands/sideMenu/{plot_status.lower()}Off.svg"
             image_html = f'<img src="{image_url}" alt="{plot_status}">'

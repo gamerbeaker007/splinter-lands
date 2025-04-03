@@ -41,11 +41,14 @@ def print_deed_types(df):
         deed_type = row['deed_type']
         count = row['count']
 
+        path = "assets/lands/deedAssets/"
+        extra_style = """style="width: 50px; min-height: 50px" """
+
         if deed_type == 'Unsurveyed Deed':
-            image_html = '<div style="font-size: 24px;">❓</div>'
+            image_html = '<div style="font-size: 30px;">❓</div>'
         else:
-            image_url = f"{SPL_WEB_URL}assets/lands/deedAssets/img_geography-emblem_{deed_type.lower()}.svg"
-            image_html = f'<img src="{image_url}" alt="{deed_type}">'
+            image_url = f"{SPL_WEB_URL}{path}img_geography-emblem_{deed_type.lower()}.svg"
+            image_html = f'<img src="{image_url}" alt="{deed_type}" {extra_style}>'
 
         html_blocks += f"""
         <div class="deed-item">
