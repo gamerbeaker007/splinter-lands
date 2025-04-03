@@ -156,7 +156,7 @@ def by_select():
 def get_container_2(resource_pool_metric):
     st.markdown("## Calculate research cost")
     with st.container(border=True):
-        choice = st.radio("Select method", options=["By PP", "By select", "By deed list"])
+        choice = st.radio("Select method", options=["By PP", "By select", "By plot id list"])
 
         if choice == "By PP":
             base_pp, boosted_pp, resource = by_pp()
@@ -164,7 +164,7 @@ def get_container_2(resource_pool_metric):
         elif choice == "By select":
             base_pp, boosted_pp, resource = by_select()
             add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
-        elif choice == "By deed list":
+        elif choice == "By plot id list":
             base_pp, boosted_pp, resources = by_deed_list()
             add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resources)
 
@@ -225,7 +225,7 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
 
     if isinstance(resource, list):
         if len(resource) > 1:
-            st.warning("Selected Deeds have different resources that it produced unable to continue")
+            st.warning("Selected plots have different resources that it produces. Unable to continue...")
             return
         elif not resource[0]:
             st.warning("No producing resource found...")
