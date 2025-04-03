@@ -170,17 +170,17 @@ def get_container_2(resource_pool_metric):
 
 
 def by_deed_list():
-    with st.expander("How to find deed id", expanded=False):
+    with st.expander("How to find plot id", expanded=False):
         st.image('https://support.splinterlands.com/hc/article_attachments/21403360782228')
-    deed_ids = st.text_input("Enter plot ids space separated")
+    plot_ids = st.text_input("Enter plot ids space separated")
     df = pd.DataFrame()
     base_pp = 0
     boosted_pp = 0
     resources = None
 
-    if deed_ids:
-        deed_list = deed_ids.split(" ")
-        for plot_id in deed_list:
+    if plot_ids:
+        plot_list = plot_ids.split(" ")
+        for plot_id in plot_list:
             deed_df = spl.get_land_deeds_uid(plot_id)
             if not deed_df.empty:
                 detailed_df = spl.get_land_stake_deed_details(deed_df['deed_uid'].iloc[0])
