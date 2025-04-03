@@ -99,6 +99,7 @@ def get_land_region_details(region):
     return pd.DataFrame()
 
 
+@st.cache_data(ttl="1h")
 def get_land_resources_pools():
     result = fetch_api_data(f'{API_URLS['land']}land/liquidity/landpools', data_key='data')
     if result:
@@ -106,6 +107,7 @@ def get_land_resources_pools():
     return pd.DataFrame()
 
 
+@st.cache_data(ttl="1h")
 def get_prices():
     result = fetch_api_data(f'{API_URLS['prices']}prices')
     if result:
@@ -118,7 +120,7 @@ def get_land_deeds_uid(plot_id):
     result = fetch_api_data(f'{API_URLS['land']}land/deeds/{plot_id}', data_key='data')
     if result:
         return pd.DataFrame(result, index=[0])
-    return None
+    return pd.DataFrame()
 
 
 @st.cache_data(ttl="1h")

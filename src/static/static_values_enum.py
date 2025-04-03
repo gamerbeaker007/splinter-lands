@@ -12,6 +12,15 @@ class ExtendedEnum(Enum):
         return list(map(lambda c: c.value, cls))
 
 
+resource_list  = [
+    'GRAIN',
+    'WOOD',
+    'STONE',
+    'IRON',
+    'RESEARCH',
+    'SPS',
+]
+
 grain_conversion_ratios = {
     'WOOD': 4,
     'STONE': 10,

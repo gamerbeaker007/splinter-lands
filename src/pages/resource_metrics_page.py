@@ -8,8 +8,6 @@ from src.graphs import resources_graphs
 from src.pages.resources_metrics import resources_conversion
 
 
-# Initial load for metrics & prices
-@st.cache_data(ttl=300)
 def load_market_data():
     metrics_df = spl.get_land_resources_pools()
     prices_df = spl.get_prices()
@@ -29,7 +27,7 @@ def get_page():
 
     resources_conversion.get_container(metrics_df, prices_df)
 
-    resources_conversion.get_container_2(metrics_df, prices_df)
+    resources_conversion.get_container_2(metrics_df)
 
     df = resource_metrics.get_historical_data()
     tab1, tab2, tab3 = st.tabs(["1000 Resource chart", "1000 DEC chart", "Grain factor chart"])
