@@ -154,7 +154,7 @@ def by_select():
 
 
 def get_container_2(resource_pool_metric):
-    st.markdown("## Calculate research cost")
+    st.markdown("## Calculate DEC cost/earnings")
     with st.container(border=True):
         choice = st.radio("Select method", options=["By PP", "By select", "By plot id list"])
 
