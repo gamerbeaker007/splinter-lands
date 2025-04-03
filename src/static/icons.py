@@ -22,3 +22,16 @@ land_research_hut_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_resea
 land_shard_mine_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_sps.png'
 land_keep_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/keepsOff.svg'
 land_castle_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/castleOff.svg'
+
+totem_common_icon_url = f'{WEB_URL}website/icons/icon_totem_1_common_300.png'
+totem_rare_icon_url = f'{WEB_URL}website/icons/icon_totem_2_rare_300.png'
+totem_epic_icon_url = f'{WEB_URL}website/icons/icon_totem_3_epic_300.png'
+totem_legendary_icon_url = f'{WEB_URL}website/icons/icon_totem_4_legendary_300.png'
+
+title_rare_icon_url = f'{WEB_URL}website/icons/icon_active_legionnaire.svg'
+title_epic_icon_url = f'{WEB_URL}website/icons/icon_active_thegambler.svg'
+title_legendary_icon_url = f'{WEB_URL}website/icons/icon_active_praetorian.svg'
+
+deed_rarity_rare_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/rareOff.svg'
+deed_rarity_epic_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/epicOff.svg'
+deed_rarity_legendary_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/legendaryOff.svg'
