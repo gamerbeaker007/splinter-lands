@@ -29,7 +29,22 @@ def get_page():
 
     resources_conversion.get_container(metrics_df, prices_df)
 
+    resources_conversion.get_container_2(metrics_df, prices_df)
+
     df = resource_metrics.get_historical_data()
-    resources_graphs.create_land_resources_graph(df, True)
-    resources_graphs.create_land_resources_dec_graph(df, True)
-    resources_graphs.create_land_resources_factor_graph(df, False)
+    tab1, tab2, tab3 = st.tabs(["1000 Resource chart", "1000 DEC chart", "Grain factor chart"])
+    with tab1:
+        st.markdown("Below a chart that represent how much it cost (DEC) to get 1000 of the resource.")
+        resources_graphs.create_land_resources_graph(df, True)
+    with tab2:
+        st.markdown("Below a chart that represent how much resources you will receive for 1000 DEC (1$)")
+        resources_graphs.create_land_resources_dec_graph(df, True)
+    with tab3:
+        st.markdown("""
+    Below a chart that represent what the factor is against grain based on the whitepaper
+    * Grain: 0.02
+    * Wood: 0.005 1 Wood = 4 Grain
+    * Stone: 0.002 1 Stone = 10 Grain
+    * Iron: 0.0005 1 Iron = 40 Grain
+    """)
+        resources_graphs.create_land_resources_factor_graph(df, False)

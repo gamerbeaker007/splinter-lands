@@ -8,18 +8,13 @@ from sqlalchemy import create_engine
 from src.api import spl
 from src.api.db import upload
 from src.models.models import RESOURCE_METRICS_TABLE_NAME
+from src.static.static_values_enum import grain_conversion_ratios
 
 # Same URL as in alembic.ini
 db_url = st.secrets["database"]["url"]
 engine = create_engine(db_url)
 
 log = logging.getLogger("DB - Resource tracking")
-
-conversion_ratios = {
-    'WOOD': 4,
-    'STONE': 10,
-    'IRON': 40
-}
 
 
 def calculate_grain_equivalent_and_factor(row, grain_price):
@@ -28,7 +23,7 @@ def calculate_grain_equivalent_and_factor(row, grain_price):
     else:
         if grain_price:
             grain_equiv = row['resource_price'] / grain_price
-            factor = grain_equiv / conversion_ratios[row['token_symbol']]
+            factor = grain_equiv / grain_conversion_ratios[row['token_symbol']]
             return pd.Series([grain_equiv, factor])
         else:
             return pd.Series([None, None])

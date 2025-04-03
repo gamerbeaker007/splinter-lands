@@ -1,6 +1,8 @@
 import streamlit as st
 
-from src.static.icons import SPL_WEB_URL, WEB_URL
+from src.static.icons import SPL_WEB_URL, land_hammer_icon_url, land_grain_farm_icon_url, \
+    land_logging_camp_icon_url, land_ore_mine_icon_url, land_quarry_icon_url, land_research_hut_icon_url, \
+    land_shard_mine_icon_url, land_keep_icon_url, land_castle_icon_url
 
 
 def print_deed_types(df):
@@ -113,15 +115,15 @@ def print_rarity(df):
 
 
 worksite_type_mapping = {
-    'Grain Farm': f'{WEB_URL}website/land/worksite/img_worksite_grain_v2.webp',
-    'Logging Camp': f'{WEB_URL}website/land/worksite/img_worksite_wood.webp',
-    'Ore Mine': f'{WEB_URL}website/land/worksite/img_worksite_iron.webp',
-    'Quarry': f'{WEB_URL}website/land/worksite/img_worksite_stone.webp',
-    'Research Hut': f'{WEB_URL}website/land/worksite/img_worksite_research.png',
-    'Shard Mine': f'{WEB_URL}website/land/worksite/img_worksite_sps.png',
-    'KEEP': f'{SPL_WEB_URL}assets/lands/sideMenu/keepsOff.svg',
-    'CASTLE': f'{SPL_WEB_URL}assets/lands/sideMenu/castleOff.svg',
-    '': f'{WEB_URL}website/land/deedOverview/hammer.svg',
+    'Grain Farm': land_grain_farm_icon_url,
+    'Logging Camp': land_logging_camp_icon_url,
+    'Ore Mine': land_ore_mine_icon_url,
+    'Quarry': land_quarry_icon_url,
+    'Research Hut': land_research_hut_icon_url,
+    'Shard Mine': land_shard_mine_icon_url,
+    'KEEP': land_keep_icon_url,
+    'CASTLE': land_castle_icon_url,
+    '': land_hammer_icon_url,
 }
 
 
