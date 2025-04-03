@@ -233,18 +233,16 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
         else:
             resource = resource[0]
 
-
     if resource == 'RESEARCH':
-        costs['STONE'] =  base_pp * consume_rates.get('WOOD')
+        costs['STONE'] = base_pp * consume_rates.get('WOOD')
         costs['WOOD'] = base_pp * consume_rates.get('WOOD')
-        costs['IRON'] =  base_pp * consume_rates.get('IRON')
+        costs['IRON'] = base_pp * consume_rates.get('IRON')
         consume_list.append('WOOD')
         consume_list.append('STONE')
         consume_list.append('IRON')
         production = boosted_pp * production_rates.get('RESEARCH')
     else:
         production = boosted_pp * production_rates.get(resource)
-
 
     # DEC equivalents
     dec_costs = {
@@ -254,9 +252,6 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
 
     # Total DEC
     total_dec_cost = sum(dec_costs.values())
-
-
-    # Production output
 
     # Icons (adjust paths as needed)
     icons = {
@@ -272,8 +267,7 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
     def icon_html(icon_url):
         return f"<img src='{icon_url}' width='40' height='40' style='vertical-align:middle;'/>"
 
-
-    if resource != "SPS" and  resource != 'RESEARCH':
+    if resource != "SPS" and resource != 'RESEARCH':
         total_dec_earning = production / get_price(metrics_df, resource)
         earning_txt = f"""
         <h4>{icon_html(icons['DEC'])} {resource} DEC earning/ hr: {round(total_dec_earning*transaction_fee, 3)}*</h4>

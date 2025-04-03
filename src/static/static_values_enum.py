@@ -12,7 +12,7 @@ class ExtendedEnum(Enum):
         return list(map(lambda c: c.value, cls))
 
 
-resource_list  = [
+resource_list = [
     'GRAIN',
     'WOOD',
     'STONE',
