@@ -2,7 +2,7 @@ import logging
 
 import streamlit as st
 
-from src.pages.resources_metrics import tab_production, tab_active, tab_region_overview, tab_compare, tab_summary
+from src.pages.region_metrics import tab_compare, tab_active, tab_summary, tab_production, tab_region_overview
 
 log = logging.getLogger("Region - main container")
 

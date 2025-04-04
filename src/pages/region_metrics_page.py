@@ -1,8 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from src.pages.region_metrics import overall_region_info, region_header, filter_section
-from src.pages.resources_metrics import main_container
+from src.pages.region_metrics import overall_region_info, region_header, filter_section, main_container
 from src.utils.data_loader import load_cached_data, get_last_updated
 
 transaction_fee = 0.90  # 10% fee
