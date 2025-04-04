@@ -5,22 +5,13 @@ import streamlit as st
 
 from src.api import spl
 from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, \
-    research_icon_url, land_hammer_icon_url
+    research_icon_url, land_hammer_icon_url, sps_icon_url
 from src.static.static_values_enum import production_rates, consume_rates, resource_list
 
-log = logging.getLogger("Resource conversion")
+log = logging.getLogger("Resource cost/earning")
 
 transaction_fee = 0.90  # 10% fee
 
-default_width = 150
-sing_style = """
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 220px;
-    font-size: 32px;
-    font-weight: bold;
-"""
 
 # Initialize session state for selections
 for key in ['region_uid', 'tract_number', 'plot_number']:
@@ -46,17 +37,54 @@ def reset_on_change(key):
 def get_resource_cost(resource_pool_metric):
     st.markdown("## Calculate DEC cost/earnings")
     with st.container(border=True):
-        choice = st.radio("Select method", options=["By PP", "By select", "By plot id list"])
+        choice = st.radio("Select method", options=["By PP", "By player", "By select", "By plot id list"])
 
         if choice == "By PP":
             base_pp, boosted_pp, resource = by_pp()
             add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
+        elif choice == "By player":
+            df = by_player()
+            max_cols = 3
+            for idx, (_, row) in enumerate(df.iterrows()):
+                col_idx = idx % max_cols
+                if col_idx == 0:
+                    cols = st.columns(max_cols)
+
+                with cols[col_idx]:
+                    resource = row['token_symbol']
+                    base_pp = row['total_base_pp_after_cap']
+                    boosted_pp = row['total_harvest_pp']
+                    add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
+
+
         elif choice == "By select":
             base_pp, boosted_pp, resource = by_select()
             add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
         elif choice == "By plot id list":
             base_pp, boosted_pp, resources = by_deed_list()
             add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resources)
+
+
+def by_player():
+    player = st.text_input("Enter account name")
+    if player:
+        log.info(f"By select for {player}")
+        deeds, worksite_details, staking_details = spl.get_land_region_details_player(player)
+
+        if worksite_details.empty:
+            st.warning(f'No worksites found for player {player}')
+        else:
+            merged_df = pd.merge(
+                worksite_details,
+                staking_details,
+                how='left',
+                on=['region_uid', 'deed_uid'],
+                suffixes=('', '_staking_xxx_details')
+            )
+            grouped_df = merged_df.groupby(['token_symbol']).agg(
+                {'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum'}).reset_index()
+            return grouped_df
+    return pd.DataFrame()
 
 
 def by_select():
@@ -152,6 +180,10 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
         st.warning("No resource found...")
         return
 
+    if resource == 'TAX':
+        st.warning("TAX not implemented")
+        return
+
     if isinstance(resource, list):
         if len(resource) > 1:
             st.warning("Selected plots have different resources that it produces. Unable to continue...")
@@ -170,6 +202,14 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
         consume_list.append('STONE')
         consume_list.append('IRON')
         production = boosted_pp * production_rates.get('RESEARCH')
+    elif resource == 'SPS':
+        costs['STONE'] = base_pp * consume_rates.get('WOOD')
+        costs['WOOD'] = base_pp * consume_rates.get('WOOD')
+        costs['IRON'] = base_pp * consume_rates.get('IRON')
+        consume_list.append('WOOD')
+        consume_list.append('STONE')
+        consume_list.append('IRON')
+        production = boosted_pp * production_rates.get('SPS')
     else:
         production = boosted_pp * production_rates.get(resource)
 
@@ -190,25 +230,34 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
         'STONE': stone_icon_url,
         'WOOD': wood_icon_url,
         'IRON': iron_icon_url,
-        'RESEARCH': research_icon_url
+        'RESEARCH': research_icon_url,
+        'SPS': sps_icon_url
     }
 
     def icon_html(icon_url):
-        return f"<img src='{icon_url}' width='40' height='40' style='vertical-align:middle;'/>"
+        return f"<img src='{icon_url}' width='20' height='20' style='vertical-align:middle;'/>"
 
     if resource != "SPS" and resource != 'RESEARCH':
         total_dec_earning = production / get_price(metrics_df, resource)
         earning_txt = f"""
-        <h4>{icon_html(icons['DEC'])} {resource} DEC earning/ hr: {round(total_dec_earning*transaction_fee, 3)}*</h4>
+        <h8>{icon_html(icons['DEC'])} {resource} DEC earning/ hr: {round(total_dec_earning*transaction_fee, 3)}*</h8>
         <span style='color:gray'>* Including transaction fees</span><br>
         """
     else:
         earning_txt = ""
 
     # Markdown output
-    st.markdown(f"""
-        <h3>{icon_html(icons['PP'])} BASE PP: {base_pp}</h3>
-        <h3>{icon_html(icons['PP'])} BOOSTED PP: {boosted_pp}</h3>
+    with st.container(border=True):
+        if resource == 'SPS':
+            st.warning("SPS NEED VERIFICATION!!!")
+
+        st.markdown(f"""
+        <img src='{icons[resource]}' width='50' height='50' style='display: block; margin-left: auto; margin-right: auto;'/>
+        <br>
+        
+        <h7>{icon_html(icons['PP'])} BASE PP: {base_pp}</h7>
+        
+        <h7>{icon_html(icons['PP'])} BOOSTED PP: {boosted_pp}</h7>
 
         <table>
             <tr>
@@ -226,7 +275,7 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
             ])}
         </table>
 
-        <h4>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)}</h4>
+        <h8>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)}</h8>
         {earning_txt}
-        <h4>{icon_html(icons['DEC'])} Total DEC cost / hr: {round(total_dec_cost, 3)}</h4>
-    """, unsafe_allow_html=True)
+        <h8>{icon_html(icons['DEC'])} Total DEC cost / hr: {round(total_dec_cost, 3)}</h8>
+        """, unsafe_allow_html=True)

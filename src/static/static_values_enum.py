@@ -33,7 +33,8 @@ production_rates = {
     'WOOD': 0.005,
     'STONE': 0.002,
     'IRON': 0.0005,
-    'RESEARCH': 0.0001
+    'RESEARCH': 0.0001,
+    'SPS': 0.0001 #TODO VERIFY
 }
 
 consume_rates = {
