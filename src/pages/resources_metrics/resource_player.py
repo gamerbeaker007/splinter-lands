@@ -10,6 +10,7 @@ log = logging.getLogger("Resource player")
 
 max_cols = 3
 
+
 def get_player_info():
     player = st.text_input("Enter account name for overview")
     if player:
@@ -31,6 +32,7 @@ def get_player_info():
             return grouped_df
     return pd.DataFrame()
 
+
 def calc_costs(row):
     resource = row["token_symbol"]
     base = row["base_pp"]
@@ -46,12 +48,15 @@ def calc_costs(row):
             costs[key] = base * consume_rates[dep]
     return pd.Series(costs)
 
+
 def color_cell(val):
     color = "green" if val >= 0 else "red"
     return f'<span style="color:{color}">{val:.0f}</span>'
 
+
 def adjust_fee(val):
     return val * 1.125 if val < 0 else val
+
 
 def get_resource_region_overview(metrics_df):
     st.markdown("## Region production overview")
@@ -120,14 +125,26 @@ def get_resource_region_overview(metrics_df):
         for key, value in net_vals.items():
             summary.loc[summary['region_uid'] == region, f'adj_net_{key}'] = value
 
+        row_produce = (
+            f"| **Produce**  | {row['produced_GRAIN']:.0f} | {row['produced_WOOD']:.0f} | "
+            f"{row['produced_STONE']:.0f} | {row['produced_IRON']:.0f} | {row['produced_RESEARCH']:.0f} |"
+        )
+        row_consume = (
+            f"| **Consume**  | -{row['cost_grain']:.0f} | -{row['cost_wood']:.0f} | "
+            f"-{row['cost_stone']:.0f} | -{row['cost_iron']:.0f} | 0 |"
+        )
+        row_net = (
+            f"| **Net**      | {color_cell(net_vals['grain'])} | {color_cell(net_vals['wood'])} | "
+            f"{color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} |"
+        )
         markdown = f"""
         ### Region {region}
 
         |              | GRAIN | WOOD | STONE | IRON | RESEARCH |
         |--------------|:-----:|:----:|:-----:|:----:|:--------:|
-        | **Produce**  | {row['produced_GRAIN']:.0f} | {row['produced_WOOD']:.0f} | {row['produced_STONE']:.0f} | {row['produced_IRON']:.0f} | {row['produced_RESEARCH']:.0f} |
-        | **Consume**  | -{row['cost_grain']:.0f} | -{row['cost_wood']:.0f} | -{row['cost_stone']:.0f} | -{row['cost_iron']:.0f} | 0 |
-        | **Net**      | {color_cell(net_vals['grain'])} | {color_cell(net_vals['wood'])} | {color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} |
+        {row_produce}
+        {row_consume}
+        {row_net}
         """
         with cols[col_idx]:
             st.markdown(markdown, unsafe_allow_html=True)
@@ -137,12 +154,17 @@ def get_resource_region_overview(metrics_df):
         for key in ['grain', 'wood', 'stone', 'iron', 'research']
     }
 
+    row_total_net = (
+        f" | **Total Net** | {color_cell(total_net['GRAIN'])} | {color_cell(total_net['WOOD'])} | "
+        f"{color_cell(total_net['STONE'])} | {color_cell(total_net['IRON'])} | {color_cell(total_net['RESEARCH'])} | "
+    )
+
     markdown_total = f"""
     ### 🌍 Total Net (All Regions)
 
     |                 | GRAIN | WOOD | STONE | IRON | RESEARCH |
     |-----------------|:-----:|:----:|:-----:|:----:|:--------:|
-    | **Total Net**   | {color_cell(total_net['GRAIN'])} | {color_cell(total_net['WOOD'])} | {color_cell(total_net['STONE'])} | {color_cell(total_net['IRON'])} | {color_cell(total_net['RESEARCH'])} |
+    {row_total_net}
     """
     st.markdown(markdown_total, unsafe_allow_html=True)
 
@@ -153,6 +175,7 @@ def get_resource_region_overview(metrics_df):
 
     st.markdown(f"## 🧪 Self-Sufficiency Score: **{self_sufficiency_score:.2f}%**")
 
+    color = "green" if self_sufficiency_score > 80 else "orange" if self_sufficiency_score > 50 else "red"
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=self_sufficiency_score,
@@ -160,7 +183,7 @@ def get_resource_region_overview(metrics_df):
         title={'text': "Overall Self-Sufficiency"},
         gauge={
             'axis': {'range': [0, 100]},
-            'bar': {'color': "green" if self_sufficiency_score > 80 else "orange" if self_sufficiency_score > 50 else "red"},
+            'bar': {'color': color},
             'steps': [
                 {'range': [0, 50], 'color': "rgba(255,0,0,0.3)"},
                 {'range': [50, 80], 'color': "rgba(255,165,0,0.3)"},
