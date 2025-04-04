@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.api import spl
-from src.static.static_values_enum import consume_rates, resource_list
+from src.static.static_values_enum import consume_rates
 
 log = logging.getLogger("Resource player")
 
