@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.api import spl
-from src.static.static_values_enum import consume_rates
+from src.static.static_values_enum import consume_rates, resource_list
 
 log = logging.getLogger("Resource player")
 
@@ -61,7 +61,18 @@ def adjust_fee(val):
     return val * 1.125 if val < 0 else val
 
 
-def get_resource_region_overview():
+def get_price(metrics_df, prices_df, token, amount) -> float:
+    if token == 'RESEARCH':
+        return 0
+    if token == "SPS":
+        usd_value = amount * prices_df['sps'].values[0]
+        dec_total = usd_value / prices_df['dec'].values[0]
+        return dec_total
+    print("")
+    return amount / metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
+
+
+def get_resource_region_overview(metrics_df, prices_df):
     st.markdown("## Region production overview")
     df = get_player_info()
 
@@ -170,23 +181,46 @@ def get_resource_region_overview():
         f"{color_cell(total_net['SPS'])} |"
     )
 
+    dec_net = {
+        key.upper(): get_price(metrics_df, prices_df, key.upper(), summary[f"adj_net_{key}"].sum())
+        for key in ['grain', 'wood', 'stone', 'iron', 'research', 'sps']
+    }
+
+    dec_total_net = (
+        f" | **Total Net (DEC)** | {color_cell(dec_net['GRAIN'])} | {color_cell(dec_net['WOOD'])} | "
+        f"{color_cell(dec_net['STONE'])} | {color_cell(dec_net['IRON'])} | {color_cell(dec_net['RESEARCH'])} | "
+        f"{color_cell(dec_net['SPS'])} |"
+    )
+
     markdown_total = f"""
     ### 🌍 Total Net (All Regions)
 
     |                 | GRAIN | WOOD | STONE | IRON | RESEARCH | SPS |
     |-----------------|:-----:|:----:|:-----:|:----:|:--------:|:---:|
     {row_total_net}
+    {dec_total_net}
     """
     st.markdown(markdown_total, unsafe_allow_html=True)
 
-    net_vals = list(total_net.values())
+    net_vals = list(dec_net.values())
     net_sum = sum(net_vals)
-    abs_sum = sum(abs(x) for x in net_vals)
-    self_sufficiency_score = 100 * (net_sum / abs_sum) if abs_sum > 0 else 0
+
+    # Adjust this number to control how much deficit is acceptable before hitting 0%
+    TOLERANCE_DEC = 1000
+
+    # Calculate a score based on acceptable loss
+    if net_sum >= 0:
+        self_sufficiency_score = 100
+    else:
+        self_sufficiency_score = max(0, 100 - abs(net_sum) / TOLERANCE_DEC * 100)
 
     st.markdown(f"## 🧪 Self-Sufficiency Score: **{self_sufficiency_score:.2f}%**")
+    st.info("Self-Sufficiency is considered when you can pay the other resources with the excess DEC")
 
+    # Color zones
     color = "green" if self_sufficiency_score > 80 else "orange" if self_sufficiency_score > 50 else "red"
+
+    # Gauge
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=self_sufficiency_score,
