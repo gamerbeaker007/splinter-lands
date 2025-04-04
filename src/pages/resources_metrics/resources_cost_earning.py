@@ -11,6 +11,7 @@ from src.static.static_values_enum import production_rates, consume_rates, resou
 log = logging.getLogger("Resource cost/earning")
 
 transaction_fee = 0.90  # 10% fee
+taxes_fee = 0.90  # 10% fee
 
 
 # Initialize session state for selections
@@ -40,34 +41,39 @@ def get_resource_cost(resource_pool_metric):
     with st.container(border=True):
         choice = st.radio("Select method", options=["By PP", "By player", "By select", "By plot id list"])
 
+        taxes_fee_txt = "Include taxes(10%) and fees (10%)"
         if choice == "By PP":
             base_pp, boosted_pp, resource = by_pp()
+            tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
             with cols[0]:
-                add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
+                add_research_production_cost(base_pp, boosted_pp, resource, resource_pool_metric, tax_fee)
+
         elif choice == "By player":
             df = by_player()
+            tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
             for idx, (_, row) in enumerate(df.iterrows()):
                 col_idx = idx % max_cols
-
                 with cols[col_idx]:
                     resource = row['token_symbol']
                     base_pp = row['total_base_pp_after_cap']
                     boosted_pp = row['total_harvest_pp']
-                    add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
-
+                    add_research_production_cost(base_pp, boosted_pp, resource, resource_pool_metric, tax_fee)
 
         elif choice == "By select":
             base_pp, boosted_pp, resource = by_select()
+            tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
             with cols[0]:
-                add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
+                add_research_production_cost(base_pp, boosted_pp, resource, resource_pool_metric, tax_fee)
+
         elif choice == "By plot id list":
             base_pp, boosted_pp, resources = by_deed_list()
+            tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
             with cols[0]:
-                add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resources)
+                add_research_production_cost(base_pp, boosted_pp, resources, resource_pool_metric, tax_fee)
 
 
 def by_player():
@@ -174,7 +180,25 @@ def by_pp():
     return base_pp, boosted_pp, resource
 
 
-def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
+def calculate_fees(tax_fee, total_dec_earning):
+    if tax_fee:
+        total_dec_earning = total_dec_earning * transaction_fee
+        extra_txt = "<span style='color:gray'>(incl. fees)</span><br>"
+    else:
+        extra_txt = "<br>"
+    return extra_txt, total_dec_earning
+
+
+def calculate_taxes(production, tax_fee):
+    if tax_fee:
+        production = production * taxes_fee
+        extra_txt = "<span style='color:gray'>(incl. taxes)</span><br>"
+    else:
+        extra_txt = "<br>"
+    return extra_txt, production
+
+
+def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_fee):
     consume_list = ['GRAIN']
     # There is always a grain cost
     costs = {
@@ -199,24 +223,15 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
         else:
             resource = resource[0]
 
-    if resource == 'RESEARCH':
+    production = boosted_pp * production_rates.get(resource)
+
+    if resource in ['RESEARCH', 'SPS']:
         costs['STONE'] = base_pp * consume_rates.get('WOOD')
         costs['WOOD'] = base_pp * consume_rates.get('WOOD')
         costs['IRON'] = base_pp * consume_rates.get('IRON')
         consume_list.append('WOOD')
         consume_list.append('STONE')
         consume_list.append('IRON')
-        production = boosted_pp * production_rates.get('RESEARCH')
-    elif resource == 'SPS':
-        costs['STONE'] = base_pp * consume_rates.get('WOOD')
-        costs['WOOD'] = base_pp * consume_rates.get('WOOD')
-        costs['IRON'] = base_pp * consume_rates.get('IRON')
-        consume_list.append('WOOD')
-        consume_list.append('STONE')
-        consume_list.append('IRON')
-        production = boosted_pp * production_rates.get('SPS')
-    else:
-        production = boosted_pp * production_rates.get(resource)
 
     # DEC equivalents
     dec_costs = {
@@ -242,14 +257,18 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
     def icon_html(icon_url):
         return f"<img src='{icon_url}' width='20' height='20' style='vertical-align:middle;'/>"
 
-    if resource != "SPS" and resource != 'RESEARCH':
+    total_dec_earning = 0
+    earning_txt = ""
+
+    if resource not in ['RESEARCH', 'SPS']:
         total_dec_earning = production / get_price(metrics_df, resource)
-        earning_txt = f"""
-        <h8>{icon_html(icons['DEC'])} {resource} DEC earning/ hr: {round(total_dec_earning*transaction_fee, 3)}*</h8>
-        <span style='color:gray'>* Including transaction fees</span><br>
-        """
-    else:
-        earning_txt = ""
+        extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
+
+        earning_txt = (f"<h8>{icon_html(icons['DEC'])} {resource} DEC earning/ hr: {round(total_dec_earning, 3)} "
+                       f"{extra_txt}</h8>")
+
+    extra_txt, production = calculate_taxes(production, tax_fee)
+    cost_txt = f"<h8>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)} {extra_txt}</h8>"
 
     # Markdown output
     with st.container(border=True):
@@ -279,8 +298,8 @@ def add_research_production_cost(base_pp, boosted_pp, metrics_df, resource):
                 for res in consume_list
             ])}
         </table>
-
-        <h8>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)}</h8>
+        {cost_txt}
         {earning_txt}
-        <h8>{icon_html(icons['DEC'])} Total DEC cost / hr: {round(total_dec_cost, 3)}</h8>
+        <h8>{icon_html(icons['DEC'])}Net Positive DEC / hr: {round(total_dec_earning - total_dec_cost, 3)}
+        <span style='color:gray'>(earn-cost)</span><br></h8>
         """, unsafe_allow_html=True)
