@@ -36,19 +36,20 @@ def reset_on_change(key):
 
 def get_resource_cost(resource_pool_metric):
     st.markdown("## Calculate DEC cost/earnings")
+    max_cols = 3
     with st.container(border=True):
         choice = st.radio("Select method", options=["By PP", "By player", "By select", "By plot id list"])
 
         if choice == "By PP":
             base_pp, boosted_pp, resource = by_pp()
-            add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
+            cols = st.columns(max_cols)
+            with cols[0]:
+                add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
         elif choice == "By player":
             df = by_player()
-            max_cols = 3
+            cols = st.columns(max_cols)
             for idx, (_, row) in enumerate(df.iterrows()):
                 col_idx = idx % max_cols
-                if col_idx == 0:
-                    cols = st.columns(max_cols)
 
                 with cols[col_idx]:
                     resource = row['token_symbol']
@@ -59,10 +60,14 @@ def get_resource_cost(resource_pool_metric):
 
         elif choice == "By select":
             base_pp, boosted_pp, resource = by_select()
-            add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
+            cols = st.columns(max_cols)
+            with cols[0]:
+                add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resource)
         elif choice == "By plot id list":
             base_pp, boosted_pp, resources = by_deed_list()
-            add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resources)
+            cols = st.columns(max_cols)
+            with cols[0]:
+                add_research_production_cost(base_pp, boosted_pp, resource_pool_metric, resources)
 
 
 def by_player():
