@@ -163,23 +163,30 @@ def by_deed_list():
         for plot_id in plot_list:
             deed_df = spl.get_land_deeds_uid(plot_id)
             if not deed_df.empty:
-                detailed_df = spl.get_land_stake_deed_details(deed_df['deed_uid'].iloc[0])
-                merged_df = pd.merge(
-                    deed_df,
-                    detailed_df,
-                    how='left',
-                    on=['region_uid', 'deed_uid'],
-                    suffixes=('', '_xxx_details')
-                )
+                _, worksite_details, staking_details = spl.get_land_region_details_player(deed_df.player.iloc[0])
+                if worksite_details.empty:
+                    st.warning(f'No worksites found....')
+                else:
+                    merged_df = pd.merge(
+                        worksite_details,
+                        staking_details,
+                        how='left',
+                        on=['region_uid', 'deed_uid'],
+                        suffixes=('', '_staking_xxx_details')
+                    )
+                    grouped_df = merged_df.groupby(['token_symbol', 'deed_uid']).agg(
+                        {'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum',
+                         'rewards_per_hour': 'sum'}).reset_index()
+                    grouped_df = grouped_df.loc[grouped_df.deed_uid == deed_df.deed_uid.iloc[0]]
 
-                df = pd.concat([df, merged_df], ignore_index=True)
+                    df = pd.concat([df, grouped_df], ignore_index=True)
             else:
                 st.warning(f"No information found for plot id: {plot_id}... break")
                 return base_pp, boosted_pp, resources
         base_pp = df.total_base_pp_after_cap.sum()
         boosted_pp = df.total_harvest_pp.sum()
         rewards_per_hour = df.rewards_per_hour.sum()
-        resources = df.resource_symbol.unique().tolist()
+        resources = df.token_symbol.unique().tolist()
     return base_pp, boosted_pp, rewards_per_hour, resources
 
 
@@ -218,7 +225,7 @@ def add_research_production_cost(base_pp,
         return
 
     if resource == 'TAX':
-        st.warning("TAX not implemented")
+        st.warning("Resource TAX (Castle/Keep) not implemented")
         return
 
     if isinstance(resource, list):
