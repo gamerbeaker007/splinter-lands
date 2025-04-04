@@ -5,7 +5,7 @@ import streamlit as st
 from src.api import spl
 from src.api.db import resource_metrics
 from src.graphs import resources_graphs
-from src.pages.resources_metrics import resources_conversion, resources_cost_earning
+from src.pages.resources_metrics import resources_conversion, resources_cost_earning, resource_player
 
 
 def load_market_data():
@@ -28,6 +28,8 @@ def get_page():
     resources_conversion.get_container(metrics_df, prices_df)
 
     resources_cost_earning.get_resource_cost(metrics_df)
+
+    resource_player.get_resource_region_overview(metrics_df)
 
     df = resource_metrics.get_historical_data()
     tab1, tab2, tab3 = st.tabs(["1000 Resource chart", "1000 DEC chart", "Grain factor chart"])
