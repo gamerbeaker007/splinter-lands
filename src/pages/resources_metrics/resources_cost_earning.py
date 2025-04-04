@@ -264,17 +264,19 @@ def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_
         total_dec_earning = production / get_price(metrics_df, resource)
         extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
 
-        earning_txt = (f"<h8>{icon_html(icons['DEC'])} {resource} DEC Earning/ hr: {round(total_dec_earning, 3)} "
+        earning_txt = (f"<h8>{icon_html(icons['DEC'])} DEC Earning/ hr: {round(total_dec_earning, 3)} "
                        f"{extra_txt}</h8>")
 
-    extra_txt, production = calculate_taxes(production, tax_fee)
-    cost_txt = f"<h8>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)} {extra_txt}</h8>"
+    if resource != 'SPS':
+        extra_txt, production = calculate_taxes(production, tax_fee)
+        cost_txt = (f"<h8>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)} "
+                    f"{extra_txt}</h8>")
+    else:
+        cost_txt = (f"<h8>{icon_html(icons[resource])} {resource} Production / hr: "
+                    f"<span style='color:gray'>Unknown</span><br></h8>")
 
     # Markdown output
     with st.container(border=True):
-        if resource == 'SPS':
-            st.warning("SPS NEED VERIFICATION!!!")
-
         st.markdown(f"""
         <img src='{icons[resource]}' width='50' height='50' style='display: block; margin-left: auto; margin-right: auto;'/>
         <br>
