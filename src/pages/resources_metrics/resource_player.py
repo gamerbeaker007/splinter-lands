@@ -8,6 +8,8 @@ from src.static.static_values_enum import production_rates, consume_rates
 
 log = logging.getLogger("Resource player")
 
+max_cols = 3
+
 def get_player_info():
     player = st.text_input("Enter account name for overview")
     if player:
@@ -102,7 +104,9 @@ def get_resource_region_overview(metrics_df):
 
     include_fee = st.checkbox("Include transfer fee (12.5%)", value=False)
 
-    for _, row in summary.iterrows():
+    cols = st.columns(max_cols)
+    for idx, (_, row) in enumerate(summary.iterrows()):
+        col_idx = idx % max_cols
         region = row["region_uid"]
 
         net_vals = {
@@ -125,7 +129,8 @@ def get_resource_region_overview(metrics_df):
         | **Consume**  | -{row['cost_grain']:.0f} | -{row['cost_wood']:.0f} | -{row['cost_stone']:.0f} | -{row['cost_iron']:.0f} | 0 |
         | **Net**      | {color_cell(net_vals['grain'])} | {color_cell(net_vals['wood'])} | {color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} |
         """
-        st.markdown(markdown, unsafe_allow_html=True)
+        with cols[col_idx]:
+            st.markdown(markdown, unsafe_allow_html=True)
 
     total_net = {
         key.upper(): summary[f"adj_net_{key}"].sum()
