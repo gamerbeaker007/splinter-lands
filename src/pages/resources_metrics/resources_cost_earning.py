@@ -226,7 +226,7 @@ def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_
     production = boosted_pp * production_rates.get(resource)
 
     if resource in ['RESEARCH', 'SPS']:
-        costs['STONE'] = base_pp * consume_rates.get('WOOD')
+        costs['STONE'] = base_pp * consume_rates.get('STONE')
         costs['WOOD'] = base_pp * consume_rates.get('WOOD')
         costs['IRON'] = base_pp * consume_rates.get('IRON')
         consume_list.append('WOOD')
@@ -264,7 +264,7 @@ def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_
         total_dec_earning = production / get_price(metrics_df, resource)
         extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
 
-        earning_txt = (f"<h8>{icon_html(icons['DEC'])} {resource} DEC earning/ hr: {round(total_dec_earning, 3)} "
+        earning_txt = (f"<h8>{icon_html(icons['DEC'])} {resource} DEC Earning/ hr: {round(total_dec_earning, 3)} "
                        f"{extra_txt}</h8>")
 
     extra_txt, production = calculate_taxes(production, tax_fee)
