@@ -6,13 +6,12 @@ import streamlit as st
 from src.api import spl
 from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, \
     research_icon_url, land_hammer_icon_url, sps_icon_url
-from src.static.static_values_enum import production_rates, consume_rates, resource_list
+from src.static.static_values_enum import consume_rates
 
 log = logging.getLogger("Resource cost/earning")
 
 transaction_fee = 0.90  # 10% fee
 taxes_fee = 0.90  # 10% fee
-
 
 # Initialize session state for selections
 for key in ['region_uid', 'tract_number', 'plot_number']:
@@ -20,18 +19,19 @@ for key in ['region_uid', 'tract_number', 'plot_number']:
         st.session_state[key] = None
 
 
-def get_price(metrics_df: pd.DataFrame, token: str,) -> float:
+def get_price(metrics_df: pd.DataFrame, token: str, ) -> float:
     return metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
 
 
 # Reset logic
-def reset_on_change(key):
+def reset_on_change(_key):
     def reset():
-        if key == "region_uid":
+        if _key == "region_uid":
             st.session_state.tract_number = None
             st.session_state.plot_number = None
-        elif key == "tract_number":
+        elif _key == "tract_number":
             st.session_state.plot_number = None
+
     return reset
 
 
@@ -39,17 +39,10 @@ def get_resource_cost(resource_pool_metric):
     st.markdown("## Calculate DEC cost/earnings")
     max_cols = 3
     with st.container(border=True):
-        choice = st.radio("Select method", options=["By PP", "By player", "By select", "By plot id list"])
+        choice = st.radio("Select method", options=["By player", "By select", "By plot id list"])
 
         taxes_fee_txt = "Include taxes(10%) and fees (10%)"
-        if choice == "By PP":
-            base_pp, boosted_pp, resource = by_pp()
-            tax_fee = st.checkbox(taxes_fee_txt)
-            cols = st.columns(max_cols)
-            with cols[0]:
-                add_research_production_cost(base_pp, boosted_pp, resource, resource_pool_metric, tax_fee)
-
-        elif choice == "By player":
+        if choice == "By player":
             df = by_player()
             tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
@@ -59,21 +52,37 @@ def get_resource_cost(resource_pool_metric):
                     resource = row['token_symbol']
                     base_pp = row['total_base_pp_after_cap']
                     boosted_pp = row['total_harvest_pp']
-                    add_research_production_cost(base_pp, boosted_pp, resource, resource_pool_metric, tax_fee)
+                    rewards_per_hour = row['rewards_per_hour']
+                    add_research_production_cost(base_pp,
+                                                 boosted_pp,
+                                                 rewards_per_hour,
+                                                 resource,
+                                                 resource_pool_metric,
+                                                 tax_fee)
 
         elif choice == "By select":
-            base_pp, boosted_pp, resource = by_select()
+            base_pp, boosted_pp, rewards_per_hour, resource = by_select()
             tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
             with cols[0]:
-                add_research_production_cost(base_pp, boosted_pp, resource, resource_pool_metric, tax_fee)
+                add_research_production_cost(base_pp,
+                                             boosted_pp,
+                                             rewards_per_hour,
+                                             resource,
+                                             resource_pool_metric,
+                                             tax_fee)
 
         elif choice == "By plot id list":
-            base_pp, boosted_pp, resources = by_deed_list()
+            base_pp, boosted_pp, rewards_per_hour, resources = by_deed_list()
             tax_fee = st.checkbox(taxes_fee_txt)
             cols = st.columns(max_cols)
             with cols[0]:
-                add_research_production_cost(base_pp, boosted_pp, resources, resource_pool_metric, tax_fee)
+                add_research_production_cost(base_pp,
+                                             boosted_pp,
+                                             rewards_per_hour,
+                                             resources,
+                                             resource_pool_metric,
+                                             tax_fee)
 
 
 def by_player():
@@ -93,7 +102,7 @@ def by_player():
                 suffixes=('', '_staking_xxx_details')
             )
             grouped_df = merged_df.groupby(['token_symbol']).agg(
-                {'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum'}).reset_index()
+                {'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum', 'rewards_per_hour': 'sum'}).reset_index()
             return grouped_df
     return pd.DataFrame()
 
@@ -102,6 +111,7 @@ def by_select():
     player = st.text_input("Enter account name")
     base_pp = 0
     boosted_pp = 0
+    rewards_per_hour = 0
     token_symbol = None
 
     if player:
@@ -131,10 +141,11 @@ def by_select():
                         details = staking_details[staking_details.deed_uid == selected_plot.deed_uid.iloc[0]]
                         base_pp = details['total_base_pp_after_cap'].iloc[0]
                         boosted_pp = details['total_harvest_pp'].iloc[0]
+                        rewards_per_hour = details['rewards_per_hour'].iloc[0]
                         worksite = worksite_details[worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]]
                         token_symbol = worksite.token_symbol.iloc[0]
 
-    return base_pp, boosted_pp, token_symbol
+    return base_pp, boosted_pp, rewards_per_hour, token_symbol
 
 
 def by_deed_list():
@@ -144,6 +155,7 @@ def by_deed_list():
     df = pd.DataFrame()
     base_pp = 0
     boosted_pp = 0
+    rewards_per_hour = 0
     resources = None
 
     if plot_ids:
@@ -166,18 +178,9 @@ def by_deed_list():
                 return base_pp, boosted_pp, resources
         base_pp = df.total_base_pp_after_cap.sum()
         boosted_pp = df.total_harvest_pp.sum()
+        rewards_per_hour = df.rewards_per_hour.sum()
         resources = df.resource_symbol.unique().tolist()
-    return base_pp, boosted_pp, resources
-
-
-def by_pp():
-    col1, col2 = st.columns(2)
-    with col1:
-        base_pp = st.number_input("Base PP", value=0)
-    with col2:
-        boosted_pp = st.number_input("Boosted PP", value=0)
-    resource = st.selectbox("Select resource",  resource_list)
-    return base_pp, boosted_pp, resource
+    return base_pp, boosted_pp, rewards_per_hour, resources
 
 
 def calculate_fees(tax_fee, total_dec_earning):
@@ -198,7 +201,12 @@ def calculate_taxes(production, tax_fee):
     return extra_txt, production
 
 
-def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_fee):
+def add_research_production_cost(base_pp,
+                                 boosted_pp,
+                                 rewards_per_hour,
+                                 resource,
+                                 metrics_df,
+                                 tax_fee):
     consume_list = ['GRAIN']
     # There is always a grain cost
     costs = {
@@ -222,8 +230,6 @@ def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_
             return
         else:
             resource = resource[0]
-
-    production = boosted_pp * production_rates.get(resource)
 
     if resource in ['RESEARCH', 'SPS']:
         costs['STONE'] = base_pp * consume_rates.get('STONE')
@@ -261,19 +267,17 @@ def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_
     earning_txt = ""
 
     if resource not in ['RESEARCH', 'SPS']:
-        total_dec_earning = production / get_price(metrics_df, resource)
+        total_dec_earning = rewards_per_hour / get_price(metrics_df, resource)
         extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
 
         earning_txt = (f"<h8>{icon_html(icons['DEC'])} DEC Earning/ hr: {round(total_dec_earning, 3)} "
                        f"{extra_txt}</h8>")
 
-    if resource != 'SPS':
-        extra_txt, production = calculate_taxes(production, tax_fee)
-        cost_txt = (f"<h8>{icon_html(icons[resource])} {resource} Production / hr: {round(production, 3)} "
-                    f"{extra_txt}</h8>")
-    else:
-        cost_txt = (f"<h8>{icon_html(icons[resource])} {resource} Production / hr: "
-                    f"<span style='color:gray'>Unknown</span><br></h8>")
+    production_txt = ""
+    if rewards_per_hour:
+        extra_txt, production = calculate_taxes(rewards_per_hour, tax_fee)
+        production_txt = (f"<h8>{icon_html(icons[resource])} {resource} Production / hr RR: {round(production, 3)} "
+                          f"{extra_txt}</h8>")
 
     # Markdown output
     with st.container(border=True):
@@ -292,15 +296,15 @@ def add_research_production_cost(base_pp, boosted_pp, resource, metrics_df, tax_
                 <th>DEC / hr</th>
             </tr>
             {''.join([
-                f"<tr>"
-                f"<td>{icon_html(icons[res])} {res}</td>"
-                f"<td>{round(costs[res], 3)}</td>"
-                f"<td>{round(dec_costs[res], 3)}</td>"
-                f"</tr>"
-                for res in consume_list
-            ])}
+            f"<tr>"
+            f"<td>{icon_html(icons[res])} {res}</td>"
+            f"<td>{round(costs[res], 3)}</td>"
+            f"<td>{round(dec_costs[res], 3)}</td>"
+            f"</tr>"
+            for res in consume_list
+        ])}
         </table>
-        {cost_txt}
+        {production_txt}
         {earning_txt}
         <h8>{icon_html(icons['DEC'])}Net Positive DEC / hr: {round(total_dec_earning - total_dec_cost, 3)}
         <span style='color:gray'>(earn-cost)</span><br></h8>

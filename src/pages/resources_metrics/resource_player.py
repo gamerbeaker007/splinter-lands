@@ -1,14 +1,16 @@
 import logging
+
 import pandas as pd
-import streamlit as st
 import plotly.graph_objects as go
+import streamlit as st
 
 from src.api import spl
-from src.static.static_values_enum import production_rates, consume_rates
+from src.static.static_values_enum import consume_rates
 
 log = logging.getLogger("Resource player")
 
-max_cols = 3
+max_cols = 2
+tax_rate = 0.9
 
 
 def get_player_info():
@@ -28,7 +30,10 @@ def get_player_info():
                 suffixes=('', '_staking_xxx_details')
             )
             grouped_df = merged_df.groupby(["region_uid", 'token_symbol']).agg(
-                {'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum'}).reset_index()
+                {'total_harvest_pp': 'sum',
+                 'total_base_pp_after_cap': 'sum',
+                 'rewards_per_hour': 'sum'}
+            ).reset_index()
             return grouped_df
     return pd.DataFrame()
 
@@ -38,11 +43,9 @@ def calc_costs(row):
     base = row["base_pp"]
     costs = {f'cost_per_h_{res.lower()}': 0 for res in ['GRAIN', 'WOOD', 'STONE', 'IRON']}
 
-    if resource == "GRAIN":
+    if resource in {"GRAIN", "WOOD", "STONE", "IRON"}:
         costs['cost_per_h_grain'] = base * consume_rates["GRAIN"]
-    elif resource in {"WOOD", "STONE", "IRON"}:
-        costs['cost_per_h_grain'] = base * consume_rates["GRAIN"]
-    elif resource == "RESEARCH":
+    elif resource in ["RESEARCH", "SPS"]:
         for dep in ["GRAIN", "WOOD", "STONE", "IRON"]:
             key = f'cost_per_h_{dep.lower()}'
             costs[key] = base * consume_rates[dep]
@@ -51,7 +54,7 @@ def calc_costs(row):
 
 def color_cell(val):
     color = "green" if val >= 0 else "red"
-    return f'<span style="color:{color}">{val:.0f}</span>'
+    return f'<span style="color:{color}">{val:.3f}</span>'
 
 
 def adjust_fee(val):
@@ -67,12 +70,9 @@ def get_resource_region_overview():
 
     df = df.rename(columns={
         "total_harvest_pp": "boosted_pp",
-        "total_base_pp_after_cap": "base_pp"
+        "total_base_pp_after_cap": "base_pp",
+        "rewards_per_hour": "production_per_hour"
     })
-
-    df["production_per_hour"] = df.apply(
-        lambda row: row["boosted_pp"] * production_rates.get(row["token_symbol"], 0), axis=1
-    )
 
     df = pd.concat([df, df.apply(calc_costs, axis=1)], axis=1)
 
@@ -84,9 +84,15 @@ def get_resource_region_overview():
         fill_value=0
     ).add_prefix('produced_').reset_index()
 
+    include_taxes = st.checkbox("Include taxes (10%)", value=False)
+    if include_taxes:
+        produced = produced.set_index('region_uid') * tax_rate
+        produced = produced.reset_index()
+
     cost_cols = [f'cost_per_h_{res.lower()}' for res in ['GRAIN', 'WOOD', 'STONE', 'IRON']]
     cost_df = df.groupby('region_uid')[cost_cols].sum().reset_index()
 
+    # Add taxes
     cost_df = cost_df.rename(columns={
         'cost_per_h_grain': 'cost_grain',
         'cost_per_h_wood': 'cost_wood',
@@ -96,7 +102,7 @@ def get_resource_region_overview():
 
     summary = pd.merge(produced, cost_df, on='region_uid')
 
-    for res in ['GRAIN', 'WOOD', 'STONE', 'IRON', 'RESEARCH']:
+    for res in ['GRAIN', 'WOOD', 'STONE', 'IRON', 'RESEARCH', 'SPS']:
         col = f'produced_{res}'
         if col not in summary.columns:
             summary[col] = 0
@@ -106,8 +112,9 @@ def get_resource_region_overview():
     summary["net_stone"] = summary["produced_STONE"] - summary["cost_stone"]
     summary["net_iron"] = summary["produced_IRON"] - summary["cost_iron"]
     summary["net_research"] = summary["produced_RESEARCH"]
+    summary["net_sps"] = summary["produced_SPS"]
 
-    include_fee = st.checkbox("Include transfer fee (12.5%)", value=False)
+    include_fee = st.checkbox("Include transfer fees(12.5%)", value=False)
 
     cols = st.columns(max_cols)
     for idx, (_, row) in enumerate(summary.iterrows()):
@@ -119,29 +126,32 @@ def get_resource_region_overview():
             'wood': adjust_fee(row["net_wood"]) if include_fee else row["net_wood"],
             'stone': adjust_fee(row["net_stone"]) if include_fee else row["net_stone"],
             'iron': adjust_fee(row["net_iron"]) if include_fee else row["net_iron"],
-            'research': row["net_research"]
+            'research': row["net_research"],
+            'sps': row["net_research"]
         }
 
         for key, value in net_vals.items():
             summary.loc[summary['region_uid'] == region, f'adj_net_{key}'] = value
 
         row_produce = (
-            f"| **Produce**  | {row['produced_GRAIN']:.0f} | {row['produced_WOOD']:.0f} | "
-            f"{row['produced_STONE']:.0f} | {row['produced_IRON']:.0f} | {row['produced_RESEARCH']:.0f} |"
+            f"| **Produce**  | {row['produced_GRAIN']:.3f} | {row['produced_WOOD']:.3f} | "
+            f"{row['produced_STONE']:.3f} | {row['produced_IRON']:.3f} | {row['produced_RESEARCH']:.3f} | "
+            f"{row['produced_SPS']:.3f} |"
         )
         row_consume = (
-            f"| **Consume**  | -{row['cost_grain']:.0f} | -{row['cost_wood']:.0f} | "
-            f"-{row['cost_stone']:.0f} | -{row['cost_iron']:.0f} | 0 |"
+            f"| **Consume**  | -{row['cost_grain']:.3f} | -{row['cost_wood']:.3f} | "
+            f"-{row['cost_stone']:.3f} | -{row['cost_iron']:.3f} | 0 | 0 |"
         )
         row_net = (
             f"| **Net**      | {color_cell(net_vals['grain'])} | {color_cell(net_vals['wood'])} | "
-            f"{color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} |"
+            f"{color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} | "
+            f"{color_cell(net_vals['sps'])} |"
         )
         markdown = f"""
         ### Region {region}
 
-        |              | GRAIN | WOOD | STONE | IRON | RESEARCH |
-        |--------------|:-----:|:----:|:-----:|:----:|:--------:|
+        |              | GRAIN | WOOD | STONE | IRON | RESEARCH | SPS |
+        |--------------|:-----:|:----:|:-----:|:----:|:--------:|:---:|
         {row_produce}
         {row_consume}
         {row_net}
@@ -151,19 +161,20 @@ def get_resource_region_overview():
 
     total_net = {
         key.upper(): summary[f"adj_net_{key}"].sum()
-        for key in ['grain', 'wood', 'stone', 'iron', 'research']
+        for key in ['grain', 'wood', 'stone', 'iron', 'research', 'sps']
     }
 
     row_total_net = (
         f" | **Total Net** | {color_cell(total_net['GRAIN'])} | {color_cell(total_net['WOOD'])} | "
         f"{color_cell(total_net['STONE'])} | {color_cell(total_net['IRON'])} | {color_cell(total_net['RESEARCH'])} | "
+        f"{color_cell(total_net['SPS'])} |"
     )
 
     markdown_total = f"""
     ### 🌍 Total Net (All Regions)
 
-    |                 | GRAIN | WOOD | STONE | IRON | RESEARCH |
-    |-----------------|:-----:|:----:|:-----:|:----:|:--------:|
+    |                 | GRAIN | WOOD | STONE | IRON | RESEARCH | SPS |
+    |-----------------|:-----:|:----:|:-----:|:----:|:--------:|:---:|
     {row_total_net}
     """
     st.markdown(markdown_total, unsafe_allow_html=True)
