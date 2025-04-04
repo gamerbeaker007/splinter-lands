@@ -138,7 +138,7 @@ def get_resource_region_overview(metrics_df, prices_df):
             'stone': adjust_fee(row["net_stone"]) if include_fee else row["net_stone"],
             'iron': adjust_fee(row["net_iron"]) if include_fee else row["net_iron"],
             'research': row["net_research"],
-            'sps': row["net_research"]
+            'sps': row["net_sps"]
         }
 
         for key, value in net_vals.items():
