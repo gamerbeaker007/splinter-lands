@@ -29,7 +29,7 @@ def get_page():
 
     resources_cost_earning.get_resource_cost(metrics_df)
 
-    resource_player.get_resource_region_overview(metrics_df)
+    resource_player.get_resource_region_overview()
 
     df = resource_metrics.get_historical_data()
     tab1, tab2, tab3 = st.tabs(["1000 Resource chart", "1000 DEC chart", "Grain factor chart"])

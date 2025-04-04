@@ -14,7 +14,7 @@ max_cols = 3
 def get_player_info():
     player = st.text_input("Enter account name for overview")
     if player:
-        log.info(f"By select for {player}")
+        log.info(f"Request region information for player: {player}")
         deeds, worksite_details, staking_details = spl.get_land_region_details_player(player)
 
         if worksite_details.empty:
@@ -58,7 +58,7 @@ def adjust_fee(val):
     return val * 1.125 if val < 0 else val
 
 
-def get_resource_region_overview(metrics_df):
+def get_resource_region_overview():
     st.markdown("## Region production overview")
     df = get_player_info()
 
