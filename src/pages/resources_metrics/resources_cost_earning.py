@@ -5,7 +5,7 @@ import streamlit as st
 
 from src.api import spl
 from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, \
-    research_icon_url, land_hammer_icon_url, sps_icon_url
+    research_icon_url, land_hammer_icon_url, sps_icon_url, land_plot_icon_url, land_region_icon_url, land_tract_icon_url
 from src.static.static_values_enum import consume_rates
 
 log = logging.getLogger("Resource cost/earning")
@@ -107,6 +107,18 @@ def by_player():
     return pd.DataFrame()
 
 
+def add_selection_text(text, icon):
+    st.markdown(
+        f"""
+        <span style="font-size:16px;">
+            <strong>{text}</strong>
+            <img src="{icon}" width="20" style="vertical-align:middle; margin-bottom:6px; margin-left:6px;">
+        </span>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 def by_select():
     player = st.text_input("Enter account name")
     base_pp = 0
@@ -121,29 +133,55 @@ def by_select():
         if deeds.empty:
             st.warning(f'No deeds found for player {player}')
         else:
+            columns = st.columns([1, 1, 1])
             regions = deeds.region_uid.unique().tolist()
-            st.selectbox("Select your region", regions,
-                         key="region_uid", on_change=reset_on_change("region_uid"))
+            with columns[0]:
+                add_selection_text("Select your region", land_region_icon_url)
+                st.selectbox("", regions,
+                             key="region_uid",
+                             label_visibility='collapsed',
+                             on_change=reset_on_change("region_uid"))
 
-            if st.session_state.region_uid:
-                selected_region = deeds[deeds.region_uid == st.session_state.region_uid]
-                tracts = selected_region.tract_number.unique().tolist()
-                st.selectbox("Select your tract", tracts,
-                             key="tract_number", on_change=reset_on_change("tract_number"))
+                if st.session_state.region_uid:
+                    selected_region = deeds[deeds.region_uid == st.session_state.region_uid]
+                    tracts = selected_region.tract_number.unique().tolist()
+                    with columns[1]:
+                        add_selection_text("Select your tract", land_tract_icon_url)
+                        st.selectbox("",
+                                     tracts,
+                                     label_visibility="collapsed",
+                                     key="tract_number",
+                                     on_change=reset_on_change("tract_number"))
 
-                if st.session_state.tract_number:
-                    selected_tract = selected_region[selected_region.tract_number == st.session_state.tract_number]
-                    plots = selected_tract.plot_number.unique().tolist()
-                    st.selectbox("Select your plot", plots, key="plot_number")
+                        if st.session_state.tract_number:
+                            selected_tract = selected_region[
+                                selected_region.tract_number == st.session_state.tract_number
+                            ]
+                            plots = selected_tract.plot_number.unique().tolist()
+                            with columns[2]:
+                                add_selection_text("Select your plot", land_plot_icon_url)
+                                st.selectbox("",
+                                             plots,
+                                             label_visibility="collapsed",
+                                             key="plot_number")
 
-                    if st.session_state.plot_number:
-                        selected_plot = selected_tract[selected_tract.plot_number == st.session_state.plot_number]
-                        details = staking_details[staking_details.deed_uid == selected_plot.deed_uid.iloc[0]]
-                        base_pp = details['total_base_pp_after_cap'].iloc[0]
-                        boosted_pp = details['total_harvest_pp'].iloc[0]
-                        rewards_per_hour = details['rewards_per_hour'].iloc[0]
-                        worksite = worksite_details[worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]]
-                        token_symbol = worksite.token_symbol.iloc[0]
+                                if st.session_state.plot_number:
+                                    selected_plot = selected_tract[
+                                        selected_tract.plot_number == st.session_state.plot_number
+                                    ]
+                                    details = staking_details[
+                                        staking_details.deed_uid == selected_plot.deed_uid.iloc[0]
+                                    ]
+                                    worksite_details = worksite_details[
+                                        worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]
+                                    ]
+                                    base_pp = details['total_base_pp_after_cap'].iloc[0]
+                                    boosted_pp = details['total_harvest_pp'].iloc[0]
+                                    rewards_per_hour = worksite_details['rewards_per_hour'].iloc[0]
+                                    worksite = worksite_details[
+                                        worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]
+                                    ]
+                                    token_symbol = worksite.token_symbol.iloc[0]
 
     return base_pp, boosted_pp, rewards_per_hour, token_symbol
 

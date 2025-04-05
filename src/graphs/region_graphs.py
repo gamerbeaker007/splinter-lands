@@ -122,7 +122,9 @@ def create_pp_per_source_type(df, key=None, title=None, slim=False):
         x=df['resource'],
         y=df['total_base_pp_after_cap'],
         name='RAW PP',
-        marker=dict(color='steelblue'),
+        marker=dict(
+            color=[COLOR_MAP.get(res, 'steelblue') for res in df['resource']]
+        ),
     ))
 
     fig.add_trace(go.Scatter(
@@ -142,7 +144,15 @@ def create_pp_per_source_type(df, key=None, title=None, slim=False):
         yaxis_title="PP",
         xaxis_title="Resource",
         title=plot_title,
-        showlegend=False if slim else True
+        showlegend=False if slim else True,
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='center',
+            x=0.5
+        )
+
     )
 
     st.plotly_chart(fig, use_container_width=True, key=key)
@@ -150,37 +160,6 @@ def create_pp_per_source_type(df, key=None, title=None, slim=False):
     if not slim:
         with st.expander("DATA", expanded=False):
             st.dataframe(df, hide_index=True)
-
-
-def create_land_region_production_sum_graph(df):
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Bar(
-        x=df['resource'],
-        y=df['total_base_pp_after_cap'],
-        name='RAW PP',
-        marker=dict(color='steelblue'),
-    ))
-
-    fig.add_trace(go.Bar(
-        x=df['resource'],
-        y=df['total_harvest_pp'],
-        name='BOOSTED PP',
-        marker=dict(color='lightgray'),
-    ))
-
-    fig.update_layout(
-        barmode='group',
-        yaxis_title="PP",
-        xaxis_title="Resource",
-        title="Production Power (PP) by resource",
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-    with st.expander("DATA", expanded=False):
-        st.dataframe(df, hide_index=True)
 
 
 def create_land_region_historical(df, log_y=True):

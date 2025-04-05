@@ -35,3 +35,7 @@ title_legendary_icon_url = f'{WEB_URL}website/icons/icon_active_praetorian.svg'
 deed_rarity_rare_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/rareOff.svg'
 deed_rarity_epic_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/epicOff.svg'
 deed_rarity_legendary_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/legendaryOff.svg'
+
+land_region_icon_url = f"{WEB_URL}website/icons/icon_claim_region.svg"
+land_tract_icon_url = f"{WEB_URL}website/icons/icon_claim_tract.svg"
+land_plot_icon_url = f"{WEB_URL}website/icons/icon_claim_plot.svg"
