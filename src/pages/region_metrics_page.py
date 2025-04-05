@@ -38,7 +38,7 @@ def get_page():
         st.title(f"Region from: {date_str.strftime('%Y-%m-%d')}")
 
         all_df = prepare_data()
-        region_header.get_page(all_df)
+        region_header.get_page()
         overall_region_info.get_page(all_df)
 
         # filtered_all_data = filter_section.get_page(all_df)

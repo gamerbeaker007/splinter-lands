@@ -165,7 +165,7 @@ def by_deed_list():
             if not deed_df.empty:
                 _, worksite_details, staking_details = spl.get_land_region_details_player(deed_df.player.iloc[0])
                 if worksite_details.empty:
-                    st.warning(f'No worksites found....')
+                    st.warning('No worksites found....')
                 else:
                     merged_df = pd.merge(
                         worksite_details,

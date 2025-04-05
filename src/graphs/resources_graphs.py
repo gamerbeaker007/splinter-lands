@@ -1,5 +1,7 @@
+import pandas as pd
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 
 COLOR_MAP = {
     "GRAIN": "orange",
@@ -76,5 +78,64 @@ def create_land_resources_factor_graph(df, log_y):
     )
 
     fig.for_each_trace(lambda t: t.update(mode="lines+markers"))
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def create_active_graph(df):
+    df["date"] = pd.to_datetime(df["date"])  # Ensure datetime type
+
+    # Calculate percentage
+    total = 150_000
+    df["pp_percentage"] = (df["active_based_on_pp"] / total) * 100
+
+    fig = go.Figure()
+
+    # First Y-axis traces
+    fig.add_trace(go.Scatter(
+        x=df["date"],
+        y=df["active_based_on_pp"],
+        mode='lines+markers',
+        name='Active Based on PP',
+        yaxis='y1'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=df["date"],
+        y=df["active_based_on_in_use"],
+        mode='lines+markers',
+        name='Active Based on in_use state',
+        yaxis='y1'
+    ))
+
+    # Second Y-axis trace (percentage)
+    fig.add_trace(go.Scatter(
+        x=df["date"],
+        y=df["pp_percentage"],
+        mode='lines+markers',
+        name='Active % (Based on PP)',
+        yaxis='y2',
+        line=dict(dash='dot')  # Optional: make it dotted to distinguish
+    ))
+
+    fig.update_layout(
+        title='Active Land (Based on PP)',
+        xaxis=dict(title='Date'),
+        yaxis=dict(
+            title='Count',
+            side='left'
+        ),
+        yaxis2=dict(
+            title='PP %',
+            overlaying='y',
+            showgrid=False,
+            zeroline=False,
+            side='right',
+            tickformat=".1f",
+            range=[0, 100]
+        ),
+        height=600,
+        hovermode='x unified'
+    )
 
     st.plotly_chart(fig, use_container_width=True)
