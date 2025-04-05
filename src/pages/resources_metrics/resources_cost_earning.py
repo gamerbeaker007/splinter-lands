@@ -137,7 +137,8 @@ def by_select():
             regions = deeds.region_uid.unique().tolist()
             with columns[0]:
                 add_selection_text("Select your region", land_region_icon_url)
-                st.selectbox("", regions,
+                st.selectbox("",
+                             regions,
                              key="region_uid",
                              label_visibility='collapsed',
                              on_change=reset_on_change("region_uid"))
@@ -179,12 +180,13 @@ def by_select():
                                     boosted_pp = details['total_harvest_pp'].iloc[0]
                                     if worksite_details.empty:
                                         rewards_per_hour = 0
+                                        token_symbol = None
                                     else:
                                         rewards_per_hour = worksite_details['rewards_per_hour'].iloc[0]
-                                    worksite = worksite_details[
-                                        worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]
-                                    ]
-                                    token_symbol = worksite.token_symbol.iloc[0]
+                                        worksite = worksite_details[
+                                            worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]
+                                            ]
+                                        token_symbol = worksite.token_symbol.iloc[0]
 
     return base_pp, boosted_pp, rewards_per_hour, token_symbol
 
