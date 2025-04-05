@@ -137,7 +137,7 @@ def by_select():
             regions = deeds.region_uid.unique().tolist()
             with columns[0]:
                 add_selection_text("Select your region", land_region_icon_url)
-                st.selectbox("",
+                st.selectbox("Select",
                              regions,
                              key="region_uid",
                              label_visibility='collapsed',
@@ -148,7 +148,7 @@ def by_select():
                     tracts = selected_region.tract_number.unique().tolist()
                     with columns[1]:
                         add_selection_text("Select your tract", land_tract_icon_url)
-                        st.selectbox("",
+                        st.selectbox("Select",
                                      tracts,
                                      label_visibility="collapsed",
                                      key="tract_number",
@@ -161,7 +161,7 @@ def by_select():
                             plots = selected_tract.plot_number.unique().tolist()
                             with columns[2]:
                                 add_selection_text("Select your plot", land_plot_icon_url)
-                                st.selectbox("",
+                                st.selectbox("Select",
                                              plots,
                                              label_visibility="collapsed",
                                              key="plot_number")
