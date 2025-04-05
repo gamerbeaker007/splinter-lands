@@ -177,7 +177,10 @@ def by_select():
                                     ]
                                     base_pp = details['total_base_pp_after_cap'].iloc[0]
                                     boosted_pp = details['total_harvest_pp'].iloc[0]
-                                    rewards_per_hour = worksite_details['rewards_per_hour'].iloc[0]
+                                    if worksite_details.empty:
+                                        rewards_per_hour = worksite_details['rewards_per_hour'].iloc[0]
+                                    else:
+                                        rewards_per_hour = 0
                                     worksite = worksite_details[
                                         worksite_details.deed_uid == selected_plot.deed_uid.iloc[0]
                                     ]
