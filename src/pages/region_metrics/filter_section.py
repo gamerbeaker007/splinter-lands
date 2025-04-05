@@ -4,7 +4,7 @@ import streamlit as st
 FILTER_KEYS = [
     "filter_regions", "filter_tracts", "filter_plots",
     "filter_rarity", "filter_resources", "filter_worksites",
-    "filter_deed_type", "filter_plot_status"
+    "filter_deed_type", "filter_plot_status", "filter_players"
 ]
 
 log = logging.getLogger("filter section")
@@ -28,6 +28,8 @@ def apply_filters(df):
         df = df[df.deed_type.isin(st.session_state["filter_deed_type"])]
     if st.session_state.get("filter_plot_status"):
         df = df[df.plot_status.isin(st.session_state["filter_plot_status"])]
+    if st.session_state.get("filter_players"):
+        df = df[df.player.isin(st.session_state["filter_players"])]
     return df
 
 
@@ -42,6 +44,7 @@ def get_page(df):
     all_worksites = df[df.worksite_type.notna() & (df.worksite_type != "")].worksite_type.unique().tolist()
     all_deed_type = df.deed_type.dropna().unique().tolist()
     all_plot_status = df.plot_status.dropna().unique().tolist()
+    all_players = df.player.dropna().unique().tolist()
 
     st.markdown("### 🎛️ Filters")
     with st.expander("Location Filters", expanded=False):
@@ -87,6 +90,10 @@ def get_page(df):
             "Plot Status",
             options=all_plot_status, key="filter_plot_status",
             default=st.session_state.get("filter_plot_status", []))
+        st.multiselect(
+            "Players",
+            options=all_players, key="filter_players",
+            default=st.session_state.get("filter_players", []))
 
     if st.button("🔄 Reset Filters"):
         for key in FILTER_KEYS:

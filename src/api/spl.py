@@ -1,4 +1,5 @@
 import logging
+import streamlit as st
 from typing import Dict, Any, Optional
 
 import pandas as pd
@@ -6,6 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 
 from src.api.logRetry import LogRetry
+
 
 # API URLs
 API_URLS = {
@@ -97,6 +99,7 @@ def get_land_region_details(region):
     return pd.DataFrame()
 
 
+@st.cache_data(ttl="1h")
 def get_land_resources_pools():
     result = fetch_api_data(f'{API_URLS['land']}land/liquidity/landpools', data_key='data')
     if result:
@@ -104,8 +107,36 @@ def get_land_resources_pools():
     return pd.DataFrame()
 
 
+@st.cache_data(ttl="1h")
 def get_prices():
     result = fetch_api_data(f'{API_URLS['prices']}prices')
     if result:
         return pd.DataFrame(result, index=[0])
+    return pd.DataFrame()
+
+
+@st.cache_data(ttl="1h")
+def get_land_deeds_uid(plot_id):
+    result = fetch_api_data(f'{API_URLS['land']}land/deeds/{plot_id}', data_key='data')
+    if result:
+        return pd.DataFrame(result, index=[0])
+    return pd.DataFrame()
+
+
+@st.cache_data(ttl="1h")
+def get_land_stake_deed_details(deed_uid):
+    result = fetch_api_data(f'{API_URLS['land']}land/stake/deed/details/{deed_uid}', data_key='data')
+    if result:
+        return pd.DataFrame(result, index=[0])
+    return pd.DataFrame()
+
+
+def get_land_region_details_player(player):
+    result = fetch_api_data(f'{API_URLS['land']}land/deeds', params={"player": player}, data_key='data')
+
+    if result:
+        worksite_details = pd.DataFrame(result["worksite_details"])
+        staking_details = pd.DataFrame(result["staking_details"])
+        deeds = pd.DataFrame(result["deeds"])
+        return deeds, worksite_details, staking_details
     return pd.DataFrame()

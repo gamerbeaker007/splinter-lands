@@ -3,7 +3,7 @@ import logging
 import streamlit as st
 
 from src.graphs import region_graphs
-from src.pages.resources_metrics.tab_production import get_per_resource_data
+from src.pages.region_metrics.tab_production import get_per_resource_data
 
 log = logging.getLogger("Tab - production")
 
