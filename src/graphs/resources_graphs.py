@@ -82,7 +82,7 @@ def create_land_resources_factor_graph(df, log_y):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def create_active_graph(df):
+def create_active_graph(df, height):
     df["date"] = pd.to_datetime(df["date"])  # Ensure datetime type
 
     # Calculate percentage
@@ -115,7 +115,7 @@ def create_active_graph(df):
         mode='lines+markers',
         name='Active % (Based on PP)',
         yaxis='y2',
-        line=dict(dash='dot')  # Optional: make it dotted to distinguish
+        line=dict(dash='dot'),
     ))
 
     fig.update_layout(
@@ -134,8 +134,16 @@ def create_active_graph(df):
             tickformat=".1f",
             range=[0, 100]
         ),
-        height=600,
-        hovermode='x unified'
+        height=height,
+        hovermode='x unified',
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='center',
+            x=0.5
+        )
+
     )
 
     st.plotly_chart(fig, use_container_width=True)
