@@ -14,6 +14,10 @@ def get_page():
         resources_graphs.create_active_graph(df, height)
     with col2:
         df = active_metrics.get_latest_active()
+        if df.empty:
+            st.warning("No data available to display the Active Land graph.")
+            return
+
         active_amount = df.active_based_on_pp.iloc[0]
         in_use_amount = df.active_based_on_in_use.iloc[0]
 

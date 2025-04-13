@@ -83,6 +83,10 @@ def create_land_resources_factor_graph(df, log_y):
 
 
 def create_active_graph(df, height):
+    if df.empty:
+        st.warning("No data available to display the Active Land graph.")
+        return
+
     df["date"] = pd.to_datetime(df["date"])  # Ensure datetime type
 
     # Calculate percentage
