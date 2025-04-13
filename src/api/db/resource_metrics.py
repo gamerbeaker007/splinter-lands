@@ -48,5 +48,5 @@ def upload_land_resources_info():
 @st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
     engine.dispose()
-    query = f"SELECT * FROM public.{RESOURCE_METRICS_TABLE_NAME}"
+    query = f"SELECT * FROM {RESOURCE_METRICS_TABLE_NAME}"
     return pd.read_sql(query, engine)

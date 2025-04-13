@@ -6,6 +6,7 @@ import streamlit as st
 from st_pages import get_nav_from_toml, add_page_title
 
 from src.pages import resource_metrics_page, region_metrics_page
+from src.utils import dev_mode
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
 
 
@@ -29,6 +30,8 @@ st.set_page_config(page_title="SplinterLands", layout="wide")
 
 nav = get_nav_from_toml('.streamlit/pages.toml')
 pg = st.navigation(nav)
+
+dev_mode.show_dev_warning()
 
 add_page_title(pg)
 
