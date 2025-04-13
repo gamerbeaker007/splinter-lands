@@ -120,7 +120,7 @@ def get_page(filtered_all_data):
             total_resources_df = pd.DataFrame(list(totals.items()), columns=['Type', 'Total PP'])
             region_graphs.create_total_production_power(total_resources_df)
         with col2:
-            region_graphs.create_pp_per_source_type(resource_df)
+            region_graphs.create_pp_per_source_type(resource_df, key='production-overview')
 
         resource_df = get_production(filtered_all_data)
         raw_cols = [col for col in resource_df.columns if col.endswith("_raw_pp")]
