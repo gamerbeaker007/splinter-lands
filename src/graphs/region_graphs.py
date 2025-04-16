@@ -181,3 +181,36 @@ def create_land_region_historical(df, log_y=True):
 
     with st.expander("DATA", expanded=False):
         st.dataframe(df, hide_index=True)
+
+
+def create_tax_income_chart(df, title):
+    custom_order = ["GRAIN", "IRON", "WOOD", "STONE", "SPS", "RESEARCH"]
+    order_map = {name: i for i, name in enumerate(custom_order)}
+    df["sort_order"] = df["token_symbol"].map(order_map).fillna(len(custom_order))
+    df = df.sort_values("sort_order").drop(columns="sort_order").reset_index(drop=True)
+
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=df["token_symbol"],
+                y=df["tax_income"],
+                marker=dict(color=[COLOR_MAP.get(res, 'steelblue') for res in df["token_symbol"]])
+            )
+        ]
+    )
+
+    fig.update_layout(
+        title=title,
+        xaxis_title="Token Symbol",
+        yaxis_title="Tax Income",
+        template="plotly_white",
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='center',
+            x=0.5
+        )
+    )
+
+    st.plotly_chart(fig, use_container_width=True, key=title)
