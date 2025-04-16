@@ -4,7 +4,7 @@ import sys
 import streamlit as st
 from st_pages import get_nav_from_toml, add_page_title
 
-from src.pages import resource_metrics_page, region_metrics_page
+from src.pages import resource_metrics_page, region_metrics_page, player_overview_page
 from src.utils import dev_mode
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
 from src.utils.log_util import configure_logger
@@ -55,3 +55,6 @@ if pg.title == "Resource Metrics":
 if pg.title == "Region Metrics":
     with placeholder.container():
         region_metrics_page.get_page()
+if pg.title == "Player Overview":
+    with placeholder.container():
+        player_overview_page.get_page()

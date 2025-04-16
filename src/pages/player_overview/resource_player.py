@@ -12,8 +12,7 @@ max_cols = 2
 tax_rate = 0.9
 
 
-def get_player_info():
-    player = st.text_input("Enter account name for overview")
+def get_player_info(player):
     if player:
         log.info(f"Request region information for player: {player}")
         deeds, worksite_details, staking_details = spl.get_land_region_details_player(player)
@@ -67,13 +66,12 @@ def get_price(metrics_df, prices_df, token, amount) -> float:
         usd_value = amount * prices_df['sps'].values[0]
         dec_total = usd_value / prices_df['dec'].values[0]
         return dec_total
-    print("")
     return amount / metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
 
 
-def get_resource_region_overview(metrics_df, prices_df):
+def get_resource_region_overview(player, metrics_df, prices_df):
     st.markdown("## Region production overview")
-    df = get_player_info()
+    df = get_player_info(player)
 
     if df.empty:
         return
@@ -167,7 +165,8 @@ def get_resource_region_overview(metrics_df, prices_df):
         {row_net}
         """
         with cols[col_idx]:
-            st.markdown(markdown, unsafe_allow_html=True)
+            with st.container():
+                st.markdown(markdown, unsafe_allow_html=True)
 
     total_net = {
         key.upper(): summary[f"adj_net_{key}"].sum()
@@ -203,15 +202,15 @@ def get_resource_region_overview(metrics_df, prices_df):
 
     net_vals = list(dec_net.values())
     net_sum = sum(net_vals)
+    total_activity = sum(abs(v) for v in net_vals)
 
-    # Adjust this number to control how much deficit is acceptable before hitting 0%
-    TOLERANCE_DEC = 1000
-
-    # Calculate a score based on acceptable loss
     if net_sum >= 0:
         self_sufficiency_score = 100
+    elif total_activity == 0:
+        self_sufficiency_score = 0  # Edge case: all zeros
     else:
-        self_sufficiency_score = max(0, 100 - abs(net_sum) / TOLERANCE_DEC * 100)
+        imbalance_ratio = abs(net_sum) / total_activity
+        self_sufficiency_score = max(0, 100 - imbalance_ratio * 100)
 
     st.markdown(f"## 🧪 Self-Sufficiency Score: **{self_sufficiency_score:.2f}%**")
     st.info("Self-Sufficiency is considered when you can pay the other resources with the excess DEC")
@@ -224,7 +223,7 @@ def get_resource_region_overview(metrics_df, prices_df):
         mode="gauge+number",
         value=self_sufficiency_score,
         domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': "Overall Self-Sufficiency"},
+        title={'text': f"Overall Self-Sufficiency for {player}"},
         gauge={
             'axis': {'range': [0, 100]},
             'bar': {'color': color},
