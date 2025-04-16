@@ -32,6 +32,17 @@ def get_player_info(player):
                  'total_base_pp_after_cap': 'sum',
                  'rewards_per_hour': 'sum'}
             ).reset_index()
+
+            # Count token_symbols per region_uid
+            token_counts = (
+                merged_df.groupby(['region_uid', 'token_symbol'])
+                .agg(count=('token_symbol', 'count'))
+                .reset_index()
+            )
+
+            # Merge that count back in if you want it alongside the main data
+            grouped_df = grouped_df.merge(token_counts, on=["region_uid", 'token_symbol'], how='left')
+
             return grouped_df
     return pd.DataFrame()
 
@@ -83,6 +94,7 @@ def get_resource_region_overview(player, metrics_df, prices_df):
     })
 
     df = pd.concat([df, df.apply(calc_costs, axis=1)], axis=1)
+    amount_df = df[['region_uid', 'token_symbol', 'count']]
 
     produced = df.pivot_table(
         index='region_uid',
@@ -155,10 +167,20 @@ def get_resource_region_overview(player, metrics_df, prices_df):
             f"{color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} | "
             f"{color_cell(net_vals['sps'])} |"
         )
+
+        # Filter for current region
+        region_df = amount_df[amount_df['region_uid'] == region]
+
+        # Build the markdown header with counts
+        header_row = "|              |"
+        for res in ['GRAIN', 'WOOD', 'STONE', 'IRON', 'RESEARCH', 'SPS']:
+            count = region_df[region_df['token_symbol'] == res]['count'].sum()
+            header_row += f" {res} ({count}) |"
+
         markdown = f"""
         ### Region {region}
 
-        |              | GRAIN | WOOD | STONE | IRON | RESEARCH | SPS |
+        {header_row}
         |--------------|:-----:|:----:|:-----:|:----:|:--------:|:---:|
         {row_produce}
         {row_consume}
@@ -168,42 +190,15 @@ def get_resource_region_overview(player, metrics_df, prices_df):
             with st.container():
                 st.markdown(markdown, unsafe_allow_html=True)
 
-    total_net = {
-        key.upper(): summary[f"adj_net_{key}"].sum()
-        for key in ['grain', 'wood', 'stone', 'iron', 'research', 'sps']
-    }
+    dec_net = total_section(amount_df, metrics_df, prices_df, summary)
 
-    row_total_net = (
-        f" | **Total Net** | {color_cell(total_net['GRAIN'])} | {color_cell(total_net['WOOD'])} | "
-        f"{color_cell(total_net['STONE'])} | {color_cell(total_net['IRON'])} | {color_cell(total_net['RESEARCH'])} | "
-        f"{color_cell(total_net['SPS'])} |"
-    )
+    add_self_sufficiency(dec_net, player)
 
-    dec_net = {
-        key.upper(): get_price(metrics_df, prices_df, key.upper(), summary[f"adj_net_{key}"].sum())
-        for key in ['grain', 'wood', 'stone', 'iron', 'research', 'sps']
-    }
 
-    dec_total_net = (
-        f" | **Total Net (DEC)** | {color_cell(dec_net['GRAIN'])} | {color_cell(dec_net['WOOD'])} | "
-        f"{color_cell(dec_net['STONE'])} | {color_cell(dec_net['IRON'])} | {color_cell(dec_net['RESEARCH'])} | "
-        f"{color_cell(dec_net['SPS'])} |"
-    )
-
-    markdown_total = f"""
-    ### 🌍 Total Net (All Regions)
-
-    |                 | GRAIN | WOOD | STONE | IRON | RESEARCH | SPS |
-    |-----------------|:-----:|:----:|:-----:|:----:|:--------:|:---:|
-    {row_total_net}
-    {dec_total_net}
-    """
-    st.markdown(markdown_total, unsafe_allow_html=True)
-
+def add_self_sufficiency(dec_net, player):
     net_vals = list(dec_net.values())
     net_sum = sum(net_vals)
     total_activity = sum(abs(v) for v in net_vals)
-
     if net_sum >= 0:
         self_sufficiency_score = 100
     elif total_activity == 0:
@@ -211,13 +206,10 @@ def get_resource_region_overview(player, metrics_df, prices_df):
     else:
         imbalance_ratio = abs(net_sum) / total_activity
         self_sufficiency_score = max(0, 100 - imbalance_ratio * 100)
-
     st.markdown(f"## 🧪 Self-Sufficiency Score: **{self_sufficiency_score:.2f}%**")
     st.info("Self-Sufficiency is considered when you can pay the other resources with the excess DEC")
-
     # Color zones
     color = "green" if self_sufficiency_score > 80 else "orange" if self_sufficiency_score > 50 else "red"
-
     # Gauge
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -234,5 +226,40 @@ def get_resource_region_overview(player, metrics_df, prices_df):
             ]
         }
     ))
-
     st.plotly_chart(fig, use_container_width=True)
+
+
+def total_section(amount_df, metrics_df, prices_df, summary):
+    total_net = {
+        key.upper(): summary[f"adj_net_{key}"].sum()
+        for key in ['grain', 'wood', 'stone', 'iron', 'research', 'sps']
+    }
+    row_total_net = (
+        f" | **Total Net** | {color_cell(total_net['GRAIN'])} | {color_cell(total_net['WOOD'])} | "
+        f"{color_cell(total_net['STONE'])} | {color_cell(total_net['IRON'])} | {color_cell(total_net['RESEARCH'])} | "
+        f"{color_cell(total_net['SPS'])} |"
+    )
+    dec_net = {
+        key.upper(): get_price(metrics_df, prices_df, key.upper(), summary[f"adj_net_{key}"].sum())
+        for key in ['grain', 'wood', 'stone', 'iron', 'research', 'sps']
+    }
+    dec_total_net = (
+        f" | **Total Net (DEC)** | {color_cell(dec_net['GRAIN'])} | {color_cell(dec_net['WOOD'])} | "
+        f"{color_cell(dec_net['STONE'])} | {color_cell(dec_net['IRON'])} | {color_cell(dec_net['RESEARCH'])} | "
+        f"{color_cell(dec_net['SPS'])} |"
+    )
+    # Build the markdown header with counts
+    header_row = "|              |"
+    for res in ['GRAIN', 'WOOD', 'STONE', 'IRON', 'RESEARCH', 'SPS']:
+        count = amount_df[amount_df['token_symbol'] == res]['count'].sum()
+        header_row += f" {res} ({count}) |"
+    markdown_total = f"""
+    ### 🌍 Total Net (All Regions)
+
+    {header_row}
+    |-----------------|:-----:|:----:|:-----:|:----:|:--------:|:---:|
+    {row_total_net}
+    {dec_total_net}
+    """
+    st.markdown(markdown_total, unsafe_allow_html=True)
+    return dec_net

@@ -77,18 +77,6 @@ def by_player(player):
     return pd.DataFrame()
 
 
-def add_selection_text(text, icon):
-    st.markdown(
-        f"""
-        <span style="font-size:16px;">
-            <strong>{text}</strong>
-            <img src="{icon}" width="20" style="vertical-align:middle; margin-bottom:6px; margin-left:6px;">
-        </span>
-        """,
-        unsafe_allow_html=True
-    )
-
-
 def calculate_fees(tax_fee, total_dec_earning):
     if tax_fee:
         total_dec_earning = total_dec_earning * transaction_fee
