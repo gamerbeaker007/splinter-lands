@@ -1,13 +1,12 @@
-import logging
-import streamlit as st
 from typing import Dict, Any, Optional
 
 import pandas as pd
 import requests
+import streamlit as st
 from requests.adapters import HTTPAdapter
 
 from src.api.logRetry import LogRetry
-
+from src.utils.log_util import configure_logger
 
 # API URLs
 API_URLS = {
@@ -16,9 +15,7 @@ API_URLS = {
     "prices": "https://prices.splinterlands.com/",
 }
 
-# Configure Logging
-log = logging.getLogger("SPL API")
-log.setLevel(logging.INFO)
+log = configure_logger(__name__)
 
 
 # Retry Strategy

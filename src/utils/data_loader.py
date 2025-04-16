@@ -1,15 +1,14 @@
-import logging
-
-import pandas as pd
-
 import asyncio
 import os
 from datetime import datetime
 
+import pandas as pd
+
 from src.api import spl
 from src.api.db import pp_tracking, resource_metrics, active_metrics
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger('Data Loader')
+log = configure_logger(__name__)
 
 DATA_BASE_DIR = 'data'
 TIMESTAMP_PATH = os.path.join(DATA_BASE_DIR, 'last_updated.txt')

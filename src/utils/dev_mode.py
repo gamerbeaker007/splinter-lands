@@ -1,17 +1,20 @@
-import logging
 import os
 
 import streamlit as st
 from alembic import command
 from alembic.config import Config
 
+from src.utils.log_util import configure_logger
+
 db_url = st.secrets["database"]["url"]
-log = logging.getLogger("DEV Mode")
+log = configure_logger(__name__)
 
 
 def run_migrations():
     alembic_cfg = Config("alembic.ini")
     os.environ["DATABASE_URL"] = db_url
+    os.environ["DISABLE_ALEMBIC_LOGGING"] = "1"
+
     log.info("Running Alembic ....")
     command.upgrade(alembic_cfg, "head")
 

@@ -1,11 +1,10 @@
-import logging
-
 import pandas as pd
 import streamlit as st
 
 from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, sps_icon_url
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger("Resource conversion")
+log = configure_logger(__name__)
 
 transaction_fee = 0.90  # 10% fee
 

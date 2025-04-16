@@ -1,11 +1,10 @@
-import logging
-
 import pandas as pd
 import streamlit as st
 
 from src.graphs import region_graphs
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger("Tab - production")
+log = configure_logger(__name__)
 
 
 def group_by_resource(df, group_field):

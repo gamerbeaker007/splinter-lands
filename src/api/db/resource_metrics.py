@@ -1,4 +1,3 @@
-import logging
 from datetime import date
 
 import pandas as pd
@@ -9,12 +8,13 @@ from src.api import spl
 from src.api.db import upload
 from src.models.models import RESOURCE_METRICS_TABLE_NAME
 from src.static.static_values_enum import grain_conversion_ratios
+from src.utils.log_util import configure_logger
 
 # Same URL as in alembic.ini
 db_url = st.secrets["database"]["url"]
 engine = create_engine(db_url)
 
-log = logging.getLogger("DB - Resource tracking")
+log = configure_logger(__name__)
 
 
 def calculate_grain_equivalent_and_factor(row, grain_price):

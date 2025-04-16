@@ -1,5 +1,6 @@
-import logging
 import streamlit as st
+
+from src.utils.log_util import configure_logger
 
 FILTER_KEYS = [
     "filter_regions", "filter_tracts", "filter_plots",
@@ -7,7 +8,7 @@ FILTER_KEYS = [
     "filter_deed_type", "filter_plot_status", "filter_players"
 ]
 
-log = logging.getLogger("filter section")
+log = configure_logger(__name__)
 
 
 def apply_filters(df):

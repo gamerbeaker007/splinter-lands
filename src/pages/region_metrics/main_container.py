@@ -1,10 +1,9 @@
-import logging
-
 import streamlit as st
 
 from src.pages.region_metrics import tab_compare, tab_active, tab_summary, tab_production, tab_region_overview
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger("Region - main container")
+log = configure_logger(__name__)
 
 
 def get_page(filtered_all_data, date_str):

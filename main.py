@@ -1,5 +1,4 @@
 import importlib
-import logging
 import sys
 
 import streamlit as st
@@ -8,6 +7,7 @@ from st_pages import get_nav_from_toml, add_page_title
 from src.pages import resource_metrics_page, region_metrics_page
 from src.utils import dev_mode
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
+from src.utils.log_util import configure_logger
 
 
 def reload_all():
@@ -20,11 +20,7 @@ def reload_all():
 
 reload_all()
 
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  # Log format
-    datefmt="%Y-%m-%d %H:%M:%S",  # Date format
-)
+log = configure_logger(__name__)
 
 st.set_page_config(page_title="SplinterLands", layout="wide")
 

@@ -1,5 +1,3 @@
-import logging
-
 import pandas as pd
 import streamlit as st
 
@@ -7,8 +5,9 @@ from src.api import spl
 from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, \
     research_icon_url, land_hammer_icon_url, sps_icon_url, land_plot_icon_url, land_region_icon_url, land_tract_icon_url
 from src.static.static_values_enum import consume_rates
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger("Resource cost/earning")
+log = configure_logger(__name__)
 
 transaction_fee = 0.90  # 10% fee
 taxes_fee = 0.90  # 10% fee

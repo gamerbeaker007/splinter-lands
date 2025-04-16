@@ -1,14 +1,18 @@
+import time
+
 import pandas as pd
 import streamlit as st
 
 from src.pages.region_metrics import overall_region_info, region_header, filter_section, main_container
 from src.utils.data_loader import load_cached_data, get_last_updated
+from src.utils.log_util import configure_logger
 
 transaction_fee = 0.90  # 10% fee
+log = configure_logger(__name__)
 
 
-@st.cache_data
 def prepare_data():
+    start = time.time()
     deeds = load_cached_data('deeds')
     worksite_details = load_cached_data('worksite_details')
     staking_details = load_cached_data('staking_details')
@@ -29,6 +33,7 @@ def prepare_data():
 
     )
     df = df.reindex(sorted(df.columns), axis=1)
+    log.info(f'Prepare data took: {time.time() - start:.02f}s')
     return df
 
 

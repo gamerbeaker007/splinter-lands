@@ -1,13 +1,12 @@
-import logging
-
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
 from src.api import spl
 from src.static.static_values_enum import consume_rates
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger("Resource player")
+log = configure_logger(__name__)
 
 max_cols = 2
 tax_rate = 0.9
