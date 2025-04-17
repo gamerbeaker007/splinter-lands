@@ -72,3 +72,18 @@ biome_mapper = {
 class Format(ExtendedEnum):
     wild = 'wild'
     modern = 'modern'
+
+
+class Edition(ExtendedEnum):
+    alpha = 0
+    beta = 1
+    promo = 2
+    reward = 3
+    untamed = 4
+    dice = 5
+    gladius = 6
+    chaos = 7
+    riftwatchers = 8
+    soulbound = 10
+    rebellion = 12
+    soulboundrb = 13
