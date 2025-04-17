@@ -42,10 +42,10 @@ land_region_icon_url = f"{WEB_URL}website/icons/icon_claim_region.svg"
 land_tract_icon_url = f"{WEB_URL}website/icons/icon_claim_tract.svg"
 land_plot_icon_url = f"{WEB_URL}website/icons/icon_claim_plot.svg"
 
-fire_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_fire_off.svg'
-water_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_water_off.svg'
-death_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_death_off.svg'
-life_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_life_off.svg'
-earth_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_earth_off.svg'
-dragon_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_dragon_off.svg'
-neutral_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_neutral_off.svg'
+fire_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_fire_on.png'
+water_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_water_on.png'
+death_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_death_on.png'
+life_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_life_on.png'
+earth_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_earth_on.png'
+dragon_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_dragon_on.png'
+neutral_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_neutral_on.png'
