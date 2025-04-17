@@ -14,25 +14,30 @@ COLOR_MAP = {
 }
 
 
-def create_land_region_active_graph(df, date_str):
+def create_land_region_active_graph(df, date_str, group_by_label):
     df = df.copy()
-
     df = df.sort_values(by='active', ascending=False)
 
     fig = go.Figure(data=[
-        go.Bar(name='Active', x=df['region_uid'], y=df['active']),
-        go.Bar(name='Inactive', x=df['region_uid'], y=df['inactive'])
+        go.Bar(name='Active', x=df[group_by_label], y=df['active']),
+        go.Bar(name='Inactive', x=df[group_by_label], y=df['inactive'])
     ])
 
-    # Update layout for stacking
     fig.update_layout(
         barmode='stack',
-        title=f'Active vs Inactive Deeds per Region (as of {date_str})',
-        xaxis_title='Region UID',
+        title=f'Active vs Inactive Deeds per {"Tract" if "tract" in group_by_label else "Region"} (as of {date_str})',
+        xaxis_title=group_by_label.replace("_", " ").title(),
         yaxis_title='Deeds',
         xaxis_tickangle=45,
-        legend=dict(x=0.85, y=0.95),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='center',
+            x=0.5
+        )
     )
+
     st.plotly_chart(fig, theme="streamlit")
 
     with st.expander("DATA", expanded=False):
