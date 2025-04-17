@@ -2,7 +2,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.api import spl
 from src.static.static_values_enum import consume_rates
 from src.utils.log_util import configure_logger
 
@@ -10,41 +9,6 @@ log = configure_logger(__name__)
 
 max_cols = 2
 tax_rate = 0.9
-
-
-def get_player_info(player):
-    if player:
-        log.info(f"Request region information for player: {player}")
-        deeds, worksite_details, staking_details = spl.get_land_region_details_player(player)
-
-        if worksite_details.empty:
-            st.warning(f'No worksites found for player {player}')
-        else:
-            merged_df = pd.merge(
-                worksite_details,
-                staking_details,
-                how='left',
-                on=['region_uid', 'deed_uid'],
-                suffixes=('', '_staking_xxx_details')
-            )
-            grouped_df = merged_df.groupby(["region_uid", 'token_symbol']).agg(
-                {'total_harvest_pp': 'sum',
-                 'total_base_pp_after_cap': 'sum',
-                 'rewards_per_hour': 'sum'}
-            ).reset_index()
-
-            # Count token_symbols per region_uid
-            token_counts = (
-                merged_df.groupby(['region_uid', 'token_symbol'])
-                .agg(count=('token_symbol', 'count'))
-                .reset_index()
-            )
-
-            # Merge that count back in if you want it alongside the main data
-            grouped_df = grouped_df.merge(token_counts, on=["region_uid", 'token_symbol'], how='left')
-
-            return grouped_df
-    return pd.DataFrame()
 
 
 def calc_costs(row):
@@ -80,9 +44,29 @@ def get_price(metrics_df, prices_df, token, amount) -> float:
     return amount / metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
 
 
-def get_resource_region_overview(player, metrics_df, prices_df):
+def prepare_data(df):
+    grouped_df = df.groupby(["region_uid", 'token_symbol']).agg(
+        {'total_harvest_pp': 'sum',
+         'total_base_pp_after_cap': 'sum',
+         'rewards_per_hour': 'sum'}
+    ).reset_index()
+
+    # Count token_symbols per region_uid
+    token_counts = (
+        df.groupby(['region_uid', 'token_symbol'])
+        .agg(count=('token_symbol', 'count'))
+        .reset_index()
+    )
+
+    # Merge that count back in if you want it alongside the main data
+    grouped_df = grouped_df.merge(token_counts, on=["region_uid", 'token_symbol'], how='left')
+    return grouped_df
+
+
+def get_resource_region_overview(df, player, metrics_df, prices_df):
     st.markdown("## Region production overview")
-    df = get_player_info(player)
+
+    df = prepare_data(df)
 
     if df.empty:
         return

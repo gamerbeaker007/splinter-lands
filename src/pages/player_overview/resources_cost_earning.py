@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 
-from src.api import spl
 from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, \
     research_icon_url, land_hammer_icon_url, sps_icon_url
 from src.static.static_values_enum import consume_rates
@@ -34,11 +33,18 @@ def reset_on_change(_key):
     return reset
 
 
-def get_resource_cost(player, resource_pool_metric):
+def get_resource_cost(df, resource_pool_metric):
     st.markdown("## Calculate DEC cost/earnings")
+
+    df = df.groupby(['token_symbol']).agg(
+        {
+            'total_harvest_pp': 'sum',
+            'total_base_pp_after_cap': 'sum',
+            'rewards_per_hour': 'sum'
+        }).reset_index()
+
     max_cols = 3
     taxes_fee_txt = "Include taxes(10%) and fees (10%)"
-    df = by_player(player)
     tax_fee = st.checkbox(taxes_fee_txt)
     cols = st.columns(max_cols)
     for idx, (_, row) in enumerate(df.iterrows()):
@@ -54,27 +60,6 @@ def get_resource_cost(player, resource_pool_metric):
                                          resource,
                                          resource_pool_metric,
                                          tax_fee)
-
-
-def by_player(player):
-    if player:
-        log.info(f"By select for {player}")
-        deeds, worksite_details, staking_details = spl.get_land_region_details_player(player)
-
-        if worksite_details.empty:
-            st.warning(f'No worksites found for player {player}')
-        else:
-            merged_df = pd.merge(
-                worksite_details,
-                staking_details,
-                how='left',
-                on=['region_uid', 'deed_uid'],
-                suffixes=('', '_staking_xxx_details')
-            )
-            grouped_df = merged_df.groupby(['token_symbol']).agg(
-                {'total_harvest_pp': 'sum', 'total_base_pp_after_cap': 'sum', 'rewards_per_hour': 'sum'}).reset_index()
-            return grouped_df
-    return pd.DataFrame()
 
 
 def calculate_fees(tax_fee, total_dec_earning):

@@ -22,6 +22,8 @@ land_research_hut_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_resea
 land_shard_mine_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_sps.png'
 land_keep_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/keepsOff.svg'
 land_castle_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/castleOff.svg'
+land_under_construction_icon_url = ('https://files.peakd.com/file/peakd-hive/beaker007/'
+                                    'AJg3Ws5boAJF5cdekBgVCzVRbBcLKjVuDYqXqTLAbgo6XoAVXTGuVYh8Ggn22S1.png')
 
 totem_common_icon_url = f'{WEB_URL}website/icons/icon_totem_1_common_300.png'
 totem_rare_icon_url = f'{WEB_URL}website/icons/icon_totem_2_rare_300.png'
@@ -39,3 +41,11 @@ deed_rarity_legendary_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/legendaryO
 land_region_icon_url = f"{WEB_URL}website/icons/icon_claim_region.svg"
 land_tract_icon_url = f"{WEB_URL}website/icons/icon_claim_tract.svg"
 land_plot_icon_url = f"{WEB_URL}website/icons/icon_claim_plot.svg"
+
+fire_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_fire_off.svg'
+water_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_water_off.svg'
+death_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_death_off.svg'
+life_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_life_off.svg'
+earth_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_earth_off.svg'
+dragon_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_gold_off.svg'
+neutral_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_neutral_off.svg'

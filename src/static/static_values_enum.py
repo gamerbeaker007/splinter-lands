@@ -1,5 +1,11 @@
 from enum import Enum
 
+from src.static.icons import land_grain_farm_icon_url, land_logging_camp_icon_url, land_ore_mine_icon_url, \
+    land_quarry_icon_url, land_research_hut_icon_url, land_shard_mine_icon_url, land_keep_icon_url, \
+    land_castle_icon_url, land_under_construction_icon_url, fire_element_icon_url, \
+    water_element_icon_url, life_element_icon_url, death_element_icon_url, earth_element_icon_url, \
+    dragon_element_icon_url
+
 
 class ExtendedEnum(Enum):
 
@@ -11,15 +17,6 @@ class ExtendedEnum(Enum):
     def list_values(cls):
         return list(map(lambda c: c.value, cls))
 
-
-resource_list = [
-    'GRAIN',
-    'WOOD',
-    'STONE',
-    'IRON',
-    'RESEARCH',
-    'SPS',
-]
 
 grain_conversion_ratios = {
     'WOOD': 4,
@@ -43,6 +40,33 @@ consume_rates = {
     'STONE': 0.002,
     'IRON': 0.0005,
 }
+
+worksite_type_mapping = {
+    'Grain Farm': land_grain_farm_icon_url,
+    'Logging Camp': land_logging_camp_icon_url,
+    'Ore Mine': land_ore_mine_icon_url,
+    'Quarry': land_quarry_icon_url,
+    'Research Hut': land_research_hut_icon_url,
+    'Shard Mine': land_shard_mine_icon_url,
+    'KEEP': land_keep_icon_url,
+    'CASTLE': land_castle_icon_url,
+    'Undeveloped': land_under_construction_icon_url,
+}
+
+biome_mapper = {
+    'red':  fire_element_icon_url,
+    'blue': water_element_icon_url,
+    'white': life_element_icon_url,
+    'black': death_element_icon_url,
+    'green': earth_element_icon_url,
+    'gold': dragon_element_icon_url,
+}
+# red_biome_modifier,0.1
+# blue_biome_modifier,-0.5
+# white_biome_modifier,0.0
+# black_biome_modifier,0.1
+# green_biome_modifier,-0.5
+# gold_biome_modifier,0.0
 
 
 class Format(ExtendedEnum):
