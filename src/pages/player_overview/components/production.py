@@ -1,3 +1,5 @@
+import pandas as pd
+
 from src.static.icons import land_hammer_icon_url
 from src.static.static_values_enum import worksite_type_mapping, resource_icon_map
 from src.utils.resource_util import calc_costs
@@ -180,12 +182,15 @@ def add_production(row):
 
 
 def get_progres_html(hours_since_last_op, projected_created_date, projected_end_date):
-    if projected_end_date:
+    if pd.notna(projected_end_date):
         info_str = f'Finished in: {time_until(projected_end_date)}'
         percentage_done = calculate_progress(projected_created_date, projected_end_date)
-    else:
+    elif pd.notna(hours_since_last_op):
         percentage_done = production_percentage(hours_since_last_op)
         info_str = f'{percentage_done}% Full'
+    else:
+        percentage_done = 0
+        info_str = "Undeveloped"
 
     progress_color = "red" if percentage_done >= 75 else "orange" if percentage_done >= 40 else "green"
     progress_fill_style = f"width: {percentage_done}%; background-color: {progress_color};"

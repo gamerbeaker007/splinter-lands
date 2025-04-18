@@ -44,9 +44,14 @@ def reset_filters():
         st.session_state.pop(key, None)
 
 
+def get_valid_session_values(key, valid_options):
+    """Return only the valid session values that exist in current options."""
+    return [v for v in st.session_state.get(key, []) if v in valid_options]
+
 def get_page(df):
     filtered_df = df.copy()
 
+    # Precompute filter options
     all_regions = df.region_uid.dropna().unique().tolist()
     all_tracts = df.tract_number.dropna().unique().tolist()
     all_plots = df.plot_number.dropna().unique().tolist()
@@ -65,59 +70,59 @@ def get_page(df):
                 "Regions",
                 options=all_regions,
                 key="filter_regions",
-                default=st.session_state.get("filter_regions", []))
+                default=get_valid_session_values("filter_regions", all_regions))
             st.multiselect(
                 "Tracts",
                 options=all_tracts,
                 key="filter_tracts",
-                default=st.session_state.get("filter_tracts", []))
+                default=get_valid_session_values("filter_tracts", all_tracts))
             st.multiselect(
                 "Plots",
                 options=all_plots,
                 key="filter_plots",
-                default=st.session_state.get("filter_plots", []))
+                default=get_valid_session_values("filter_plots", all_plots))
 
         with st.expander("🔎 Attributes", expanded=False):
             st.multiselect(
                 "Rarity",
                 options=all_rarity,
                 key="filter_rarity",
-                default=st.session_state.get("filter_rarity", []))
+                default=get_valid_session_values("filter_rarity", all_rarity))
             st.multiselect(
                 "Resources",
                 options=all_resources,
                 key="filter_resources",
-                default=st.session_state.get("filter_resources", []))
+                default=get_valid_session_values("filter_resources", all_resources))
             st.multiselect(
                 "Worksites",
                 options=all_worksites,
                 key="filter_worksites",
-                default=st.session_state.get("filter_worksites", []))
+                default=get_valid_session_values("filter_worksites", all_worksites))
             st.multiselect(
                 "Deed Type",
                 options=all_deed_type,
                 key="filter_deed_type",
-                default=st.session_state.get("filter_deed_type", []))
+                default=get_valid_session_values("filter_deed_type", all_deed_type))
             st.multiselect(
                 "Plot Status",
                 options=all_plot_status,
                 key="filter_plot_status",
-                default=st.session_state.get("filter_plot_status", []))
+                default=get_valid_session_values("filter_plot_status", all_plot_status))
             st.checkbox(
                 "Undeveloped",
                 key="filter_developed",
-                value=st.session_state.get("filter_developed", []))
+                value=st.session_state.get("filter_developed", False))
             st.checkbox(
                 "Under Construction",
                 key="filter_under_construction",
-                value=st.session_state.get("filter_under_construction", []))
+                value=st.session_state.get("filter_under_construction", False))
 
         with st.expander("🧑 Players", expanded=False):
             st.multiselect(
                 "Players",
                 options=all_players,
                 key="filter_players",
-                default=st.session_state.get("filter_players", []))
+                default=get_valid_session_values("filter_players", all_players))
 
         if st.button("🔄 Reset Filters"):
             reset_filters()
