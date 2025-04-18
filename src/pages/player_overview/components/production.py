@@ -140,7 +140,12 @@ def add_production(row):
     hammer_icon = f'<img src="{land_hammer_icon_url}" alt="hammer" />'
     prod_icon = f'<img src="{resource_icon_map.get(resource, land_hammer_icon_url)}" alt="{resource}" />'
 
-    progress_html = get_progres_html(hours_since_last_op, projected_created_date, projected_end_date)
+    progress_html = get_progres_html(
+        hours_since_last_op,
+        projected_created_date,
+        projected_end_date,
+        boosted_pp
+    )
 
     # Generate cost lines (skip zero)
     cost_html = ""
@@ -181,10 +186,13 @@ def add_production(row):
     return html
 
 
-def get_progres_html(hours_since_last_op, projected_created_date, projected_end_date):
+def get_progres_html(hours_since_last_op, projected_created_date, projected_end_date, boosted_pp):
     if pd.notna(projected_end_date):
         info_str = f'Finished in: {time_until(projected_end_date)}'
         percentage_done = calculate_progress(projected_created_date, projected_end_date)
+    elif boosted_pp <= 0:
+        percentage_done = 0
+        info_str = "No workers assigned"
     elif pd.notna(hours_since_last_op):
         percentage_done = production_percentage(hours_since_last_op)
         info_str = f'{percentage_done}% Full'
