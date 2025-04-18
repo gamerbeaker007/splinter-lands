@@ -1,9 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from src.static.icons import grain_icon_url, wood_icon_url, stone_icon_url, iron_icon_url, dec_icon_url, \
-    research_icon_url, land_hammer_icon_url, sps_icon_url
-from src.static.static_values_enum import consume_rates
+from src.static.static_values_enum import consume_rates, resource_icon_map
 from src.utils.log_util import configure_logger
 
 log = configure_logger(__name__)
@@ -127,18 +125,6 @@ def add_research_production_cost(base_pp,
     # Total DEC
     total_dec_cost = sum(dec_costs.values())
 
-    # Icons (adjust paths as needed)
-    icons = {
-        'PP': land_hammer_icon_url,
-        'DEC': dec_icon_url,
-        'GRAIN': grain_icon_url,
-        'STONE': stone_icon_url,
-        'WOOD': wood_icon_url,
-        'IRON': iron_icon_url,
-        'RESEARCH': research_icon_url,
-        'SPS': sps_icon_url
-    }
-
     def icon_html(icon_url):
         return f"<img src='{icon_url}' width='20' height='20' style='vertical-align:middle;'/>"
 
@@ -149,24 +135,25 @@ def add_research_production_cost(base_pp,
         total_dec_earning = rewards_per_hour / get_price(metrics_df, resource)
         extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
 
-        earning_txt = (f"<h8>{icon_html(icons['DEC'])} DEC Earning/ hr: {round(total_dec_earning, 3)} "
+        earning_txt = (f"<h8>{icon_html(resource_icon_map['DEC'])} DEC Earning: {round(total_dec_earning, 3)} /hr"
                        f"{extra_txt}</h8>")
 
     production_txt = ""
     if rewards_per_hour:
         extra_txt, production = calculate_taxes(rewards_per_hour, tax_fee)
-        production_txt = (f"<h8>{icon_html(icons[resource])} {resource} Production / hr RR: {round(production, 3)} "
+        production_txt = (f"<h8>{icon_html(resource_icon_map[resource])}"
+                          f" {resource} Production {round(production, 3)} /hr"
                           f"{extra_txt}</h8>")
 
     # Markdown output
     with st.container(border=True):
         st.markdown(f"""
-        <img src='{icons[resource]}' width='50' height='50' style='display: block; margin-left: auto; margin-right: auto;'/>
+        <img src='{resource_icon_map[resource]}' width='50' height='50' style='display: block; margin-left: auto; margin-right: auto;'/>
         <br>
         
-        <h7>{icon_html(icons['PP'])} BASE PP: {base_pp}</h7>
+        <h7>{icon_html(resource_icon_map['PP'])} BASE PP: {base_pp}</h7>
         
-        <h7>{icon_html(icons['PP'])} BOOSTED PP: {boosted_pp}</h7>
+        <h7>{icon_html(resource_icon_map['PP'])} BOOSTED PP: {boosted_pp}</h7>
 
         <table>
             <tr>
@@ -176,7 +163,7 @@ def add_research_production_cost(base_pp,
             </tr>
             {''.join([
             f"<tr>"
-            f"<td>{icon_html(icons[res])} {res}</td>"
+            f"<td>{icon_html(resource_icon_map[res])} {res}</td>"
             f"<td>{round(costs[res], 3)}</td>"
             f"<td>{round(dec_costs[res], 3)}</td>"
             f"</tr>"
@@ -185,6 +172,6 @@ def add_research_production_cost(base_pp,
         </table>
         {production_txt}
         {earning_txt}
-        <h8>{icon_html(icons['DEC'])}Net Positive DEC / hr: {round(total_dec_earning - total_dec_cost, 3)}
+        <h8>{icon_html(resource_icon_map['DEC'])}Net Positive DEC: {round(total_dec_earning - total_dec_cost, 3)} /hr
         <span style='color:gray'>(earn-cost)</span><br></h8>
         """, unsafe_allow_html=True)

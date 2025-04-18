@@ -33,7 +33,7 @@ card_display_style = """
     margin-top: 1px;
     background-color: rgba(240, 240, 240, 0.85);
     color: #333;
-    font-size: 8pt;
+    font-size: 10pt;
     font-family: monospace;
     padding: 4px 6px;
     border-radius: 6px;

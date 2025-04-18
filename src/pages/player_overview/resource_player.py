@@ -2,27 +2,13 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.static.static_values_enum import consume_rates
 from src.utils.log_util import configure_logger
+from src.utils.resource_util import calc_costs
 
 log = configure_logger(__name__)
 
 max_cols = 2
 tax_rate = 0.9
-
-
-def calc_costs(row):
-    resource = row["token_symbol"]
-    base = row["base_pp"]
-    costs = {f'cost_per_h_{res.lower()}': 0 for res in ['GRAIN', 'WOOD', 'STONE', 'IRON']}
-
-    if resource in {"GRAIN", "WOOD", "STONE", "IRON"}:
-        costs['cost_per_h_grain'] = base * consume_rates["GRAIN"]
-    elif resource in ["RESEARCH", "SPS"]:
-        for dep in ["GRAIN", "WOOD", "STONE", "IRON"]:
-            key = f'cost_per_h_{dep.lower()}'
-            costs[key] = base * consume_rates[dep]
-    return pd.Series(costs)
 
 
 def color_cell(val):
@@ -71,19 +57,13 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
     if df.empty:
         return
 
-    df = df.rename(columns={
-        "total_harvest_pp": "boosted_pp",
-        "total_base_pp_after_cap": "base_pp",
-        "rewards_per_hour": "production_per_hour"
-    })
-
     df = pd.concat([df, df.apply(calc_costs, axis=1)], axis=1)
     amount_df = df[['region_uid', 'token_symbol', 'count']]
 
     produced = df.pivot_table(
         index='region_uid',
         columns='token_symbol',
-        values='production_per_hour',
+        values='rewards_per_hour',
         aggfunc='sum',
         fill_value=0
     ).add_prefix('produced_').reset_index()

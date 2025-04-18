@@ -6,6 +6,7 @@ from src.pages.player_overview.components.biome import add_biome, biome_style
 from src.pages.player_overview.components.cards import card_display_style, add_card, add_card_runi
 from src.pages.player_overview.components.deed_type import add_deed_type, deed_type_style
 from src.pages.player_overview.components.items import add_items, item_boost_style
+from src.pages.player_overview.components.production import add_production, production_card_style
 
 deed_tile_wrapper_css = """
 <style>
@@ -96,7 +97,8 @@ def get_page(df: pd.DataFrame):
         deed_type_style +
         biome_style +
         item_boost_style +
-        card_display_style,
+        card_display_style +
+        production_card_style,
         unsafe_allow_html=True)
 
     tiles_html = ""
@@ -112,6 +114,7 @@ def get_page(df: pd.DataFrame):
         biome_html = add_biome(row)
         cards_html = add_card(cards)
         runi_html = add_card_runi(cards)
+        production_html = add_production(row)
 
         tile = f"""<div class="deed-tile">
             {card_html}
@@ -140,8 +143,8 @@ def get_page(df: pd.DataFrame):
             <div class="wrapper">
                 <h6 style="margin-bottom: 1px;">Production</h6>
                 <div class="production-wrapper">
-                    <div class="cards-section" style="text-align: left;">
-                        <h1>TODO</h1>
+                    <div class="production-section" style="text-align: left;">
+                        {production_html}
                     </div>
                 </div>
             </div>

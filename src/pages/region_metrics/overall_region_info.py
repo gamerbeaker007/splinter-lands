@@ -1,19 +1,8 @@
 import streamlit as st
 
-from src.static.icons import grain_icon_url, stone_icon_url, wood_icon_url, iron_icon_url, sps_icon_url, \
-    research_icon_url, tax_icon_url
+from src.static.static_values_enum import resource_icon_map
 from src.utils.card import create_card, card_style
 from src.utils.large_number_util import format_large_number
-
-icon_map = {
-    "GRAIN": grain_icon_url,
-    "STONE": stone_icon_url,
-    "WOOD": wood_icon_url,
-    "IRON": iron_icon_url,
-    "SPS": sps_icon_url,
-    "RESEARCH": research_icon_url,
-    "TAX": tax_icon_url,
-}
 
 
 def get_page(df):
@@ -37,7 +26,7 @@ def get_page(df):
                 f"Active w/o Type: {active_empty.index.size}<br>" +
                 f"RAW PP: {total_raw_pp}<br>" +
                 f"BOOSTED PP: {total_boosted_pp}<br>",
-                icon_map.get(token)
+                resource_icon_map.get(token)
             )
 
             cols[j].markdown(card_html, unsafe_allow_html=True)

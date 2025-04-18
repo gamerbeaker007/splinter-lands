@@ -23,7 +23,7 @@ item_boost_style = """
     padding: 2px;
 }
 .item-boost {
-    font-size: 8pt;
+    font-size: 10pt;
     font-weight: bold;
     font-family: monospace;
     margin-top: 1px;

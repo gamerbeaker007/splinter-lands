@@ -6,7 +6,7 @@ biome_style = """
         color: green;
         font-weight: bold;
         font-family: monospace;
-        font-size: 8pt;
+        font-size: 10pt;
         display: block;
         text-align: center;
     }
@@ -14,7 +14,7 @@ biome_style = """
         color: red;
         font-weight: bold;
         font-family: monospace;
-        font-size: 8pt;
+        font-size: 10pt;
         display: block;
         text-align: center;
     }
