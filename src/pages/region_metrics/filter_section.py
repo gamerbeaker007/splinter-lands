@@ -48,6 +48,7 @@ def get_valid_session_values(key, valid_options):
     """Return only the valid session values that exist in current options."""
     return [v for v in st.session_state.get(key, []) if v in valid_options]
 
+
 def get_page(df):
     filtered_df = df.copy()
 
