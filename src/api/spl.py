@@ -128,7 +128,6 @@ def get_land_stake_deed_details(deed_uid):
     return pd.DataFrame()
 
 
-@st.cache_data(ttl="1h")
 def get_land_region_details_player(player):
     result = fetch_api_data(f'{API_URLS['land']}land/deeds', params={"player": player}, data_key='data')
 
