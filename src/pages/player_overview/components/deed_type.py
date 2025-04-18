@@ -13,7 +13,7 @@ deed_type_style = """
     width: 400px;
     background-size: cover;
     background-position: center;
-    margin: 20px auto;
+    margin: 10px auto;
     overflow: hidden;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     flex-direction: column;

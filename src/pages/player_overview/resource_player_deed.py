@@ -25,28 +25,23 @@ deed_tile_wrapper_css = """
     flex-direction: column;
 }
 
-.boosts-wrapper {
+.info-wrapper {
     display: inline-flex;
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
     gap: 16px;
     flex-wrap: wrap;
-    margin-top: 8px;
+    margin-top: 1px;
+    margin-bottom: 10px;
 }
 
-.cards-wrapper {
-    display: inline-flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 1px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
 
-.wrapper h6 {
-    margin: 6px 0 4px 0;
+.wrapper p {
+    margin-top: 5px;
+    margin-bottom: 0px;
+    font-size: 14pt;
+    font-weight: bold;
 }
 
 .boost-section {
@@ -90,8 +85,8 @@ def get_page(df: pd.DataFrame):
         tile = f"""<div class="deed-tile">
             {card_html}
             <div class="wrapper">
-                <h6 style="margin-bottom: 1px;">Boosts</h6>
-                <div class="boosts-wrapper">
+                <p>Boosts:</p>
+                <div class="info-wrapper">
                     <div class="boost-section" style="text-align: left;">
                         {biome_html}
                     </div>
@@ -104,16 +99,16 @@ def get_page(df: pd.DataFrame):
                 </div>
             </div>
             <div class="wrapper">
-                <h6 style="margin-bottom: 1px;">Cards</h6>
-                <div class="cards-wrapper">
+                <p>Cards:</p>
+                <div class="info-wrapper">
                     <div class="cards-section" style="text-align: left;">
                         {cards_html}
                     </div>
                 </div>
             </div>
             <div class="wrapper">
-                <h6 style="margin-bottom: 1px;">Production</h6>
-                <div class="production-wrapper">
+                <p>Production:</p>
+                <div class="info-wrapper">
                     <div class="production-section" style="text-align: left;">
                         {production_html}
                     </div>

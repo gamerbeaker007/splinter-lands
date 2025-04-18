@@ -7,6 +7,8 @@ card_display_style = """
 .card-wrapper {
     display: inline-block;
     text-align: center;
+    margin-top: 0px;
+    margin-bottom: 10px;
     width: 75px;
 }
 
