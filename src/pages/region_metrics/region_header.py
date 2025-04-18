@@ -27,6 +27,7 @@ def get_page():
                     <h3>{round((active_amount / 150000) * 100, 2)} % ({active_amount})
                      Active based on PP.</h3>
                     <h3>{round((in_use_amount / 150000) * 100, 2)} % ({in_use_amount})
-s                </div>
+                     Active based on in_use state.</h3>                    
+                </div>
             </div>
         """, unsafe_allow_html=True)
