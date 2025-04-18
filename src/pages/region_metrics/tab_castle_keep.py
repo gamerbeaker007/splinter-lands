@@ -22,13 +22,14 @@ def get_page(df):
             'token_symbol',
             'rewards_per_hour'
         ]
-    ]
+    ].copy()
 
     keeps_and_castles = df_filtered[df_filtered['worksite_type'].isin(['CASTLE', 'KEEP'])]
     add_top_taxes(keeps_and_castles)
 
     # Calculate taxed income for each plot (10% of rewards_per_hour)
     df_filtered['paid_taxes'] = df_filtered['rewards_per_hour'].astype(float) * df_filtered['tax_rate'].astype(float)
+
     all_resources = df_filtered[df_filtered['token_symbol'] != 'TAX']
 
     keeps_df = df_filtered[df_filtered['worksite_type'] == 'KEEP']

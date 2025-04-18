@@ -36,7 +36,7 @@ production_card_style = """
     display: block;
 }
 
-.production-right {
+.production-left {
     text-align: center;
     flex-shrink: 0;
 }
@@ -45,7 +45,7 @@ production_card_style = """
     width: 150px;
     height: 150px;
     border-radius: 10px;
-    background-size: 150%;
+    background-size: 90%;
     background-repeat: no-repeat;
     background-position: center center;
     border: 2px solid #ccc;
@@ -98,7 +98,7 @@ def add_production(row):
     </div>"""
 
     html = f"""<div class="production-card">
-        <div class="production-right">
+        <div class="production-left">
             <div class="production-img-container" style="background-image: url('{image_url}');"></div>
             <div class="production-pp">
                 {hammer_icon} {base_pp:.0f} </br>
@@ -112,4 +112,4 @@ def add_production(row):
         </div>
     </div>"""
 
-    return production_card_style + html
+    return html

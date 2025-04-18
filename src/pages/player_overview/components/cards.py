@@ -60,7 +60,6 @@ def add_card(cards):
     html = ""
     for card in cards:
         if 'runi' in card['name'].lower():
-            print("RUNI TODO")
             continue  # Skip or handle separately
         base_pp = float(card['base_pp_after_cap'])
         boosted_pp = float(card['total_harvest_pp'])

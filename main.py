@@ -37,7 +37,6 @@ if is_data_stale() and not is_refreshing():
     safe_refresh_data()
 
 # Sidebar status
-st.sidebar.markdown("### Data Status")
 if is_refreshing():
     st.sidebar.markdown(":large_orange_circle: Data Refreshing...")
 elif is_data_stale():

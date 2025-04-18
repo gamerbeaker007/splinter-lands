@@ -113,10 +113,22 @@ def safe_refresh_data():
 
 
 def merge_with_details(deeds, worksite_details, staking_details):
-    df = pd.merge(deeds, worksite_details, how='left', on='deed_uid', suffixes=('', '_worksite_details'))
-    df = pd.merge(df, staking_details, how='left', on='deed_uid', suffixes=('', '_staking_details'))
+    df = pd.merge(
+        deeds,
+        worksite_details,
+        how='left',
+        on='deed_uid',
+        suffixes=('', '_worksite_details')
+    )
+    df = pd.merge(
+        df,
+        staking_details,
+        how='left',
+        on='deed_uid',
+        suffixes=('', '_staking_details')
+    )
 
     matching_columns = df.columns[df.columns.str.endswith(('_worksite_details', '_staking_details'))].tolist()
-    log.info(f'Reminder watch these columns: {matching_columns}')
+    log.debug(f'Reminder watch these columns: {matching_columns}')
 
     return df.reindex(sorted(df.columns), axis=1)

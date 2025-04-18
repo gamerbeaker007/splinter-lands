@@ -55,41 +55,12 @@ deed_tile_wrapper_css = """
 </style>
 """
 
-# def create_plot_tile(row):
-#     with st.container(border=True):
-
-# st.write(row)
-
-# total_base_pp = row['total_base_pp']
-# total_boosted_pp = row['total_harvest_pp']
-
-# add_deed_type(row)
-
-# worksite_type = row['worksite_type']
-# if worksite_type == '':
-#     worksite_type = 'Undeveloped'
-#
-# image_url = worksite_type_mapping.get(worksite_type)
-# st.write(worksite_type)
-# st.image(image_url)
-
-# raw_pp = row['total_base_pp']
-# boosted_pp = row['total_harvest_pp']
-# extra_style_2 = """style="width: 30px; min-height: 30px" """
-# hammer_img = f'<img src="{land_hammer_icon_url}" alt="region" {extra_style_2}>'
-
 
 def get_page(df: pd.DataFrame):
-    st.markdown("## Deed Overview")
+    st.markdown(f"## Deed Overview ({df.index.size})")
     if df.index.size > 100:
         st.warning("To many deeds displaying the first 100 (please use filters)")
         df = df.head(100)
-
-    # df = df.head(3)
-    # st.dataframe(df)
-    # st.write(df.columns.tolist())
-    # filtered_df = df.filter(regex='_y_', axis=1)
-    # st.write(filtered_df.columns.tolist())
 
     # add styles once
     st.markdown(
