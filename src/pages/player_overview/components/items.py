@@ -5,8 +5,6 @@ item_boost_style = """
 .item-wrapper {
     display: inline-block;
     text-align: center;
-    margin: 6px;
-    width: 75px;
 }
 .item-img-container {
     width: 50px;
@@ -28,7 +26,7 @@ item_boost_style = """
     font-size: 8pt;
     font-weight: bold;
     font-family: monospace;
-    margin-top: 4px;
+    margin-top: 1px;
 }
 </style>
 """
@@ -51,9 +49,9 @@ def add_items(items):
             label = name
             totem_map = {
                 'Common Totem': '1_common',
-                'Rare Totem': '1_rare',
-                'Epic Totem': '1_epic',
-                'Legendary Totem': '1_legendary'
+                'Rare Totem': '2_rare',
+                'Epic Totem': '3_epic',
+                'Legendary Totem': '4_legendary'
             }
             image_name = totem_map.get(name, name.lower().replace(" ", "_"))
             img_url = f'{WEB_URL}website/icons/icon_totem_{image_name}_300.png'

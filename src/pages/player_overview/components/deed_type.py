@@ -9,9 +9,8 @@ deed_type_style = """
     position: relative;
     display: flex;
     aspect-ratio: 1 / 2;
-    width: 100%;
-    height: 186px;
-    width: 350px;
+    height: 210px;
+    width: 400px;
     background-size: cover;
     background-position: center;
     margin: 20px auto;

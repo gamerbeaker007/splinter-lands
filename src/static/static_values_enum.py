@@ -83,7 +83,7 @@ class Edition(ExtendedEnum):
     dice = 5
     gladius = 6
     chaos = 7
-    riftwatchers = 8
+    rift = 8
     soulbound = 10
     rebellion = 12
     soulboundrb = 13

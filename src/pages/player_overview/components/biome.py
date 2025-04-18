@@ -20,9 +20,7 @@ biome_style = """
     }
     .biome_img {
         vertical-align: middle;
-        # width: 36px;
-        height: 20px;
-        # margin: 1px;
+        height: 25px;
         padding: 2px;
         border: 1px solid white;
         box-sizing: border-box;
@@ -33,7 +31,7 @@ biome_style = """
     .biome_container {
         display: inline-block;
         text-align: center;
-        margin: 4px;
+        margin: 1px;
     }
 </style>
 """
