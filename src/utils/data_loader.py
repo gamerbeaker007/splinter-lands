@@ -1,15 +1,14 @@
-import logging
-
-import pandas as pd
-
 import asyncio
 import os
 from datetime import datetime
 
+import pandas as pd
+
 from src.api import spl
 from src.api.db import pp_tracking, resource_metrics, active_metrics
+from src.utils.log_util import configure_logger
 
-log = logging.getLogger('Data Loader')
+log = configure_logger(__name__)
 
 DATA_BASE_DIR = 'data'
 TIMESTAMP_PATH = os.path.join(DATA_BASE_DIR, 'last_updated.txt')
@@ -114,10 +113,22 @@ def safe_refresh_data():
 
 
 def merge_with_details(deeds, worksite_details, staking_details):
-    df = pd.merge(deeds, worksite_details, how='left', on='deed_uid', suffixes=('', '_worksite_details'))
-    df = pd.merge(df, staking_details, how='left', on='deed_uid', suffixes=('', '_staking_details'))
+    df = pd.merge(
+        deeds,
+        worksite_details,
+        how='left',
+        on='deed_uid',
+        suffixes=('', '_worksite_details')
+    )
+    df = pd.merge(
+        df,
+        staking_details,
+        how='left',
+        on='deed_uid',
+        suffixes=('', '_staking_details')
+    )
 
     matching_columns = df.columns[df.columns.str.endswith(('_worksite_details', '_staking_details'))].tolist()
-    log.info(f'Reminder watch these columns: {matching_columns}')
+    log.debug(f'Reminder watch these columns: {matching_columns}')
 
     return df.reindex(sorted(df.columns), axis=1)

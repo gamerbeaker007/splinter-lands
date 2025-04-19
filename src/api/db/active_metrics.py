@@ -1,4 +1,3 @@
-import logging
 from datetime import date
 
 import pandas as pd
@@ -7,12 +6,13 @@ from sqlalchemy import create_engine
 
 from src.api.db import upload
 from src.models.models import ACTIVE_TABLE_NAME
+from src.utils.log_util import configure_logger
 
 # Same URL as in alembic.ini
 db_url = st.secrets["database"]["url"]
 engine = create_engine(db_url)
 
-log = logging.getLogger("DB - Active metrics")
+log = configure_logger(__name__)
 
 
 def upload_daily_active_metrics(df):

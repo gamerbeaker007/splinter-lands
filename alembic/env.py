@@ -15,7 +15,7 @@ config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-if config.config_file_name is not None:
+if context.config.config_file_name is not None and os.getenv("DISABLE_ALEMBIC_LOGGING") != "1":
     fileConfig(config.config_file_name)
 
 # add your model's MetaData object here

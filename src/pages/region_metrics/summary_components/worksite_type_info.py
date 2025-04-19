@@ -1,20 +1,6 @@
 import streamlit as st
 
-from src.static.icons import land_grain_farm_icon_url, land_logging_camp_icon_url, land_ore_mine_icon_url, \
-    land_quarry_icon_url, land_research_hut_icon_url, land_shard_mine_icon_url, land_keep_icon_url, \
-    land_castle_icon_url, land_hammer_icon_url
-
-worksite_type_mapping = {
-    'Grain Farm': land_grain_farm_icon_url,
-    'Logging Camp': land_logging_camp_icon_url,
-    'Ore Mine': land_ore_mine_icon_url,
-    'Quarry': land_quarry_icon_url,
-    'Research Hut': land_research_hut_icon_url,
-    'Shard Mine': land_shard_mine_icon_url,
-    'KEEP': land_keep_icon_url,
-    'CASTLE': land_castle_icon_url,
-    '': land_hammer_icon_url,
-}
+from src.static.static_values_enum import worksite_type_mapping
 
 
 def print_worksite_types(df):
@@ -51,6 +37,8 @@ def print_worksite_types(df):
     html_blocks = ""
     for _, row in worksite_types.iterrows():
         worksite_type = row['worksite_type']
+        if worksite_type == '':
+            worksite_type = 'Undeveloped'
         count = row['count']
 
         if worksite_type == 'KEEP' or worksite_type == "CASTLE":

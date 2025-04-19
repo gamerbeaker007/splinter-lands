@@ -1,12 +1,13 @@
 import importlib
-import logging
 import sys
 
 import streamlit as st
 from st_pages import get_nav_from_toml, add_page_title
 
-from src.pages import resource_metrics_page, region_metrics_page
+from src.pages import resource_metrics_page, region_metrics_page, player_overview_page
+from src.utils import dev_mode
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
+from src.utils.log_util import configure_logger
 
 
 def reload_all():
@@ -19,16 +20,14 @@ def reload_all():
 
 reload_all()
 
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  # Log format
-    datefmt="%Y-%m-%d %H:%M:%S",  # Date format
-)
+log = configure_logger(__name__)
 
 st.set_page_config(page_title="SplinterLands", layout="wide")
 
 nav = get_nav_from_toml('.streamlit/pages.toml')
 pg = st.navigation(nav)
+
+dev_mode.show_dev_warning()
 
 add_page_title(pg)
 
@@ -38,7 +37,6 @@ if is_data_stale() and not is_refreshing():
     safe_refresh_data()
 
 # Sidebar status
-st.sidebar.markdown("### Data Status")
 if is_refreshing():
     st.sidebar.markdown(":large_orange_circle: Data Refreshing...")
 elif is_data_stale():
@@ -56,3 +54,6 @@ if pg.title == "Resource Metrics":
 if pg.title == "Region Metrics":
     with placeholder.container():
         region_metrics_page.get_page()
+if pg.title == "Player Overview":
+    with placeholder.container():
+        player_overview_page.get_page()

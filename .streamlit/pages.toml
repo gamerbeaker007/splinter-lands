@@ -6,6 +6,10 @@ icon = ':coin:'
 [[pages]]
 path = 'src/pages/region_metrics_page.py'
 name = 'Region Metrics'
-icon = ':coin:'
+icon = ':bar_chart:'
 
 
+[[pages]]
+path = 'src/pages/player_overview_page.py'
+name = 'Player Overview'
+icon = ':male-farmer:'

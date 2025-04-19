@@ -14,25 +14,30 @@ COLOR_MAP = {
 }
 
 
-def create_land_region_active_graph(df, date_str):
+def create_land_region_active_graph(df, date_str, group_by_label):
     df = df.copy()
-
     df = df.sort_values(by='active', ascending=False)
 
     fig = go.Figure(data=[
-        go.Bar(name='Active', x=df['region_uid'], y=df['active']),
-        go.Bar(name='Inactive', x=df['region_uid'], y=df['inactive'])
+        go.Bar(name='Active', x=df[group_by_label], y=df['active']),
+        go.Bar(name='Inactive', x=df[group_by_label], y=df['inactive'])
     ])
 
-    # Update layout for stacking
     fig.update_layout(
         barmode='stack',
-        title=f'Active vs Inactive Deeds per Region (as of {date_str})',
-        xaxis_title='Region UID',
+        title=f'Active vs Inactive Deeds per {"Tract" if "tract" in group_by_label else "Region"} (as of {date_str})',
+        xaxis_title=group_by_label.replace("_", " ").title(),
         yaxis_title='Deeds',
         xaxis_tickangle=45,
-        legend=dict(x=0.85, y=0.95),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='center',
+            x=0.5
+        )
     )
+
     st.plotly_chart(fig, theme="streamlit")
 
     with st.expander("DATA", expanded=False):
@@ -181,3 +186,36 @@ def create_land_region_historical(df, log_y=True):
 
     with st.expander("DATA", expanded=False):
         st.dataframe(df, hide_index=True)
+
+
+def create_tax_income_chart(df, title):
+    custom_order = ["GRAIN", "IRON", "WOOD", "STONE", "SPS", "RESEARCH"]
+    order_map = {name: i for i, name in enumerate(custom_order)}
+    df["sort_order"] = df["token_symbol"].map(order_map).fillna(len(custom_order))
+    df = df.sort_values("sort_order").drop(columns="sort_order").reset_index(drop=True)
+
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=df["token_symbol"],
+                y=df["tax_income"],
+                marker=dict(color=[COLOR_MAP.get(res, 'steelblue') for res in df["token_symbol"]])
+            )
+        ]
+    )
+
+    fig.update_layout(
+        title=title,
+        xaxis_title="Token Symbol",
+        yaxis_title="Tax Income",
+        template="plotly_white",
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='center',
+            x=0.5
+        )
+    )
+
+    st.plotly_chart(fig, use_container_width=True, key=title)

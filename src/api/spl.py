@@ -1,13 +1,12 @@
-import logging
-import streamlit as st
 from typing import Dict, Any, Optional
 
 import pandas as pd
 import requests
+import streamlit as st
 from requests.adapters import HTTPAdapter
 
 from src.api.logRetry import LogRetry
-
+from src.utils.log_util import configure_logger
 
 # API URLs
 API_URLS = {
@@ -16,9 +15,7 @@ API_URLS = {
     "prices": "https://prices.splinterlands.com/",
 }
 
-# Configure Logging
-log = logging.getLogger("SPL API")
-log.setLevel(logging.INFO)
+log = configure_logger(__name__)
 
 
 # Retry Strategy
@@ -131,7 +128,6 @@ def get_land_stake_deed_details(deed_uid):
     return pd.DataFrame()
 
 
-@st.cache_data(ttl="1h")
 def get_land_region_details_player(player):
     result = fetch_api_data(f'{API_URLS['land']}land/deeds', params={"player": player}, data_key='data')
 
@@ -141,3 +137,10 @@ def get_land_region_details_player(player):
         deeds = pd.DataFrame(result["deeds"])
         return deeds, worksite_details, staking_details
     return pd.DataFrame()
+
+
+def get_staked_assets(deed_uid):
+    result = fetch_api_data(f'{API_URLS['land']}land/stake/deeds/{deed_uid}/assets', data_key='data')
+    if result:
+        return result
+    return None
