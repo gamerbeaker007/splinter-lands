@@ -2,10 +2,15 @@ from enum import Enum
 
 from src.static.icons import land_grain_farm_icon_url, land_logging_camp_icon_url, land_ore_mine_icon_url, \
     land_quarry_icon_url, land_research_hut_icon_url, land_shard_mine_icon_url, land_keep_icon_url, \
-    land_castle_icon_url, land_under_construction_icon_url, fire_element_icon_url, \
-    water_element_icon_url, life_element_icon_url, death_element_icon_url, earth_element_icon_url, \
-    dragon_element_icon_url, grain_icon_url, stone_icon_url, wood_icon_url, iron_icon_url, sps_icon_url, \
-    research_icon_url, tax_icon_url, land_hammer_icon_url, dec_icon_url
+    land_castle_icon_url, land_under_construction_icon_url, fire_element_icon_url, water_element_icon_url, \
+    life_element_icon_url, death_element_icon_url, earth_element_icon_url, dragon_element_icon_url, grain_icon_url, \
+    stone_icon_url, wood_icon_url, iron_icon_url, sps_icon_url, research_icon_url, tax_icon_url, dec_icon_url, \
+    land_hammer_icon_url, title_untamed_icon_url, title_praetorian_icon_url, title_explorer_icon_url, \
+    title_grandmaster_icon_url, title_legionnaire_icon_url, title_watcher_icon_url, title_gambler_icon_url, \
+    title_high_roller_icon_url, title_burninator_icon_url, title_incinerator_icon_url, title_scorcher_icon_url, \
+    title_rebel_icon_url, title_defiant_icon_url, title_dawn_bringer_icon_url, title_tower_mage_icon_url, \
+    title_renown_icon_url, title_veteran_icon_url, title_proven_icon_url, title_myth_hunter_icon_url, \
+    title_fable_scout_icon_url, title_saga_seeker_icon_url, title_emissary_icon_url
 
 
 class ExtendedEnum(Enum):
@@ -74,6 +79,31 @@ resource_icon_map = {
     "DEC": dec_icon_url,
     "PP": land_hammer_icon_url,
     "": land_hammer_icon_url,
+}
+
+title_icon_map = {
+    'untamed': title_untamed_icon_url,
+    'praetorian': title_praetorian_icon_url,
+    'explorer': title_explorer_icon_url,
+    'grandmaster': title_grandmaster_icon_url,
+    'legionnaire': title_legionnaire_icon_url,
+    'watcher': title_watcher_icon_url,
+    'gambler': title_gambler_icon_url,
+    'high_roller': title_high_roller_icon_url,
+    'burninator': title_burninator_icon_url,
+    'incinerator': title_incinerator_icon_url,
+    'scorcher': title_scorcher_icon_url,
+    'rebel': title_rebel_icon_url,
+    'defiant': title_defiant_icon_url,
+    'dawn_bringer': title_dawn_bringer_icon_url,
+    'tower_mage': title_tower_mage_icon_url,
+    'renown': title_renown_icon_url,
+    'veteran': title_veteran_icon_url,
+    'proven': title_proven_icon_url,
+    'myth_hunter': title_myth_hunter_icon_url,
+    'fable_scout': title_fable_scout_icon_url,
+    'saga_seeker': title_saga_seeker_icon_url,
+    'emissary': title_emissary_icon_url,
 }
 
 

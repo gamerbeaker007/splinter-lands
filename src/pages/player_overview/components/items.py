@@ -1,4 +1,5 @@
-from src.static.icons import WEB_URL
+from src.static.icons import WEB_URL, land_hammer_icon_url
+from src.static.static_values_enum import title_icon_map
 
 item_boost_style = """
 <style>
@@ -40,10 +41,7 @@ def add_items(items):
         name = item['name']
 
         if stake_type == 'STK-LND-TTL':
-            label = name
-            normalized = name[4:].lower() if name.lower().startswith('the ') else name.lower()
-            image_name = normalized.replace(" ", "%20")
-            img_url = f'{WEB_URL}website/icons/icon_active_{image_name}.svg'
+            img_url, label = find_title_icon(name)
 
         elif stake_type == 'STK-LND-TOT':
             label = name
@@ -66,3 +64,11 @@ def add_items(items):
         </div>"""
 
     return f"<div style='text-align: center;'>{html}</div>"
+
+
+def find_title_icon(name):
+    label = name
+    normalized = name[4:].lower() if name.lower().startswith('the ') else name.lower()
+    image_name = normalized.replace(" ", "_")
+    img_url = title_icon_map.get(image_name, land_hammer_icon_url)
+    return img_url, label

@@ -16,7 +16,12 @@ def prepare_data(player):
         deeds, worksite_details, staking_details = spl.get_land_region_details_player(player)
 
         if worksite_details.empty:
-            st.warning(f'No worksites found for player {player}')
+            st.warning(f"""
+            No land data found for player: {player}.
+
+            Note: it's case-sensitive
+            """)
+
         else:
             df = merge_with_details(deeds, worksite_details, staking_details)
             return df
@@ -45,6 +50,9 @@ def get_page():
 
     # Prepare and filter data
     df = prepare_data(player)
+    if df.empty:
+        return
+
     filtered_df = filter_section.get_page(df)
 
     # Tabs view
