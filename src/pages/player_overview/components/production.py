@@ -3,7 +3,7 @@ import pandas as pd
 from src.static.icons import land_hammer_icon_url
 from src.static.static_values_enum import worksite_type_mapping, resource_icon_map
 from src.utils.resource_util import calc_costs
-from src.utils.time_util import time_until, calculate_progress
+from src.utils.time_util import time_until, calculate_progress, valid_date
 
 production_card_style = """
 <style>
@@ -187,7 +187,7 @@ def add_production(row):
 
 
 def get_progres_html(hours_since_last_op, projected_created_date, projected_end_date, boosted_pp):
-    if pd.notna(projected_end_date):
+    if valid_date(projected_end_date):
         info_str = f'Finished in: {time_until(projected_end_date)}'
         percentage_done = calculate_progress(projected_created_date, projected_end_date)
     elif boosted_pp <= 0:

@@ -1,6 +1,11 @@
 from datetime import datetime, timezone
 
+import pandas as pd
 from dateutil.relativedelta import relativedelta
+
+from src.utils.log_util import configure_logger
+
+log = configure_logger(__name__)
 
 
 def time_until(iso_str):
@@ -47,3 +52,16 @@ def calculate_progress(projected_created_date, projected_end_date):
     percent_complete = (elapsed / total_duration) * 100
 
     return round(percent_complete, 2)
+
+
+def valid_date(date_str: str) -> bool:
+    if pd.isna(date_str):
+        return False
+
+    try:
+        # Attempt to parse input time, with support for 'Z'
+        datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        return True
+    except ValueError:
+        log.warning(f"Unable to parse date: {date_str}")
+        return False
