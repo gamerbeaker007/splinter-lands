@@ -144,3 +144,18 @@ def get_staked_assets(deed_uid):
     if result:
         return result
     return None
+
+
+def get_resource_leaderboard(resource):
+    params = {
+        'territory': '',
+        'region': '',
+        'resource': resource,
+        'player': '',
+        'limit': 150000
+    }
+    result = fetch_api_data(f'{API_URLS['land']}land/resources/leaderboards', params=params, data_key='data')
+
+    if result:
+        return pd.DataFrame(result)
+    return pd.DataFrame()

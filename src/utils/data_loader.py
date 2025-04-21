@@ -28,14 +28,25 @@ async def fetch_all_region_data():
         all_worksite_details.append(worksite_details)
         all_staking_details.append(staked_details)
 
+    resource_list = ['GRAIN', 'WOOD', 'STONE', 'IRON', 'RESEARCH']
+    all_resource_leaderboards = []
+    for resource in resource_list:
+        log.info(f'fetching leaderboard data for resource: {resource}')
+        leaderboard_df = spl.get_resource_leaderboard(resource)
+        leaderboard_df['resource'] = resource  # add the resource type to each row
+        all_resource_leaderboards.append(leaderboard_df)
+
     # Combine the individual DataFrames into one for each category
     deeds_df = pd.concat(all_deeds, ignore_index=True)
     worksite_df = pd.concat(all_worksite_details, ignore_index=True)
     staking_df = pd.concat(all_staking_details, ignore_index=True)
+    resource_leaderboards = pd.concat(all_resource_leaderboards, ignore_index=True)
+
     data_dict = {
         'deeds': deeds_df,
         'worksite_details': worksite_df,
         'staking_details': staking_df,
+        'resource_leaderboard': resource_leaderboards
     }
 
     # store pp tracking (resource on daily bases)

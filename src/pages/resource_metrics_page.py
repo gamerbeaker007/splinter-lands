@@ -5,7 +5,7 @@ import streamlit as st
 from src.api import spl
 from src.api.db import resource_metrics
 from src.graphs import resources_graphs
-from src.pages.resources_metrics import resources_conversion
+from src.pages.resources_metrics import resources_conversion, resource_total_overview
 
 
 def load_market_data():
@@ -28,7 +28,14 @@ def get_page():
     resources_conversion.get_container(metrics_df, prices_df)
 
     df = resource_metrics.get_historical_data()
-    tab1, tab2, tab3 = st.tabs(["Grain factor chart", "1000 Resource chart", "1000 DEC chart"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        [
+            "Grain factor chart",
+            "1000 Resource chart",
+            "1000 DEC chart",
+            "Total Resource Overview"
+        ]
+    )
     with tab1:
         st.markdown("""
     Below a chart that represent what the factor is against grain based on the whitepaper
@@ -44,3 +51,5 @@ def get_page():
     with tab3:
         st.markdown("Below a chart that represent how much it cost (DEC) to get 1000 of the resource.")
         resources_graphs.create_land_resources_graph(df, True)
+    with tab4:
+        resource_total_overview.add_section()
