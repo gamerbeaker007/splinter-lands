@@ -5,17 +5,25 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-PP_TRACKING_TABLE_NAME = "pp_tracking"
-RESOURCE_METRICS_TABLE_NAME = "resource_metrics"
+RESOURCE_TRACKING_TABLE_NAME = "resource_tracking"
+RESOURCE_HUB_METRICS_TABLE_NAME = "resource_hub_metrics"
 ACTIVE_TABLE_NAME = "active_metrics"
 
 
-class PPTracking(Base):
-    __tablename__ = PP_TRACKING_TABLE_NAME
+class ResourceTracking(Base):
+    __tablename__ = RESOURCE_TRACKING_TABLE_NAME
+
     date = Column(Date, primary_key=True)
     resource = Column(String, primary_key=True)
+    token_symbol = Column(String)
     total_harvest_pp = Column(BigInteger)
     total_base_pp_after_cap = Column(BigInteger)
+    total_supply = Column(BigInteger)
+    rewards_per_hour = Column(BigInteger)
+    cost_per_h_grain = Column(BigInteger)
+    cost_per_h_wood = Column(BigInteger)
+    cost_per_h_stone = Column(BigInteger)
+    cost_per_h_iron = Column(BigInteger)
 
 
 class Active(Base):
@@ -25,8 +33,8 @@ class Active(Base):
     active_based_on_in_use = Column(BigInteger)
 
 
-class ResourceMetrics(Base):
-    __tablename__ = RESOURCE_METRICS_TABLE_NAME
+class ResourceHubMetrics(Base):
+    __tablename__ = RESOURCE_HUB_METRICS_TABLE_NAME
 
     date = Column(Date, primary_key=True)
     id = Column(String)  # assuming `id` is unique text/UUID

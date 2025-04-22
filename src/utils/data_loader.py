@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 
 from src.api import spl
-from src.api.db import pp_tracking, resource_metrics, active_metrics
+from src.api.db import resource_tracking, resource_metrics, active_metrics
 from src.utils.log_util import configure_logger
 
 log = configure_logger(__name__)
@@ -51,7 +51,7 @@ async def fetch_all_region_data():
 
     # store pp tracking (resource on daily bases)
     df = merge_with_details(deeds_df, worksite_df, staking_df)
-    pp_tracking.upload_daily_resource_metrics(df)
+    resource_tracking.upload_daily_resource_metrics(df, resource_leaderboards)
 
     # store daily resource metrics
     resource_metrics.upload_land_resources_info()

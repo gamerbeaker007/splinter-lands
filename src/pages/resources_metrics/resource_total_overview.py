@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 
+from src.api.db import resource_tracking
 from src.static.static_values_enum import resource_icon_map
 from src.utils.data_loader import load_cached_data, merge_with_details
 from src.utils.large_number_util import format_large_number
@@ -56,39 +57,25 @@ def render_resource_card(row, df):
 
 def add_section():
     st.subheader("Daily Production / Consumption Overview")
-    df = prepare_data()
-    resource_leaderboard = load_cached_data('resource_leaderboard')
+    resource_leaderboard = resource_tracking.get_latest_resources()
+    resource_leaderboard = resource_leaderboard[resource_leaderboard["token_symbol"].notnull()]
 
-    if df.empty or resource_leaderboard.empty:
+    if resource_leaderboard.empty:
         st.warning("No data to present")
         return
 
-    grouped_df = df.groupby(['token_symbol']).agg(
-        {'total_base_pp_after_cap': 'sum',
-         'rewards_per_hour': 'sum'}
-    ).reset_index()
-    grouped_df = pd.concat([grouped_df, grouped_df.apply(calc_costs, axis=1)], axis=1)
-    grouped_df.drop(columns='total_base_pp_after_cap', inplace=True)
-
     # Filter out 'TAX' and reorder
     desired_order = ["GRAIN", "WOOD", "STONE", "IRON", "RESEARCH", "SPS"]
-    filtered_df = grouped_df[grouped_df["token_symbol"].isin(desired_order)]
+    filtered_df = resource_leaderboard[resource_leaderboard["token_symbol"].isin(desired_order)]
     ordered_df = filtered_df.set_index("token_symbol").loc[desired_order].reset_index()
 
     max_cols = 4
-    # Add total_supply column to ordered_df
-    ordered_df['total_supply'] = ordered_df['token_symbol'].apply(
-        lambda symbol: resource_leaderboard.loc[
-            resource_leaderboard.resource == symbol
-            ].amount.sum()
-    )
-
-    # Now use the precomputed values
     cols = st.columns(max_cols)
     for idx, (_, row) in enumerate(ordered_df.iterrows()):
         col_idx = idx % max_cols
+
         with cols[col_idx]:
-            render_resource_card(row, grouped_df)
+            render_resource_card(row, resource_leaderboard)
 
     with st.expander("DATA", expanded=False):
         st.dataframe(ordered_df, hide_index=True)

@@ -51,7 +51,7 @@ def fetch_api_data(address: str, params: Optional[Dict[str, Any]] = None,
     :return: DataFrame with requested data or empty DataFrame on failure.
     """
     try:
-        response = http.get(address, params=params, timeout=10)
+        response = http.get(address, params=params, timeout=30)
         response.raise_for_status()
 
         response_json = response.json()
