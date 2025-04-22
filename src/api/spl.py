@@ -51,7 +51,7 @@ def fetch_api_data(address: str, params: Optional[Dict[str, Any]] = None,
     :return: DataFrame with requested data or empty DataFrame on failure.
     """
     try:
-        response = http.get(address, params=params, timeout=10)
+        response = http.get(address, params=params, timeout=30)
         response.raise_for_status()
 
         response_json = response.json()
@@ -144,3 +144,18 @@ def get_staked_assets(deed_uid):
     if result:
         return result
     return None
+
+
+def get_resource_leaderboard(resource):
+    params = {
+        'territory': '',
+        'region': '',
+        'resource': resource,
+        'player': '',
+        'limit': 150000
+    }
+    result = fetch_api_data(f'{API_URLS['land']}land/resources/leaderboards', params=params, data_key='data')
+
+    if result:
+        return pd.DataFrame(result)
+    return pd.DataFrame()
