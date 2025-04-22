@@ -1,11 +1,9 @@
-import pandas as pd
 import streamlit as st
 
 from src.api.db import resource_tracking
 from src.static.static_values_enum import resource_icon_map
 from src.utils.data_loader import load_cached_data, merge_with_details
 from src.utils.large_number_util import format_large_number
-from src.utils.resource_util import calc_costs
 
 
 def prepare_data():

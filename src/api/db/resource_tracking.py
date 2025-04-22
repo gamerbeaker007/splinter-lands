@@ -20,7 +20,7 @@ def group_by_resource(df, group_field):
     return df.groupby(group_field).agg({
         'total_harvest_pp': 'sum',
         'total_base_pp_after_cap': 'sum',
-       'rewards_per_hour': 'sum',
+        'rewards_per_hour': 'sum',
     }).reset_index()
 
 
