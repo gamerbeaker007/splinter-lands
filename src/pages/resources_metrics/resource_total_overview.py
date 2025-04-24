@@ -14,26 +14,27 @@ def add_section():
 
 def add_daily_overview_section():
     st.subheader("Daily Production / Consumption Overview")
-    resource_leaderboard = resource_tracking.get_latest_resources()
-    resource_leaderboard = filter_rows(resource_leaderboard)
+    df = resource_tracking.get_latest_resources()
+    df = filter_rows(df)
 
-    if resource_leaderboard.empty:
+    if df.empty:
         st.warning("No data to present")
         return
 
-    resource_leaderboard = add_daily_production(resource_leaderboard)
-    ordered_df = reorder_column(resource_leaderboard)
+    df = add_daily_production(df)
+    df = add_consumption_df(df)
+    df = reorder_column(df)
 
     max_cols = 4
     cols = st.columns(max_cols)
-    for idx, (_, row) in enumerate(ordered_df.iterrows()):
+    for idx, (_, row) in enumerate(df.iterrows()):
         col_idx = idx % max_cols
 
         with cols[col_idx]:
-            render_resource_card(row, resource_leaderboard)
+            render_resource_card(row, df)
 
     with st.expander("DATA", expanded=False):
-        st.dataframe(ordered_df, hide_index=True)
+        st.dataframe(df, hide_index=True)
 
 
 def add_historical_section():
@@ -63,6 +64,7 @@ def add_historical_section():
 def render_resource_card(row, df):
     token = row['token_symbol']
     daily_production = row['daily_production']
+    daily_consumption = row['daily_consumption']
     icon_url = resource_icon_map.get(token, '')
     total_supply = format_large_number(row['total_supply'])
 
@@ -77,9 +79,7 @@ def render_resource_card(row, df):
     # If resource is WOOD, IRON, or STONE, calculate total consumption across all rows
     extra_consumed = "N/A"
     if token in ["GRAIN", "WOOD", "STONE", "IRON"]:
-        col_name = f"cost_per_h_{token.lower()}"
-        total_used = df[col_name].sum() * 24
-        extra_consumed = f'{format_large_number(total_used)}'
+        extra_consumed = format_large_number(daily_consumption)
 
     with st.container(border=True):
         st.markdown(f"""
@@ -91,10 +91,12 @@ def render_resource_card(row, df):
         **Consumes:**
         """, unsafe_allow_html=True)
 
-        for res, val in daily_costs.items():
-            if val > 0:
-                st.markdown(f"""<img src="{resource_icon_map[res]}" width="16"> {res}: `{format_large_number(val)}`""",
-                            unsafe_allow_html=True)
+        # Build all resource lines into a single markdown block
+        resource_lines = [
+            f'<img src="{resource_icon_map[res]}" width="16"> {res}: `{format_large_number(val)}`'
+            for res, val in daily_costs.items() if val > 0
+        ]
+        st.markdown("<br>".join(resource_lines), unsafe_allow_html=True)
 
 
 def add_daily_production(df):
