@@ -35,6 +35,7 @@ def show_dev_warning():
         visit the main page: https://splinter-lands.streamlit.app/
     """)
 
+
 def show_memory_output(placeholder):
     if st.secrets.get("settings", {}).get("debug_memory", False):
         with st.sidebar.expander("🧠 Memory Debug Mode: ON", expanded=True):
