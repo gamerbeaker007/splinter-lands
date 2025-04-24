@@ -2,16 +2,12 @@ from datetime import date
 
 import pandas as pd
 import streamlit as st
-from sqlalchemy import create_engine
 
 from src.api.db import upload
+from src.api.db.session import get_session
 from src.models.models import RESOURCE_TRACKING_TABLE_NAME
 from src.utils.log_util import configure_logger
 from src.utils.resource_util import calc_costs
-
-# Same URL as in alembic.ini
-db_url = st.secrets["database"]["url"]
-engine = create_engine(db_url)
 
 log = configure_logger(__name__)
 
@@ -26,7 +22,6 @@ def group_by_resource(df, group_field):
 
 def upload_daily_resource_metrics(df, supply_df):
     # Non-tax resources
-
     none_tax_df = df[df.token_symbol != 'TAX']
     grouped_non_tax = group_by_resource(none_tax_df, 'token_symbol')
     grouped_non_tax['resource'] = grouped_non_tax['token_symbol']
@@ -38,6 +33,7 @@ def upload_daily_resource_metrics(df, supply_df):
 
     # Combine
     combined_df = pd.concat([
+
         grouped_non_tax[
             [
                 'resource',
@@ -57,15 +53,12 @@ def upload_daily_resource_metrics(df, supply_df):
                 'rewards_per_hour',
             ]
         ]
+
     ], ignore_index=True)
 
     # Add total supply
-
     combined_df['total_supply'] = combined_df['token_symbol'].apply(
-        lambda symbol: supply_df.loc[
-            supply_df.resource == symbol
-            ].amount.sum()
-
+        lambda symbol: supply_df.loc[supply_df.resource == symbol].amount.sum()
     )
 
     # Daily production and consumption
@@ -92,15 +85,19 @@ def upload_daily_resource_metrics(df, supply_df):
 
 @st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
-    query = f"SELECT * FROM {RESOURCE_TRACKING_TABLE_NAME}"
-    return pd.read_sql(query, engine)
+    Session = get_session()
+    with Session() as session:
+        query = f"SELECT * FROM {RESOURCE_TRACKING_TABLE_NAME}"
+        return pd.read_sql(query, con=session.bind)
 
 
 @st.cache_data(ttl="1h")
 def get_latest_resources() -> pd.DataFrame:
-    query = f"""
-        SELECT *
-        FROM {RESOURCE_TRACKING_TABLE_NAME}
-        WHERE date = (SELECT MAX(date) FROM {RESOURCE_TRACKING_TABLE_NAME})
-    """
-    return pd.read_sql(query, engine)
+    Session = get_session()
+    with Session() as session:
+        query = f"""
+            SELECT *
+            FROM {RESOURCE_TRACKING_TABLE_NAME}
+            WHERE date = (SELECT MAX(date) FROM {RESOURCE_TRACKING_TABLE_NAME})
+        """
+        return pd.read_sql(query, con=session.bind)

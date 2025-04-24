@@ -2,17 +2,13 @@ from datetime import date
 
 import pandas as pd
 import streamlit as st
-from sqlalchemy import create_engine
 
 from src.api import spl
 from src.api.db import upload
+from src.api.db.session import get_session
 from src.models.models import RESOURCE_HUB_METRICS_TABLE_NAME
 from src.static.static_values_enum import grain_conversion_ratios
 from src.utils.log_util import configure_logger
-
-# Same URL as in alembic.ini
-db_url = st.secrets["database"]["url"]
-engine = create_engine(db_url)
 
 log = configure_logger(__name__)
 
@@ -47,6 +43,7 @@ def upload_land_resources_info():
 
 @st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
-    engine.dispose()
-    query = f"SELECT * FROM {RESOURCE_HUB_METRICS_TABLE_NAME}"
-    return pd.read_sql(query, engine)
+    Session = get_session()
+    with Session() as session:
+        query = f"SELECT * FROM {RESOURCE_HUB_METRICS_TABLE_NAME}"
+        return pd.read_sql(query, con=session.bind)
