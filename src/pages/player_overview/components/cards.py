@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from src.static.icons import WEB_URL, land_hammer_icon_url
 from src.static.static_values_enum import Edition
 
@@ -54,7 +56,7 @@ def get_card_img(card_name, edition, foil):
     gold_suffix = "_gold" if foil else ""
     base_card_url = f'{WEB_URL}cards_by_level'
     edition_name = Edition(edition).name
-    safe_card_name = str(card_name).replace(" ", "%20")
+    safe_card_name = quote(card_name)
     return f'{base_card_url}/{edition_name}/{safe_card_name}_lv1{gold_suffix}.png'
 
 
