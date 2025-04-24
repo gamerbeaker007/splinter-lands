@@ -23,6 +23,7 @@ def commit(df, table_name):
                 index=False,
                 method="multi"
             )
+            session.commit()
             log.info(f"✅ Uploaded {len(df)} records to {table_name}")
         except sqlalchemy.exc.IntegrityError as e:
             log.warning("⚠️ Duplicate entry detected. Likely already inserted.")
