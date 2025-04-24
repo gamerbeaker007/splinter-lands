@@ -27,7 +27,9 @@ st.set_page_config(page_title="SplinterLands", layout="wide")
 nav = get_nav_from_toml('.streamlit/pages.toml')
 pg = st.navigation(nav)
 
+dev_mode.start_memory_measurements()
 dev_mode.show_dev_warning()
+mem_placeholder = st.empty()
 
 add_page_title(pg)
 
@@ -57,3 +59,6 @@ if pg.title == "Region Metrics":
 if pg.title == "Player Overview":
     with placeholder.container():
         player_overview_page.get_page()
+
+
+dev_mode.show_memory_output(mem_placeholder)
