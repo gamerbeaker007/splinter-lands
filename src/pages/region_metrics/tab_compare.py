@@ -12,15 +12,13 @@ MAX_NUMBER_OF_PLOTS = 6
 
 def plot_by_group(filtered_df, group_col, label_prefix):
     groups = filtered_df[group_col].unique().tolist()
+
+    check_size(len(groups))
+
     cols = st.columns(3)  # create 3 columns
-
     combined_df = None  # This will hold all data side-by-side
-    if len(groups) > MAX_NUMBER_OF_PLOTS:
-        st.warning(f"Refine filters to many plot limited to {MAX_NUMBER_OF_PLOTS}")
-
+    groups = groups[:MAX_NUMBER_OF_PLOTS]
     for i, group in enumerate(groups):
-        if i == MAX_NUMBER_OF_PLOTS:
-            break
 
         group_df = filtered_df.loc[filtered_df[group_col] == group]
         title = f"{label_prefix}: {group}"
@@ -43,6 +41,14 @@ def plot_by_group(filtered_df, group_col, label_prefix):
         st.dataframe(combined_df)
 
 
+def check_size(size):
+    if size > MAX_NUMBER_OF_PLOTS:
+        st.warning(
+            f"Too many plot combinations found. "
+            f"Showing only the first {MAX_NUMBER_OF_PLOTS}. "
+            f"Refine filters to see more.")
+
+
 def plot_split(df):
     # Get unique tract and region numbers
     tracts = df['tract_number'].unique()
@@ -52,15 +58,12 @@ def plot_split(df):
     cross_df = pd.MultiIndex.from_product([tracts, regions], names=['tract_number', 'region_number']).to_frame(
         index=False)
 
+    check_size(cross_df.index.size)
+
     cols = st.columns(3)  # create 3 columns
-
     combined_df = None  # This will hold all data side-by-side
-    if cross_df.index.size > MAX_NUMBER_OF_PLOTS:
-        st.warning(f"Refine filters to many plot limited to {MAX_NUMBER_OF_PLOTS}")
-
+    cross_df = cross_df.head(MAX_NUMBER_OF_PLOTS)
     for idx, (_, row) in enumerate(cross_df.iterrows()):
-        if idx == MAX_NUMBER_OF_PLOTS:
-            break
         region = row['region_number']
         tract = row['tract_number']
         group_df = df.loc[(df['region_number'] == region) & (df['tract_number'] == tract)]
@@ -95,7 +98,7 @@ def process_group(group_df, group_title):
 
 
 def get_page(filtered_all_data):
-    plot_by = st.radio("Select compare method", options=["By Region", "By Tract", "Flat Tract"])
+    plot_by = st.radio("Compare by", ["Region", "Tract", "Region - Tract"])
 
     st.markdown("""
     ### PP comparison by resource
@@ -110,9 +113,9 @@ def get_page(filtered_all_data):
     st.markdown("""
     """, unsafe_allow_html=True)
 
-    if plot_by == "By Region":
+    if plot_by == "Region":
         plot_by_group(filtered_all_data, group_col="region_number", label_prefix="Region")
-    elif plot_by == "By Tract":
+    elif plot_by == "Tract":
         plot_by_group(filtered_all_data, group_col="tract_number", label_prefix="Tract")
-    elif plot_by == "Flat Tract":
+    elif plot_by == "Region - Tract":
         plot_split(filtered_all_data)
