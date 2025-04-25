@@ -2,15 +2,11 @@ from datetime import date
 
 import pandas as pd
 import streamlit as st
-from sqlalchemy import create_engine
 
 from src.api.db import upload
+from src.api.db.session import get_session
 from src.models.models import ACTIVE_TABLE_NAME
 from src.utils.log_util import configure_logger
-
-# Same URL as in alembic.ini
-db_url = st.secrets["database"]["url"]
-engine = create_engine(db_url)
 
 log = configure_logger(__name__)
 
@@ -29,15 +25,19 @@ def upload_daily_active_metrics(df):
 
 @st.cache_data(ttl="1h")
 def get_historical_data() -> pd.DataFrame:
-    query = f"SELECT * FROM {ACTIVE_TABLE_NAME}"
-    return pd.read_sql(query, engine)
+    Session = get_session()
+    with Session() as session:
+        query = f"SELECT * FROM {ACTIVE_TABLE_NAME}"
+        return pd.read_sql(query, con=session.bind)  # or session.connection() if needed
 
 
 @st.cache_data(ttl="1h")
 def get_latest_active() -> pd.DataFrame:
-    query = f"""
-        SELECT *
-        FROM {ACTIVE_TABLE_NAME}
-        WHERE date = (SELECT MAX(date) FROM {ACTIVE_TABLE_NAME})
-    """
-    return pd.read_sql(query, engine)
+    Session = get_session()
+    with Session() as session:
+        query = f"""
+            SELECT *
+            FROM {ACTIVE_TABLE_NAME}
+            WHERE date = (SELECT MAX(date) FROM {ACTIVE_TABLE_NAME})
+        """
+        return pd.read_sql(query, con=session.bind)

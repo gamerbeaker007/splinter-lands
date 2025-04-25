@@ -20,8 +20,10 @@ land_ore_mine_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_iron.webp
 land_quarry_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_stone.webp'
 land_research_hut_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_research.png'
 land_shard_mine_icon_url = f'{WEB_URL}website/land/worksite/img_worksite_sps.png'
-land_keep_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/keepsOff.svg'
-land_castle_icon_url = f'{SPL_WEB_URL}assets/lands/sideMenu/castleOff.svg'
+land_keep_icon_url = ('https://files.peakd.com/file/peakd-hive/beaker007/'
+                      '23tbKK6vhanQqScaFhakcFqXC68fpRjvinR6c9m34XLSYQpoHJAdUU7TM8mvrhH3TuuPP.png')
+land_castle_icon_url = ('https://files.peakd.com/file/peakd-hive/beaker007/'
+                        '23uFKKCjmeLHRVFz2EKnf8EazaPX7Ep1RhTiqWS6Hbv2HTLnsW1LFLg2jmTafgQQDdkEy.png')
 land_under_construction_icon_url = ('https://files.peakd.com/file/peakd-hive/beaker007/'
                                     'AJg3Ws5boAJF5cdekBgVCzVRbBcLKjVuDYqXqTLAbgo6XoAVXTGuVYh8Ggn22S1.png')
 
@@ -64,9 +66,9 @@ title_incinerator_icon_url = f'{WEB_URL}website/icons/icon_active_incinerator.sv
 title_scorcher_icon_url = f'{WEB_URL}website/icons/icon_active_scorcher.svg'
 title_rebel_icon_url = f'{WEB_URL}website/icons/icon_active_rebel.svg'
 title_defiant_icon_url = f'{WEB_URL}website/icons/icon_active_defiant.svg'
-title_dawn_bringer_icon_url = f'{WEB_URL}website/icons/icon_active_dawnbringer.svg'
+title_dawnbringer_icon_url = f'{WEB_URL}website/icons/icon_active_dawnbringer.svg'
 title_tower_mage_icon_url = f'{WEB_URL}website/icons/icon_active_thetowermage.svg'
-title_renown_icon_url = f'{WEB_URL}website/icons/icon_title_renown.svg'
+title_renowned_icon_url = f'{WEB_URL}website/icons/icon_title_renown.svg'
 title_veteran_icon_url = f'{WEB_URL}website/icons/icon_title_veteran.svg'
 title_proven_icon_url = f'{WEB_URL}website/icons/icon_title_proven.svg'
 title_myth_hunter_icon_url = f'{WEB_URL}website/icons/icon_active_myth%20hunter.svg'

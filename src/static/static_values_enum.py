@@ -8,8 +8,8 @@ from src.static.icons import land_grain_farm_icon_url, land_logging_camp_icon_ur
     land_hammer_icon_url, title_untamed_icon_url, title_praetorian_icon_url, title_explorer_icon_url, \
     title_grandmaster_icon_url, title_legionnaire_icon_url, title_watcher_icon_url, title_gambler_icon_url, \
     title_high_roller_icon_url, title_burninator_icon_url, title_incinerator_icon_url, title_scorcher_icon_url, \
-    title_rebel_icon_url, title_defiant_icon_url, title_dawn_bringer_icon_url, title_tower_mage_icon_url, \
-    title_renown_icon_url, title_veteran_icon_url, title_proven_icon_url, title_myth_hunter_icon_url, \
+    title_rebel_icon_url, title_defiant_icon_url, title_dawnbringer_icon_url, title_tower_mage_icon_url, \
+    title_renowned_icon_url, title_veteran_icon_url, title_proven_icon_url, title_myth_hunter_icon_url, \
     title_fable_scout_icon_url, title_saga_seeker_icon_url, title_emissary_icon_url
 
 
@@ -95,9 +95,9 @@ title_icon_map = {
     'scorcher': title_scorcher_icon_url,
     'rebel': title_rebel_icon_url,
     'defiant': title_defiant_icon_url,
-    'dawn_bringer': title_dawn_bringer_icon_url,
+    'dawnbringer': title_dawnbringer_icon_url,
     'tower_mage': title_tower_mage_icon_url,
-    'renown': title_renown_icon_url,
+    'renowned': title_renowned_icon_url,
     'veteran': title_veteran_icon_url,
     'proven': title_proven_icon_url,
     'myth_hunter': title_myth_hunter_icon_url,

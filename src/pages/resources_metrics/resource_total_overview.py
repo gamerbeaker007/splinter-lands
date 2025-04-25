@@ -1,26 +1,72 @@
+import pandas as pd
 import streamlit as st
 
 from src.api.db import resource_tracking
+from src.graphs import resources_supply_graphs
 from src.static.static_values_enum import resource_icon_map
-from src.utils.data_loader import load_cached_data, merge_with_details
 from src.utils.large_number_util import format_large_number
 
 
-def prepare_data():
-    deeds = load_cached_data('deeds')
-    worksite_details = load_cached_data('worksite_details')
-    staking_details = load_cached_data('staking_details')
-    df = merge_with_details(deeds, worksite_details, staking_details)
-    return df
+def add_section():
+    add_daily_overview_section()
+    add_historical_section()
+
+
+def add_daily_overview_section():
+    st.subheader("Daily Production / Consumption Overview")
+    df = resource_tracking.get_latest_resources()
+    df = filter_rows(df)
+
+    if df.empty:
+        st.warning("No data to present")
+        return
+
+    df = add_daily_production(df)
+    df = add_consumption_df(df)
+    df = reorder_column(df)
+
+    max_cols = 4
+    cols = st.columns(max_cols)
+    for idx, (_, row) in enumerate(df.iterrows()):
+        col_idx = idx % max_cols
+
+        with cols[col_idx]:
+            render_resource_card(row, df)
+
+    with st.expander("DATA", expanded=False):
+        st.dataframe(df, hide_index=True)
+
+
+def add_historical_section():
+    df = resource_tracking.get_historical_data()
+    df = filter_rows(df)
+    df = reorder_column(df)
+    df = add_daily_production(df)
+    df = add_consumption_df(df)
+
+    if df.empty:
+        st.warning("No data to present")
+        return
+
+    st.subheader("1. Total Supply")
+    resources_supply_graphs.plot_total_supply(df)
+
+    st.subheader("2. Production vs Consumption")
+    resources_supply_graphs.plot_production_vs_consumption(df)
+
+    st.subheader("3. Net Daily Production")
+    resources_supply_graphs.plot_net_production(df)
+
+    with st.expander("DATA", expanded=False):
+        st.dataframe(df)
 
 
 def render_resource_card(row, df):
     token = row['token_symbol']
+    daily_production = row['daily_production']
+    daily_consumption = row['daily_consumption']
     icon_url = resource_icon_map.get(token, '')
     total_supply = format_large_number(row['total_supply'])
-
-    # Daily production
-    daily_production = row['rewards_per_hour'] * 24
 
     # Daily consumption (just this row)
     daily_costs = {
@@ -33,9 +79,7 @@ def render_resource_card(row, df):
     # If resource is WOOD, IRON, or STONE, calculate total consumption across all rows
     extra_consumed = "N/A"
     if token in ["GRAIN", "WOOD", "STONE", "IRON"]:
-        col_name = f"cost_per_h_{token.lower()}"
-        total_used = df[col_name].sum() * 24
-        extra_consumed = f'{format_large_number(total_used)}'
+        extra_consumed = format_large_number(daily_consumption)
 
     with st.container(border=True):
         st.markdown(f"""
@@ -47,33 +91,50 @@ def render_resource_card(row, df):
         **Consumes:**
         """, unsafe_allow_html=True)
 
-        for res, val in daily_costs.items():
-            if val > 0:
-                st.markdown(f"""<img src="{resource_icon_map[res]}" width="16"> {res}: `{format_large_number(val)}`""",
-                            unsafe_allow_html=True)
+        # Build all resource lines into a single markdown block
+        resource_lines = [
+            f'<img src="{resource_icon_map[res]}" width="16"> {res}: `{format_large_number(val)}`'
+            for res, val in daily_costs.items() if val > 0
+        ]
+        st.markdown("<br>".join(resource_lines), unsafe_allow_html=True)
 
 
-def add_section():
-    st.subheader("Daily Production / Consumption Overview")
-    resource_leaderboard = resource_tracking.get_latest_resources()
+def add_daily_production(df):
+    df["daily_production"] = df["rewards_per_hour"] * 24
+    return df
+
+
+def add_consumption_df(df):
+    # Consumption: per day, sum columns by cost type
+    consumption_by_day = df.groupby("date")[[
+        "cost_per_h_grain", "cost_per_h_wood", "cost_per_h_stone", "cost_per_h_iron"
+    ]].sum() * 24  # multiply after groupby to keep logic clear
+    consumption_by_day = consumption_by_day.reset_index()
+    # Melt to long format for easier plotting
+    cons_melted = consumption_by_day.melt(
+        id_vars="date", var_name="resource", value_name="daily_consumption"
+    )
+    cons_melted["token_symbol"] = cons_melted["resource"].str.replace("cost_per_h_", "").str.upper()
+    cons_melted.drop(columns="resource", inplace=True)
+    net_df = pd.merge(
+        df,
+        cons_melted,
+        on=["date", "token_symbol"],
+        how="outer"
+    ).fillna(0)
+    net_df["net_production"] = net_df["daily_production"] - net_df["daily_consumption"]
+
+    return net_df
+
+
+def filter_rows(resource_leaderboard):
     resource_leaderboard = resource_leaderboard[resource_leaderboard["token_symbol"].notnull()]
+    return resource_leaderboard
 
-    if resource_leaderboard.empty:
-        st.warning("No data to present")
-        return
 
+def reorder_column(resource_leaderboard):
     # Filter out 'TAX' and reorder
     desired_order = ["GRAIN", "WOOD", "STONE", "IRON", "RESEARCH", "SPS"]
     filtered_df = resource_leaderboard[resource_leaderboard["token_symbol"].isin(desired_order)]
     ordered_df = filtered_df.set_index("token_symbol").loc[desired_order].reset_index()
-
-    max_cols = 4
-    cols = st.columns(max_cols)
-    for idx, (_, row) in enumerate(ordered_df.iterrows()):
-        col_idx = idx % max_cols
-
-        with cols[col_idx]:
-            render_resource_card(row, resource_leaderboard)
-
-    with st.expander("DATA", expanded=False):
-        st.dataframe(ordered_df, hide_index=True)
+    return ordered_df

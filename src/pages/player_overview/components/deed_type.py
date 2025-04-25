@@ -54,9 +54,12 @@ def add_deed_type(row):
     plot_number = row['plot_number']
     territory_name = row['territory']
     region_name = row['region_name']
+    worksite_type = row['worksite_type']
 
     if magical_type:
         card_img = f'{BASE_URL}/{deed_type.lower()}_{plot_status}_{magical_type}_{rarity}.jpg'
+    elif plot_status == 'kingdom':
+        card_img = f'{BASE_URL}/{deed_type.lower()}_{plot_status}_{worksite_type.lower()}.jpg'
     else:
         card_img = f'{BASE_URL}/{deed_type.lower()}_{plot_status}_{rarity}.jpg'
 
