@@ -3,7 +3,7 @@ import streamlit as st
 
 from src.api.db import resource_tracking
 from src.graphs import resources_supply_graphs
-from src.static.static_values_enum import resource_icon_map
+from src.static.static_values_enum import resource_icon_map, PRODUCING_RESOURCES, NATURAL_RESOURCE
 from src.utils.large_number_util import format_large_number
 
 
@@ -40,13 +40,14 @@ def add_daily_overview_section():
 def add_historical_section():
     df = resource_tracking.get_historical_data()
     df = filter_rows(df)
-    df = reorder_column(df)
-    df = add_daily_production(df)
-    df = add_consumption_df(df)
 
     if df.empty:
         st.warning("No data to present")
         return
+
+    df = reorder_column(df)
+    df = add_daily_production(df)
+    df = add_consumption_df(df)
 
     st.subheader("1. Total Supply")
     resources_supply_graphs.plot_total_supply(df)
@@ -78,12 +79,12 @@ def render_resource_card(row, df):
 
     # If resource is WOOD, IRON, or STONE, calculate total consumption across all rows
     extra_consumed = "N/A"
-    if token in ["GRAIN", "WOOD", "STONE", "IRON"]:
+    if token in NATURAL_RESOURCE:
         extra_consumed = format_large_number(daily_consumption)
 
     with st.container(border=True):
         st.markdown(f"""
-        ### <img src="{icon_url}" width="24" style="vertical-align:middle"> {token}
+        ### <img src="{icon_url}" width="35" style="vertical-align:middle"> {token}
         - **Total Available**: `{total_supply}`
         - **Produced Daily**: `{format_large_number(daily_production)}`
         - **Consumed Daily**: `{extra_consumed}`
@@ -105,10 +106,9 @@ def add_daily_production(df):
 
 
 def add_consumption_df(df):
+    consumable_fields = [f'cost_per_h_{resource.lower()}' for resource in NATURAL_RESOURCE]
     # Consumption: per day, sum columns by cost type
-    consumption_by_day = df.groupby("date")[[
-        "cost_per_h_grain", "cost_per_h_wood", "cost_per_h_stone", "cost_per_h_iron"
-    ]].sum() * 24  # multiply after groupby to keep logic clear
+    consumption_by_day = df.groupby("date")[consumable_fields].sum() * 24  # multiply after groupby to keep logic clear
     consumption_by_day = consumption_by_day.reset_index()
     # Melt to long format for easier plotting
     cons_melted = consumption_by_day.melt(
@@ -133,8 +133,6 @@ def filter_rows(resource_leaderboard):
 
 
 def reorder_column(resource_leaderboard):
-    # Filter out 'TAX' and reorder
-    desired_order = ["GRAIN", "WOOD", "STONE", "IRON", "RESEARCH", "SPS"]
-    filtered_df = resource_leaderboard[resource_leaderboard["token_symbol"].isin(desired_order)]
-    ordered_df = filtered_df.set_index("token_symbol").loc[desired_order].reset_index()
+    filtered_df = resource_leaderboard[resource_leaderboard["token_symbol"].isin(PRODUCING_RESOURCES)]
+    ordered_df = filtered_df.set_index("token_symbol").loc[PRODUCING_RESOURCES].reset_index()
     return ordered_df
