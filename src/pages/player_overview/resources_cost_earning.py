@@ -1,7 +1,8 @@
 import pandas as pd
 import streamlit as st
 
-from src.static.static_values_enum import consume_rates, resource_icon_map
+from src.static.static_values_enum import consume_rates, resource_icon_map, PRODUCING_RESOURCES, \
+    MULTIPLE_CONSUMING_RESOURCE, NATURAL_RESOURCE
 from src.utils.log_util import configure_logger
 
 log = configure_logger(__name__)
@@ -31,6 +32,13 @@ def reset_on_change(_key):
     return reset
 
 
+def reorder_column(df):
+    filtered_df = df[df["token_symbol"].isin(PRODUCING_RESOURCES)]
+    filtered_resources = [r for r in PRODUCING_RESOURCES if r in filtered_df["token_symbol"].values]
+    ordered_df = filtered_df.set_index("token_symbol").loc[filtered_resources].reset_index()
+    return ordered_df
+
+
 def get_resource_cost(df, resource_pool_metric):
     st.markdown("## Calculate DEC cost/earnings")
 
@@ -45,6 +53,7 @@ def get_resource_cost(df, resource_pool_metric):
     taxes_fee_txt = "Include taxes(10%) and fees (10%)"
     tax_fee = st.checkbox(taxes_fee_txt)
     cols = st.columns(max_cols)
+    df = reorder_column(df)
     for idx, (_, row) in enumerate(df.iterrows()):
         col_idx = idx % max_cols
         with cols[col_idx]:
@@ -78,6 +87,10 @@ def calculate_taxes(production, tax_fee):
     return extra_txt, production
 
 
+def icon_html(icon_url):
+    return f"<img src='{icon_url}' width='20' height='20' style='vertical-align:middle;'/>"
+
+
 def add_research_production_cost(base_pp,
                                  boosted_pp,
                                  rewards_per_hour,
@@ -108,7 +121,7 @@ def add_research_production_cost(base_pp,
         else:
             resource = resource[0]
 
-    if resource in ['RESEARCH', 'SPS']:
+    if resource in MULTIPLE_CONSUMING_RESOURCE:
         costs['STONE'] = base_pp * consume_rates.get('STONE')
         costs['WOOD'] = base_pp * consume_rates.get('WOOD')
         costs['IRON'] = base_pp * consume_rates.get('IRON')
@@ -125,13 +138,11 @@ def add_research_production_cost(base_pp,
     # Total DEC
     total_dec_cost = sum(dec_costs.values())
 
-    def icon_html(icon_url):
-        return f"<img src='{icon_url}' width='20' height='20' style='vertical-align:middle;'/>"
-
     total_dec_earning = 0
     earning_txt = ""
 
-    if resource not in ['RESEARCH', 'SPS']:
+    # DEC EARNING ONLY APPLIES TO NATURAL RESOURCES AT THE MOMENT
+    if resource in NATURAL_RESOURCE:
         total_dec_earning = rewards_per_hour / get_price(metrics_df, resource)
         extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
 

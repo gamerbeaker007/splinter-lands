@@ -3,17 +3,8 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-
-COLOR_MAP = {
-    "GRAIN": "orange",
-    "WOOD": "saddlebrown",
-    "STONE": "gray",
-    "IRON": "olive",
-    "RESEARCH": "lightblue",
-}
-
-PRODUCTION_TOKENS = ["GRAIN", "WOOD", "STONE", "IRON", "RESEARCH", "SPS"]
-CONSUMPTION_TOKENS = ["GRAIN", "WOOD", "STONE", "IRON"]
+from src.static.static_values_enum import PRODUCING_RESOURCES, RESOURCE_COLOR_MAP, \
+    NATURAL_RESOURCE
 
 
 def plot_total_supply(df):
@@ -22,7 +13,7 @@ def plot_total_supply(df):
         x="date",
         y="total_supply",
         color="token_symbol",
-        color_discrete_map=COLOR_MAP,
+        color_discrete_map=RESOURCE_COLOR_MAP,
         log_y=True,
         title="Total Supply per Token (Log Scale)"
     )
@@ -39,7 +30,7 @@ def plot_production_vs_consumption(df):
     )
 
     # --- Left Plot: Production ---
-    for token in PRODUCTION_TOKENS:
+    for token in PRODUCING_RESOURCES:
         token_prod = df[df["token_symbol"] == token]
         fig.add_trace(
             go.Scatter(
@@ -47,13 +38,13 @@ def plot_production_vs_consumption(df):
                 y=token_prod["daily_production"],
                 mode="lines+markers",
                 name=f"{token} Production",
-                line=dict(color=COLOR_MAP.get(token, "blue"))
+                line=dict(color=RESOURCE_COLOR_MAP.get(token, "blue"))
             ),
             row=1, col=1
         )
 
     # --- Right Plot: Consumption ---
-    for token in CONSUMPTION_TOKENS:
+    for token in NATURAL_RESOURCE:
         token_cons = df[df["token_symbol"] == token]
         fig.add_trace(
             go.Scatter(
@@ -61,7 +52,7 @@ def plot_production_vs_consumption(df):
                 y=token_cons["daily_consumption"],
                 mode="lines+markers",
                 name=f"{token} Consumption",
-                line=dict(color=COLOR_MAP[token], dash="dot")
+                line=dict(color=RESOURCE_COLOR_MAP[token], dash="dot")
             ),
             row=1, col=2
         )
@@ -84,13 +75,13 @@ def plot_production_vs_consumption(df):
 
 def plot_net_production(net_df):
     fig_net = go.Figure()
-    for token in CONSUMPTION_TOKENS:
+    for token in NATURAL_RESOURCE:
         token_net = net_df[net_df["token_symbol"] == token]
         fig_net.add_trace(go.Bar(
             x=token_net["date"],
             y=token_net["net_production"],
             name=token,
-            marker_color=COLOR_MAP[token]
+            marker_color=RESOURCE_COLOR_MAP[token]
         ))
 
     fig_net.update_layout(

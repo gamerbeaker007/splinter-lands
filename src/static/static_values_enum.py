@@ -10,7 +10,8 @@ from src.static.icons import land_grain_farm_icon_url, land_logging_camp_icon_ur
     title_high_roller_icon_url, title_burninator_icon_url, title_incinerator_icon_url, title_scorcher_icon_url, \
     title_rebel_icon_url, title_defiant_icon_url, title_dawnbringer_icon_url, title_tower_mage_icon_url, \
     title_renowned_icon_url, title_veteran_icon_url, title_proven_icon_url, title_myth_hunter_icon_url, \
-    title_fable_scout_icon_url, title_saga_seeker_icon_url, title_emissary_icon_url
+    title_fable_scout_icon_url, title_saga_seeker_icon_url, title_emissary_icon_url, aura_icon_url, \
+    land_aura_lab_icon_url
 
 
 class ExtendedEnum(Enum):
@@ -24,6 +25,18 @@ class ExtendedEnum(Enum):
         return list(map(lambda c: c.value, cls))
 
 
+RESOURCE_COLOR_MAP = {
+    'GRAIN': "orange",
+    'IRON': "olive",
+    'RESEARCH': "lightblue",
+    'SPS': "yellow",
+    'STONE': "gray",
+    'WOOD': "saddlebrown",
+    'AURA': "darkgray",
+    'TAX CASTLE': "purple",
+    'TAX KEEP': "lightsalmon",
+}
+
 grain_conversion_ratios = {
     'WOOD': 4,
     'STONE': 10,
@@ -31,12 +44,53 @@ grain_conversion_ratios = {
     'RESEARCH': 200
 }
 
+
+NATURAL_RESOURCE = [
+    "GRAIN",
+    "WOOD",
+    "STONE",
+    "IRON"
+]
+
+RESOURCES_RANKINGS = [
+    "GRAIN",
+    "WOOD",
+    "STONE",
+    "IRON",
+    "RESEARCH",
+    "AURA",
+]
+
+PRODUCING_RESOURCES = [
+    "GRAIN",
+    "WOOD",
+    "STONE",
+    "IRON",
+    "RESEARCH",
+    "AURA",
+    "SPS"
+]
+
+CONSUMING_GRAIN_ONLY_RESOURCES = [
+    "GRAIN",
+    "WOOD",
+    "STONE",
+    "IRON",
+]
+
+MULTIPLE_CONSUMING_RESOURCE = [
+    "RESEARCH",
+    "AURA",
+    "SPS",
+]
+
 # production_rates = {
 #     'GRAIN': 0.02,
 #     'WOOD': 0.005,
 #     'STONE': 0.002,
 #     'IRON': 0.0005,
 #     'RESEARCH': 0.0001,
+#     'AURA': 0.0005,
 #     'SPS': 0  # Not sure how to calculate so make 0
 # }
 
@@ -53,6 +107,7 @@ worksite_type_mapping = {
     'Ore Mine': land_ore_mine_icon_url,
     'Quarry': land_quarry_icon_url,
     'Research Hut': land_research_hut_icon_url,
+    'Aura Lab': land_aura_lab_icon_url,
     'Shard Mine': land_shard_mine_icon_url,
     'KEEP': land_keep_icon_url,
     'CASTLE': land_castle_icon_url,
@@ -75,6 +130,7 @@ resource_icon_map = {
     "IRON": iron_icon_url,
     "SPS": sps_icon_url,
     "RESEARCH": research_icon_url,
+    "AURA": aura_icon_url,
     "TAX": tax_icon_url,
     "DEC": dec_icon_url,
     "PP": land_hammer_icon_url,

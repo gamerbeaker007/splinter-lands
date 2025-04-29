@@ -2,16 +2,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import plotly.express as px
 
-COLOR_MAP = {
-    'GRAIN': "orange",
-    'IRON': "olive",
-    'RESEARCH': "lightblue",
-    'SPS': "yellow",
-    'STONE': "gray",
-    'WOOD': "saddlebrown",
-    'TAX CASTLE': "purple",
-    'TAX KEEP': "lightsalmon",
-}
+from src.static.static_values_enum import RESOURCE_COLOR_MAP
 
 
 def create_land_region_active_graph(df, date_str, group_by_label):
@@ -128,7 +119,7 @@ def create_pp_per_source_type(df, key=None, title=None, slim=False):
         y=df['total_base_pp_after_cap'],
         name='RAW PP',
         marker=dict(
-            color=[COLOR_MAP.get(res, 'steelblue') for res in df['resource']]
+            color=[RESOURCE_COLOR_MAP.get(res, 'steelblue') for res in df['resource']]
         ),
     ))
 
@@ -175,7 +166,7 @@ def create_land_region_historical(df, log_y=True):
         log_y=True if log_y else False,
         color="resource",
         title="Resource RAW PP history",
-        color_discrete_map=COLOR_MAP,
+        color_discrete_map=RESOURCE_COLOR_MAP,
         labels={"total_harvest_pp": "BOOSTED PP", "date": "Date"},
         hover_data=["resource", "total_harvest_pp"],
         height=600,
@@ -199,7 +190,7 @@ def create_tax_income_chart(df, title):
             go.Bar(
                 x=df["token_symbol"],
                 y=df["tax_income"],
-                marker=dict(color=[COLOR_MAP.get(res, 'steelblue') for res in df["token_symbol"]])
+                marker=dict(color=[RESOURCE_COLOR_MAP.get(res, 'steelblue') for res in df["token_symbol"]])
             )
         ]
     )

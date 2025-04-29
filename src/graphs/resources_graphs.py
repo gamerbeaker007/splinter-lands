@@ -3,12 +3,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-COLOR_MAP = {
-    "GRAIN": "orange",
-    "WOOD": "saddlebrown",  # a nice brown color name
-    "STONE": "gray",
-    "IRON": "olive"
-}
+from src.static.static_values_enum import RESOURCE_COLOR_MAP
 
 
 def create_land_resources_dec_graph(df, log_y):
@@ -22,7 +17,7 @@ def create_land_resources_dec_graph(df, log_y):
         log_y=True if log_y else False,
         color="token_symbol",
         title="1000 DEC",
-        color_discrete_map=COLOR_MAP,
+        color_discrete_map=RESOURCE_COLOR_MAP,
         labels={"dec_price_1000": "Amount of Resource", "date": "Date"},
         hover_data=["token_symbol", "dec_price_1000"],
         height=600,
@@ -42,7 +37,7 @@ def create_land_resources_graph(df, log_y):
         log_y=True if log_y else False,
         color="token_symbol",
         title="1000 Resources",
-        color_discrete_map=COLOR_MAP,
+        color_discrete_map=RESOURCE_COLOR_MAP,
         labels={"resource_price_1000": "Cost in DEC", "date": "Date"},
         hover_data=["token_symbol", "resource_price_1000"],
         height=600,
@@ -64,7 +59,7 @@ def create_land_resources_factor_graph(df, log_y):
         log_y=True if log_y else False,
         color="token_symbol",
         title="Grain factor",
-        color_discrete_map=COLOR_MAP,
+        color_discrete_map=RESOURCE_COLOR_MAP,
         labels={"factor": "Factor", "date": "Date"},
         hover_data=["token_symbol", "factor"],
         height=600,
