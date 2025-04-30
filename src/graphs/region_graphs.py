@@ -1,8 +1,9 @@
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import plotly.express as px
 
 from src.static.static_values_enum import RESOURCE_COLOR_MAP
+from src.utils.resource_util import reorder_column
 
 
 def create_land_region_active_graph(df, date_str, group_by_label):
@@ -103,16 +104,8 @@ def create_total_production_power(df):
 def create_pp_per_source_type(df, key=None, title=None, slim=False):
     fig = go.Figure()
 
-    custom_order = ["GRAIN", "IRON", "WOOD", "STONE", "SPS", "RESEARCH", "TAX KEEP", "TAX CASTLE"]
-
     # Create a mapping from resource to order index
-    order_map = {name: i for i, name in enumerate(custom_order)}
-
-    # Apply the mapping, unknowns get a large number to push them to the end
-    df['sort_order'] = df['resource'].map(order_map).fillna(len(custom_order))
-
-    # Sort by this order
-    df = df.sort_values('sort_order').drop(columns='sort_order').reset_index(drop=True)
+    df = reorder_column(df, column='resource')
 
     fig.add_trace(go.Bar(
         x=df['resource'],
@@ -180,10 +173,10 @@ def create_land_region_historical(df, log_y=True):
 
 
 def create_tax_income_chart(df, title):
-    custom_order = ["GRAIN", "IRON", "WOOD", "STONE", "SPS", "RESEARCH"]
-    order_map = {name: i for i, name in enumerate(custom_order)}
-    df["sort_order"] = df["token_symbol"].map(order_map).fillna(len(custom_order))
-    df = df.sort_values("sort_order").drop(columns="sort_order").reset_index(drop=True)
+    df = reorder_column(df)
+    # order_map = {name: i for i, name in enumerate(DEFAULT_ORDER_RESOURCES)}
+    # df["sort_order"] = df["token_symbol"].map(order_map).fillna(len(DEFAULT_ORDER_RESOURCES))
+    # df = df.sort_values("sort_order").drop(columns="sort_order").reset_index(drop=True)
 
     fig = go.Figure(
         data=[

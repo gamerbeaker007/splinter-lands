@@ -3,8 +3,9 @@ import streamlit as st
 
 from src.api.db import resource_tracking
 from src.graphs import resources_supply_graphs
-from src.static.static_values_enum import resource_icon_map, PRODUCING_RESOURCES, NATURAL_RESOURCE
+from src.static.static_values_enum import resource_icon_map, NATURAL_RESOURCE
 from src.utils.large_number_util import format_large_number
+from src.utils.resource_util import reorder_column
 
 
 def add_section():
@@ -130,9 +131,3 @@ def add_consumption_df(df):
 def filter_rows(resource_leaderboard):
     resource_leaderboard = resource_leaderboard[resource_leaderboard["token_symbol"].notnull()]
     return resource_leaderboard
-
-
-def reorder_column(resource_leaderboard):
-    filtered_df = resource_leaderboard[resource_leaderboard["token_symbol"].isin(PRODUCING_RESOURCES)]
-    ordered_df = filtered_df.set_index("token_symbol").loc[PRODUCING_RESOURCES].reset_index()
-    return ordered_df

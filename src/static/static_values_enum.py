@@ -32,7 +32,7 @@ RESOURCE_COLOR_MAP = {
     'SPS': "yellow",
     'STONE': "gray",
     'WOOD': "saddlebrown",
-    'AURA': "darkgray",
+    'AURA': "mediumorchid",
     'TAX CASTLE': "purple",
     'TAX KEEP': "lightsalmon",
 }
@@ -44,6 +44,18 @@ grain_conversion_ratios = {
     'RESEARCH': 200
 }
 
+DEFAULT_ORDER_RESOURCES = [
+    "GRAIN",
+    "WOOD",
+    "STONE",
+    "IRON",
+    "RESEARCH",
+    "AURA",
+    "SPS",
+    "TAX",
+    "TAX CASTLE",
+    "TAX KEEP",
+]
 
 NATURAL_RESOURCE = [
     "GRAIN",
@@ -52,7 +64,7 @@ NATURAL_RESOURCE = [
     "IRON"
 ]
 
-RESOURCES_RANKINGS = [
+LEADERBOARD_RESOURCES = [
     "GRAIN",
     "WOOD",
     "STONE",
@@ -89,8 +101,8 @@ MULTIPLE_CONSUMING_RESOURCE = [
 #     'WOOD': 0.005,
 #     'STONE': 0.002,
 #     'IRON': 0.0005,
-#     'RESEARCH': 0.0001,
 #     'AURA': 0.0005,
+#     'RESEARCH': 0.0001,
 #     'SPS': 0  # Not sure how to calculate so make 0
 # }
 
@@ -161,11 +173,6 @@ title_icon_map = {
     'saga_seeker': title_saga_seeker_icon_url,
     'emissary': title_emissary_icon_url,
 }
-
-
-class Format(ExtendedEnum):
-    wild = 'wild'
-    modern = 'modern'
 
 
 class Edition(ExtendedEnum):

@@ -1,9 +1,10 @@
 import pandas as pd
 import streamlit as st
 
-from src.static.static_values_enum import consume_rates, resource_icon_map, PRODUCING_RESOURCES, \
-    MULTIPLE_CONSUMING_RESOURCE, NATURAL_RESOURCE
+from src.static.static_values_enum import consume_rates, resource_icon_map, MULTIPLE_CONSUMING_RESOURCE, \
+    NATURAL_RESOURCE
 from src.utils.log_util import configure_logger
+from src.utils.resource_util import reorder_column
 
 log = configure_logger(__name__)
 
@@ -30,13 +31,6 @@ def reset_on_change(_key):
             st.session_state.plot_number = None
 
     return reset
-
-
-def reorder_column(df):
-    filtered_df = df[df["token_symbol"].isin(PRODUCING_RESOURCES)]
-    filtered_resources = [r for r in PRODUCING_RESOURCES if r in filtered_df["token_symbol"].values]
-    ordered_df = filtered_df.set_index("token_symbol").loc[filtered_resources].reset_index()
-    return ordered_df
 
 
 def get_resource_cost(df, resource_pool_metric):
