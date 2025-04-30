@@ -4,7 +4,7 @@ import streamlit as st
 
 from src.static.static_values_enum import PRODUCING_RESOURCES, NATURAL_RESOURCE
 from src.utils.log_util import configure_logger
-from src.utils.resource_util import calc_costs
+from src.utils.resource_util import calc_costs, get_price
 
 log = configure_logger(__name__)
 
@@ -19,18 +19,6 @@ def color_cell(val):
 
 def adjust_fee(val):
     return val * 1.125 if val < 0 else val
-
-
-def get_price(metrics_df, prices_df, token, amount) -> float:
-    if token == 'RESEARCH':
-        return 0
-    if token == "SPS":
-        usd_value = amount * prices_df['sps'].values[0]
-        dec_total = usd_value / prices_df['dec'].values[0]
-        return dec_total
-    if token == "AURA":
-        return 0
-    return amount / metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
 
 
 def prepare_data(df):

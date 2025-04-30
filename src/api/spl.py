@@ -160,3 +160,39 @@ def get_resource_leaderboard(resource):
     if result:
         return pd.DataFrame(result)
     return pd.DataFrame()
+
+
+@st.cache_data(ttl='1h')
+def get_item_prices():
+    result = fetch_api_data(f'{API_URLS['land']}market/landing', data_key='data.assets')
+    if result:
+        return pd.DataFrame(result)
+    return pd.DataFrame()
+
+
+@st.cache_data(ttl='1h')
+def get_item_price(detail_id):
+    """
+    Safely retrieve the minimum price for a given detailId from the spl other items marketplace.
+
+    :param detail_id: The ID of the item to search for.
+    :return: The minimum price, or None if not found or malformed.
+    """
+    try:
+        df = get_item_prices()
+        row = df.loc[df['detailId'] == detail_id]
+        if row.empty:
+            log.warning(f"No item found with detailId: {detail_id}")
+            return None
+
+        prices = row.iloc[0].get('prices')
+        if not prices or not isinstance(prices, list) or not prices[0]:
+            log.warning(f"No valid price list for detailId: {detail_id}")
+            return None
+
+        min_price = prices[0].get('minPrice') if isinstance(prices[0], dict) else None
+        return float(min_price) if min_price is not None else None
+
+    except Exception as e:
+        log.error(f"Failed to get price for detailId={detail_id}: {e}")
+        return None

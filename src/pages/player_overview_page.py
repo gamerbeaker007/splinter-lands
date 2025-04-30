@@ -62,7 +62,7 @@ def get_page():
         "Deed Overview"
     ])
     with tab1:
-        resources_cost_earning.get_resource_cost(filtered_df, metrics_df)
+        resources_cost_earning.get_resource_cost(filtered_df, metrics_df, prices_df)
     with tab2:
         resource_player.get_resource_region_overview(filtered_df, player, metrics_df, prices_df)
     with tab3:
