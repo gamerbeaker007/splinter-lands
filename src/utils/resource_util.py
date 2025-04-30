@@ -15,8 +15,9 @@ def get_price(metrics_df, prices_df, token, amount) -> float:
     if token == "AURA":
         usd_price = spl.get_item_price('MIDNIGHTPOT')
         if usd_price:
-            dec_total = usd_price / prices_df['dec'].values[0]
-            return dec_total / 40  # 40 aura is needed to make one midnight potion
+            midnight_potions_value_usd = (amount / 40) * usd_price  # 40 aura is needed to make one midnight potion
+            dec_total = midnight_potions_value_usd / prices_df['dec'].values[0]
+            return dec_total
         else:
             return 0
     return amount / metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
