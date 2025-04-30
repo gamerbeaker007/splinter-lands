@@ -1,9 +1,8 @@
-import pandas as pd
 import streamlit as st
 
-from src.static.static_values_enum import consume_rates, resource_icon_map, PRODUCING_RESOURCES, \
-    MULTIPLE_CONSUMING_RESOURCE, NATURAL_RESOURCE
+from src.static.static_values_enum import consume_rates, resource_icon_map, MULTIPLE_CONSUMING_RESOURCE
 from src.utils.log_util import configure_logger
+from src.utils.resource_util import reorder_column, get_price
 
 log = configure_logger(__name__)
 
@@ -14,10 +13,6 @@ taxes_fee = 0.90  # 10% fee
 for key in ['region_uid', 'tract_number', 'plot_number']:
     if key not in st.session_state:
         st.session_state[key] = None
-
-
-def get_price(metrics_df: pd.DataFrame, token: str, ) -> float:
-    return metrics_df[metrics_df['token_symbol'] == token]['dec_price'].values[0]
 
 
 # Reset logic
@@ -32,14 +27,7 @@ def reset_on_change(_key):
     return reset
 
 
-def reorder_column(df):
-    filtered_df = df[df["token_symbol"].isin(PRODUCING_RESOURCES)]
-    filtered_resources = [r for r in PRODUCING_RESOURCES if r in filtered_df["token_symbol"].values]
-    ordered_df = filtered_df.set_index("token_symbol").loc[filtered_resources].reset_index()
-    return ordered_df
-
-
-def get_resource_cost(df, resource_pool_metric):
+def get_resource_cost(df, resource_pool_metric, prices_df):
     st.markdown("## Calculate DEC cost/earnings")
 
     df = df.groupby(['token_symbol']).agg(
@@ -66,6 +54,7 @@ def get_resource_cost(df, resource_pool_metric):
                                          rewards_per_hour,
                                          resource,
                                          resource_pool_metric,
+                                         prices_df,
                                          tax_fee)
 
 
@@ -96,6 +85,7 @@ def add_research_production_cost(base_pp,
                                  rewards_per_hour,
                                  resource,
                                  metrics_df,
+                                 priced_df,
                                  tax_fee):
     consume_list = ['GRAIN']
     # There is always a grain cost
@@ -131,23 +121,17 @@ def add_research_production_cost(base_pp,
 
     # DEC equivalents
     dec_costs = {
-        res: costs[res] / get_price(metrics_df, res)
+        res: get_price(metrics_df, priced_df, res, costs[res])
         for res in costs
     }
 
     # Total DEC
     total_dec_cost = sum(dec_costs.values())
+    total_dec_earning = get_price(metrics_df, priced_df, resource, rewards_per_hour)
+    extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
 
-    total_dec_earning = 0
-    earning_txt = ""
-
-    # DEC EARNING ONLY APPLIES TO NATURAL RESOURCES AT THE MOMENT
-    if resource in NATURAL_RESOURCE:
-        total_dec_earning = rewards_per_hour / get_price(metrics_df, resource)
-        extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
-
-        earning_txt = (f"<h8>{icon_html(resource_icon_map['DEC'])} DEC Earning: {round(total_dec_earning, 3)} /hr"
-                       f"{extra_txt}</h8>")
+    earning_txt = (f"<h8>{icon_html(resource_icon_map['DEC'])} DEC Earning: {round(total_dec_earning, 3)} /hr"
+                   f"{extra_txt}</h8>")
 
     production_txt = ""
     if rewards_per_hour:

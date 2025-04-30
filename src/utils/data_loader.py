@@ -6,7 +6,7 @@ import pandas as pd
 
 from src.api import spl
 from src.api.db import resource_tracking, resource_metrics, active_metrics
-from src.static.static_values_enum import RESOURCES_RANKINGS
+from src.static.static_values_enum import LEADERBOARD_RESOURCES
 from src.utils.log_util import configure_logger
 
 log = configure_logger(__name__)
@@ -30,7 +30,7 @@ async def fetch_all_region_data():
         all_staking_details.append(staked_details)
 
     all_resource_leaderboards = []
-    for resource in RESOURCES_RANKINGS:
+    for resource in LEADERBOARD_RESOURCES:
         log.info(f'fetching leaderboard data for resource: {resource}')
         leaderboard_df = spl.get_resource_leaderboard(resource)
         leaderboard_df['resource'] = resource  # add the resource type to each row
