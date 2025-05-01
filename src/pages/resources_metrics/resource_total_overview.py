@@ -26,13 +26,16 @@ def add_daily_overview_section():
     df = add_consumption_df(df)
     df = reorder_column(df)
 
+    # Filter out resource TAX for this overview
+    df = df.loc[df.token_symbol != "TAX"]
+
     max_cols = 4
     cols = st.columns(max_cols)
     for idx, (_, row) in enumerate(df.iterrows()):
         col_idx = idx % max_cols
 
         with cols[col_idx]:
-            render_resource_card(row, df)
+            render_resource_card(row)
 
     with st.expander("DATA", expanded=False):
         st.dataframe(df, hide_index=True)
@@ -50,6 +53,9 @@ def add_historical_section():
     df = add_daily_production(df)
     df = add_consumption_df(df)
 
+    # Filter out resource TAX for this overview
+    df = df.loc[df.token_symbol != "TAX"]
+
     st.subheader("1. Total Supply")
     resources_supply_graphs.plot_total_supply(df)
 
@@ -63,7 +69,7 @@ def add_historical_section():
         st.dataframe(df)
 
 
-def render_resource_card(row, df):
+def render_resource_card(row):
     token = row['token_symbol']
     daily_production = row['daily_production']
     daily_consumption = row['daily_consumption']
