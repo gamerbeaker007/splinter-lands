@@ -158,7 +158,7 @@ def create_land_region_historical(df, log_y=True):
         y="total_harvest_pp",
         log_y=True if log_y else False,
         color="resource",
-        title="Resource RAW PP history",
+        title="Resource BOOSTED PP history",
         color_discrete_map=RESOURCE_COLOR_MAP,
         labels={"total_harvest_pp": "BOOSTED PP", "date": "Date"},
         hover_data=["resource", "total_harvest_pp"],
@@ -174,9 +174,6 @@ def create_land_region_historical(df, log_y=True):
 
 def create_tax_income_chart(df, title):
     df = reorder_column(df)
-    # order_map = {name: i for i, name in enumerate(DEFAULT_ORDER_RESOURCES)}
-    # df["sort_order"] = df["token_symbol"].map(order_map).fillna(len(DEFAULT_ORDER_RESOURCES))
-    # df = df.sort_values("sort_order").drop(columns="sort_order").reset_index(drop=True)
 
     fig = go.Figure(
         data=[
