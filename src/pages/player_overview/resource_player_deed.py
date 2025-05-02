@@ -51,7 +51,7 @@ deed_tile_wrapper_css = """
 """
 
 
-def get_page(df: pd.DataFrame):
+def get_player_deed_overview(df: pd.DataFrame):
     st.markdown(f"## Deed Overview ({df.index.size})")
     if df.index.size > 100:
         st.warning("To many deeds displaying the first 100 (please use filters)")

@@ -49,6 +49,7 @@ def get_page():
         return
 
     # Prepare and filter data
+    spinner_placeholder = st.empty()
     df = prepare_data(player)
     if df.empty:
         return
@@ -62,8 +63,23 @@ def get_page():
         "Deed Overview"
     ])
     with tab1:
+        add_spinner(spinner_placeholder, "📊 Calculating resource costs and earnings...")
         resources_cost_earning.get_resource_cost(filtered_df, metrics_df, prices_df)
     with tab2:
+        add_spinner(spinner_placeholder, "🌍 Generating region overview...")
         resource_player.get_resource_region_overview(filtered_df, player, metrics_df, prices_df)
     with tab3:
-        resource_player_deed.get_page(filtered_df)
+        add_spinner(spinner_placeholder, "📜 Building deed overview (fetching staked assets)...")
+        resource_player_deed.get_player_deed_overview(filtered_df)
+
+    spinner_placeholder.empty()
+
+
+def add_spinner(spinner_placeholder, current_status):
+    spinner_html = f"""
+        <div style="display: flex; align-items: center;">
+            <img src="https://i.imgur.com/llF5iyg.gif" width="24" style="margin-right: 10px;">
+            <span>{current_status}</span>
+        </div>
+        """
+    spinner_placeholder.markdown(spinner_html, unsafe_allow_html=True)

@@ -45,12 +45,18 @@ async def fetch_all_region_data():
         gc.collect()
 
     # Concatenate only for final merge/processing
-    deeds_df = pd.concat([pd.read_parquet(f"{DATA_PARTIAL_DIR}/deeds_{i}.parquet") for i in range(1, 151)])
-    worksite_df = pd.concat([pd.read_parquet(f"{DATA_PARTIAL_DIR}/worksite_details_{i}.parquet") for i in range(1, 151)])
-    staking_df = pd.concat([pd.read_parquet(f"{DATA_PARTIAL_DIR}/staking_details_{i}.parquet") for i in range(1, 151)])
-    resource_leaderboards = pd.concat([
-        pd.read_parquet(f"{DATA_PARTIAL_DIR}/resource_leaderboard_{res}.parquet") for res in LEADERBOARD_RESOURCES
-    ])
+    deeds_df = pd.concat(
+        [pd.read_parquet(f"{DATA_PARTIAL_DIR}/deeds_{i}.parquet") for i in range(1, 151)]
+    )
+    worksite_df = pd.concat(
+        [pd.read_parquet(f"{DATA_PARTIAL_DIR}/worksite_details_{i}.parquet") for i in range(1, 151)]
+    )
+    staking_df = pd.concat(
+        [pd.read_parquet(f"{DATA_PARTIAL_DIR}/staking_details_{i}.parquet") for i in range(1, 151)]
+    )
+    resource_leaderboards = pd.concat(
+        [pd.read_parquet(f"{DATA_PARTIAL_DIR}/resource_leaderboard_{res}.parquet") for res in LEADERBOARD_RESOURCES]
+    )
 
     data_dict = {
         'deeds': deeds_df,
@@ -65,6 +71,7 @@ async def fetch_all_region_data():
     active_metrics.upload_daily_active_metrics(df)
 
     save_data(data_dict)
+
 
 def save_data(dict_of_data):
     os.makedirs(DATA_BASE_DIR, exist_ok=True)
