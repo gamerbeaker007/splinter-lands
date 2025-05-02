@@ -19,10 +19,23 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
     if df.empty:
         return
 
-    include_taxes = st.checkbox("Include taxes (10%)", value=False)
-    include_fee = st.checkbox("Include transfer fees(12.5%)", value=False)
+    if 'include_taxes' not in st.session_state:
+        st.session_state.include_taxes = False
 
-    summary_df = prepare_summary(df, include_taxes, include_fee)
+    if 'include_fee' not in st.session_state:
+        st.session_state.include_fee = False
+
+    st.session_state.include_taxes = st.checkbox(
+        "Include taxes (10%)",
+        value=st.session_state.include_taxes,
+        key="region_overview_taxes"
+    )
+    st.session_state.include_fee = st.checkbox(
+        "Include transfer fees (12.5%)",
+        value=st.session_state.include_fee
+    )
+
+    summary_df = prepare_summary(df, st.session_state.include_taxes, st.session_state.include_fee)
     amount_df = df[['region_uid', 'token_symbol', 'count']]
 
     render_regions(summary_df, amount_df)

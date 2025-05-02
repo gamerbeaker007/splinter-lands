@@ -53,6 +53,16 @@ deed_tile_wrapper_css = """
 
 def get_player_deed_overview(df: pd.DataFrame):
     st.markdown(f"## Deed Overview ({df.index.size})")
+
+    if 'include_taxes_deeds' not in st.session_state:
+        st.session_state.include_taxes_deeds = False
+
+    st.session_state.include_taxes_deeds = st.checkbox(
+        "Include taxes (10%)",
+        value=st.session_state.include_taxes,
+        key="deed_overview_taxes"
+    )
+
     if df.index.size > 100:
         st.warning("To many deeds displaying the first 100 (please use filters)")
         df = df.head(100)
@@ -80,7 +90,7 @@ def get_player_deed_overview(df: pd.DataFrame):
         biome_html = add_biome(row)
         cards_html = add_card(cards)
         runi_html = add_card_runi(cards)
-        production_html = add_production(row)
+        production_html = add_production(row, st.session_state.include_taxes_deeds)
 
         tile = f"""<div class="deed-tile">
             {card_html}

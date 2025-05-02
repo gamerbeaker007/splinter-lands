@@ -38,8 +38,13 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
         }).reset_index()
 
     max_cols = 3
-    taxes_fee_txt = "Include taxes(10%) and fees (10%)"
-    tax_fee = st.checkbox(taxes_fee_txt)
+
+    taxes_fee_txt = "Include taxes(10%) and conversion fees (10%)"
+    if 'taxes_fee' not in st.session_state:
+        st.session_state.taxes_fee = False
+
+    st.session_state.taxes_fee = st.checkbox(taxes_fee_txt, value=st.session_state.taxes_fee)
+
     cols = st.columns(max_cols)
     df = reorder_column(df)
     for idx, (_, row) in enumerate(df.iterrows()):
@@ -55,7 +60,7 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
                                          resource,
                                          resource_pool_metric,
                                          prices_df,
-                                         tax_fee)
+                                         st.session_state.taxes_fee)
 
 
 def calculate_fees(tax_fee, total_dec_earning):
