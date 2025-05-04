@@ -80,6 +80,7 @@ def get_player_deed_overview(df: pd.DataFrame):
     tiles_html = ""
     for _, row in df.iterrows():
         deed_uid = row['deed_uid']
+        total_boost = float(row['total_boost']) * 100
 
         asset_info = spl.get_staked_assets(deed_uid)
         items = asset_info['items']
@@ -111,6 +112,7 @@ def get_player_deed_overview(df: pd.DataFrame):
                         {runi_html}
                     </div>
                 </div>
+                <div class=item-boost>Total Boost: {total_boost}%</div>
             </div>
             <div class="wrapper">
                 <p>Cards:</p>
