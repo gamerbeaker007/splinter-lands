@@ -6,6 +6,7 @@ item_boost_style = """
 .item-wrapper {
     display: inline-block;
     text-align: center;
+    margin-right: 5px;
 }
 .item-img-container {
     width: 50px;
@@ -16,13 +17,14 @@ item_boost_style = """
     align-items: flex-start;
     border: 1px solid #ccc;
     border-radius: 4px;
-    background-color: #gray;
 }
+
 .item-img-container img {
     max-width: 100%;
     max-height: 100%;
-    padding: 2px;
+    padding: 5px;
 }
+
 .item-boost {
     font-size: 10pt;
     font-weight: bold;
@@ -57,10 +59,10 @@ def add_items(items):
             continue  # Skip unknown types
 
         html += f"""<div class="item-wrapper">
+            <div class="item-boost">{boost:.0f}%</div>
             <div class="item-img-container">
                 <img src="{img_url}" alt="{label}" />
             </div>
-            <div class="item-boost">{boost:.0f}%</div>
         </div>"""
 
     return f"<div style='text-align: center;'>{html}</div>"

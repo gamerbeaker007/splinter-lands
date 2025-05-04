@@ -41,7 +41,7 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
 
     taxes_fee_txt = "Include taxes(10%) and conversion fees (10%)"
     if 'taxes_fee' not in st.session_state:
-        st.session_state.taxes_fee = False
+        st.session_state.taxes_fee = True
 
     st.session_state.taxes_fee = st.checkbox(taxes_fee_txt, value=st.session_state.taxes_fee)
 

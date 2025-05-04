@@ -20,10 +20,10 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
         return
 
     if 'include_taxes' not in st.session_state:
-        st.session_state.include_taxes = False
+        st.session_state.include_taxes = True
 
     if 'include_fee' not in st.session_state:
-        st.session_state.include_fee = False
+        st.session_state.include_fee = True
 
     st.session_state.include_taxes = st.checkbox(
         "Include taxes (10%)",

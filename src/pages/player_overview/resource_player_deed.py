@@ -2,11 +2,12 @@ import pandas as pd
 import streamlit as st
 
 from src.api import spl
-from src.pages.player_overview.components.biome import add_biome, biome_style
+from src.pages.player_overview.components.biome import add_biome_boosts, biome_style
 from src.pages.player_overview.components.cards import card_display_style, add_card, add_card_runi
 from src.pages.player_overview.components.deed_type import add_deed_type, deed_type_style
 from src.pages.player_overview.components.items import add_items, item_boost_style
 from src.pages.player_overview.components.production import add_production, production_card_style
+from src.pages.player_overview.components.rarity import add_rarity_boost
 
 deed_tile_wrapper_css = """
 <style>
@@ -30,12 +31,11 @@ deed_tile_wrapper_css = """
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    gap: 16px;
+    gap: 10px;
     flex-wrap: wrap;
     margin-top: 1px;
     margin-bottom: 10px;
 }
-
 
 .wrapper p {
     margin-top: 5px;
@@ -55,7 +55,7 @@ def get_player_deed_overview(df: pd.DataFrame):
     st.markdown(f"## Deed Overview ({df.index.size})")
 
     if 'include_taxes_deeds' not in st.session_state:
-        st.session_state.include_taxes_deeds = False
+        st.session_state.include_taxes_deeds = True
 
     st.session_state.include_taxes_deeds = st.checkbox(
         "Include taxes (10%)",
@@ -87,7 +87,8 @@ def get_player_deed_overview(df: pd.DataFrame):
         items_html = add_items(items)
 
         card_html = add_deed_type(row)
-        biome_html = add_biome(row)
+        biome_html = add_biome_boosts(row)
+        rarity_html = add_rarity_boost(row)
         cards_html = add_card(cards)
         runi_html = add_card_runi(cards)
         production_html = add_production(row, st.session_state.include_taxes_deeds)
@@ -102,6 +103,9 @@ def get_player_deed_overview(df: pd.DataFrame):
                     </div>
                     <div class="boost-section" style="text-align: left;">
                         {items_html}
+                    </div>
+                    <div class="boost-section" style="text-align: left;">
+                        {rarity_html}
                     </div>
                     <div class="boost-section" style="text-align: left;">
                         {runi_html}
