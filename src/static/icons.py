@@ -55,7 +55,7 @@ dragon_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_dragon_on.png
 neutral_element_icon_url = f'{SPL_WEB_URL}assets/cards/icon_element_neutral_on.png'
 
 
-title_untamed_icon_url = f'{SPL_WEB_URL}website/icons/icon_active_untamed.svg'
+title_untamed_icon_url = f'{WEB_URL}website/icons/icon_active_untamed.svg'
 title_praetorian_icon_url = f'{WEB_URL}website/icons/icon_active_praetorian.svg'
 title_explorer_icon_url = f'{WEB_URL}website/icons/icon_active_explorer.svg'
 title_grandmaster_icon_url = f'{WEB_URL}website/icons/icon_active_grandmaster.svg'

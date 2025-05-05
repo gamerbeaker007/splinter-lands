@@ -46,7 +46,7 @@ color_map = {
 }
 
 
-def add_biome(row):
+def add_biome_boosts(row):
     positives_html = ""
     negatives_html = ""
 
@@ -59,8 +59,8 @@ def add_biome(row):
 
             html_block = f"""
             <div class="biome_container">
-                <img src="{url}" class="biome_img" style="background-color:{color};" />
                 <span class="{css_class}">{percent:+.0f}%</span>
+                <img src="{url}" class="biome_img" style="background-color:{color};" />
             </div>"""
 
             if percent > 0:

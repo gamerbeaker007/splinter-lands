@@ -124,11 +124,21 @@ def production_percentage(hours_since_last_op):
     return min(round(percent, 2), 100.0)  # cap at 100%
 
 
-def add_production(row):
+def calculate_taxes(tax_fee, amount):
+    if tax_fee:
+        amount = amount * 0.90  # there is a 10% tax fee
+        extra_txt = "<span style='color:gray'>(incl. tax)</span><br>"
+    else:
+        extra_txt = "<br>"
+    return extra_txt, amount
+
+
+def add_production(row, include_tax):
     worksite_type = row.get('worksite_type', '') or 'Undeveloped'
     base_pp = row.get('total_base_pp', 0)
     boosted_pp = row.get('total_harvest_pp', 0)
     production_per_hour = row.get('rewards_per_hour', 0)
+    extra_txt, production_per_hour = calculate_taxes(include_tax, production_per_hour)
     resource = row.get('resource_symbol', '')
     projected_end_date = row.get('projected_end', None)
     projected_created_date = row.get('project_created_date', None)
@@ -159,7 +169,7 @@ def add_production(row):
                 </div>"""
 
     production_html = f"""<div class="line">
-        {prod_icon} {production_per_hour:.1f}/h
+        {prod_icon} {production_per_hour:.1f}/h {extra_txt}
     </div>"""
 
     html = f"""<div class="production-card">

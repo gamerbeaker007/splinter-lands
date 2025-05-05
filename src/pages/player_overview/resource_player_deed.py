@@ -2,11 +2,13 @@ import pandas as pd
 import streamlit as st
 
 from src.api import spl
-from src.pages.player_overview.components.biome import add_biome, biome_style
+from src.pages.player_overview.components.biome import add_biome_boosts, biome_style
 from src.pages.player_overview.components.cards import card_display_style, add_card, add_card_runi
 from src.pages.player_overview.components.deed_type import add_deed_type, deed_type_style
+from src.pages.player_overview.components.deed_type_boost import add_deed_type_boost
 from src.pages.player_overview.components.items import add_items, item_boost_style
 from src.pages.player_overview.components.production import add_production, production_card_style
+from src.pages.player_overview.components.rarity import add_rarity_boost
 
 deed_tile_wrapper_css = """
 <style>
@@ -30,12 +32,11 @@ deed_tile_wrapper_css = """
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    gap: 16px;
+    gap: 5px;
     flex-wrap: wrap;
     margin-top: 1px;
-    margin-bottom: 10px;
+    min-height: 150px;
 }
-
 
 .wrapper p {
     margin-top: 5px;
@@ -51,8 +52,18 @@ deed_tile_wrapper_css = """
 """
 
 
-def get_page(df: pd.DataFrame):
+def get_player_deed_overview(df: pd.DataFrame):
     st.markdown(f"## Deed Overview ({df.index.size})")
+
+    if 'include_taxes_deeds' not in st.session_state:
+        st.session_state.include_taxes_deeds = True
+
+    st.session_state.include_taxes_deeds = st.checkbox(
+        "Include taxes (10%)",
+        value=st.session_state.include_taxes,
+        key="deed_overview_taxes"
+    )
+
     if df.index.size > 100:
         st.warning("To many deeds displaying the first 100 (please use filters)")
         df = df.head(100)
@@ -70,6 +81,7 @@ def get_page(df: pd.DataFrame):
     tiles_html = ""
     for _, row in df.iterrows():
         deed_uid = row['deed_uid']
+        total_boost = int(float(row['total_boost']) * 100)
 
         asset_info = spl.get_staked_assets(deed_uid)
         items = asset_info['items']
@@ -77,21 +89,29 @@ def get_page(df: pd.DataFrame):
         items_html = add_items(items)
 
         card_html = add_deed_type(row)
-        biome_html = add_biome(row)
+        biome_html = add_biome_boosts(row)
+        rarity_html = add_rarity_boost(row)
+        deed_type_html = add_deed_type_boost(row)
         cards_html = add_card(cards)
         runi_html = add_card_runi(cards)
-        production_html = add_production(row)
+        production_html = add_production(row, st.session_state.include_taxes_deeds)
 
         tile = f"""<div class="deed-tile">
             {card_html}
             <div class="wrapper">
-                <p>Boosts:</p>
+                <div>Boosts: <span style='color:gray'>({total_boost}%)</span><br></div>
                 <div class="info-wrapper">
                     <div class="boost-section" style="text-align: left;">
                         {biome_html}
                     </div>
                     <div class="boost-section" style="text-align: left;">
                         {items_html}
+                    </div>
+                    <div class="boost-section" style="text-align: left;">
+                        {rarity_html}
+                    </div>
+                    <div class="boost-section" style="text-align: left;">
+                        {deed_type_html}
                     </div>
                     <div class="boost-section" style="text-align: left;">
                         {runi_html}

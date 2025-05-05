@@ -12,13 +12,36 @@ max_cols = 2
 tax_rate = 0.9
 
 
-def color_cell(val):
-    color = "green" if val >= 0 else "red"
-    return f'<span style="color:{color}">{val:.3f}</span>'
+def get_resource_region_overview(df, player, metrics_df, prices_df):
+    st.markdown("## Region production overview")
 
+    df = prepare_data(df)
+    if df.empty:
+        return
 
-def adjust_fee(val):
-    return val * 1.125 if val < 0 else val
+    if 'include_taxes' not in st.session_state:
+        st.session_state.include_taxes = True
+
+    if 'include_fee' not in st.session_state:
+        st.session_state.include_fee = True
+
+    st.session_state.include_taxes = st.checkbox(
+        "Include taxes (10%)",
+        value=st.session_state.include_taxes,
+        key="region_overview_taxes"
+    )
+    st.session_state.include_fee = st.checkbox(
+        "Include transfer fees (12.5%)",
+        value=st.session_state.include_fee
+    )
+
+    summary_df = prepare_summary(df, st.session_state.include_taxes, st.session_state.include_fee)
+    amount_df = df[['region_uid', 'token_symbol', 'count']]
+
+    render_regions(summary_df, amount_df)
+
+    dec_net = total_section(summary_df, amount_df, metrics_df, prices_df,)
+    add_self_sufficiency(dec_net, player)
 
 
 def prepare_data(df):
@@ -40,16 +63,8 @@ def prepare_data(df):
     return grouped_df
 
 
-def get_resource_region_overview(df, player, metrics_df, prices_df):
-    st.markdown("## Region production overview")
-
-    df = prepare_data(df)
-
-    if df.empty:
-        return
-
+def prepare_summary(df, include_taxes, include_fee):
     df = pd.concat([df, df.apply(calc_costs, axis=1)], axis=1)
-    amount_df = df[['region_uid', 'token_symbol', 'count']]
 
     produced = df.pivot_table(
         index='region_uid',
@@ -59,7 +74,6 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
         fill_value=0
     ).add_prefix('produced_').reset_index()
 
-    include_taxes = st.checkbox("Include taxes (10%)", value=False)
     if include_taxes:
         produced = produced.set_index('region_uid') * tax_rate
         produced = produced.reset_index()
@@ -69,11 +83,13 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
 
     summary = pd.merge(produced, cost_df, on='region_uid')
 
+    # Ensure all columns exist
     for res in PRODUCING_RESOURCES:
         col = f'produced_{res}'
         if col not in summary.columns:
             summary[col] = 0
 
+    # Net calculations
     summary["net_grain"] = summary["produced_GRAIN"] - summary["cost_per_h_grain"]
     summary["net_wood"] = summary["produced_WOOD"] - summary["cost_per_h_wood"]
     summary["net_stone"] = summary["produced_STONE"] - summary["cost_per_h_stone"]
@@ -82,68 +98,83 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
     summary["net_aura"] = summary["produced_AURA"]
     summary["net_sps"] = summary["produced_SPS"]
 
-    include_fee = st.checkbox("Include transfer fees(12.5%)", value=False)
+    # Adjusted net values
+    if include_fee:
+        summary["adj_net_grain"] = summary["net_grain"].apply(adjust_fee)
+        summary["adj_net_wood"] = summary["net_wood"].apply(adjust_fee)
+        summary["adj_net_stone"] = summary["net_stone"].apply(adjust_fee)
+        summary["adj_net_iron"] = summary["net_iron"].apply(adjust_fee)
+    else:
+        summary["adj_net_grain"] = summary["net_grain"]
+        summary["adj_net_wood"] = summary["net_wood"]
+        summary["adj_net_stone"] = summary["net_stone"]
+        summary["adj_net_iron"] = summary["net_iron"]
 
+    summary["adj_net_research"] = summary["net_research"]
+    summary["adj_net_aura"] = summary["net_aura"]
+    summary["adj_net_sps"] = summary["net_sps"]
+
+    return summary
+
+
+def color_cell(val):
+    color = "green" if val >= 0 else "red"
+    return f'<span style="color:{color}">{val:.3f}</span>'
+
+
+def adjust_fee(val):
+    return val * 1.125 if val < 0 else val
+
+
+def build_region_markdown(row, region_df):
+    region = row["region_uid"]
+
+    # Count per resource
+    region_counts = region_df.groupby("token_symbol")["count"].sum().to_dict()
+
+    header_row = "|              |"
+    sub_header_row = "|--------------|"
+    for res in PRODUCING_RESOURCES:
+        count = region_counts.get(res, 0)
+        header_row += f" {res} ({count}) |"
+        sub_header_row += ":----:|"
+
+    row_produce = (
+        f"| **Produce**  | {row['produced_GRAIN']:.3f} | {row['produced_WOOD']:.3f} | "
+        f"{row['produced_STONE']:.3f} | {row['produced_IRON']:.3f} | {row['produced_RESEARCH']:.3f} | "
+        f"{row['produced_AURA']:.3f} | {row['produced_SPS']:.3f} |"
+    )
+    row_consume = (
+        f"| **Consume**  | -{row['cost_per_h_grain']:.3f} | -{row['cost_per_h_wood']:.3f} | "
+        f"-{row['cost_per_h_stone']:.3f} | -{row['cost_per_h_iron']:.3f} | 0 | 0 | 0 | "
+    )
+    row_net = (
+        f"| **Net**      | {color_cell(row['adj_net_grain'])} | {color_cell(row['adj_net_wood'])} | "
+        f"{color_cell(row['adj_net_stone'])} | {color_cell(row['adj_net_iron'])} | "
+        f"{color_cell(row['adj_net_research'])} | {color_cell(row['adj_net_aura'])} | "
+        f"{color_cell(row['adj_net_sps'])} |"
+    )
+
+    return f"""
+    ### Region {region}
+
+    {header_row}
+    {sub_header_row}
+    {row_produce}
+    {row_consume}
+    {row_net}
+    """
+
+
+def render_regions(summary, amount_df):
     cols = st.columns(max_cols)
-    for idx, (_, row) in enumerate(summary.iterrows()):
-        col_idx = idx % max_cols
+    for idx, row in summary.iterrows():
         region = row["region_uid"]
-
-        net_vals = {
-            'grain': adjust_fee(row["net_grain"]) if include_fee else row["net_grain"],
-            'wood': adjust_fee(row["net_wood"]) if include_fee else row["net_wood"],
-            'stone': adjust_fee(row["net_stone"]) if include_fee else row["net_stone"],
-            'iron': adjust_fee(row["net_iron"]) if include_fee else row["net_iron"],
-            'research': row["net_research"],
-            'aura': row["net_aura"],
-            'sps': row["net_sps"]
-        }
-
-        for key, value in net_vals.items():
-            summary.loc[summary['region_uid'] == region, f'adj_net_{key}'] = value
-
-        row_produce = (
-            f"| **Produce**  | {row['produced_GRAIN']:.3f} | {row['produced_WOOD']:.3f} | "
-            f"{row['produced_STONE']:.3f} | {row['produced_IRON']:.3f} | {row['produced_RESEARCH']:.3f} | "
-            f"{row['produced_AURA']:.3f} | {row['produced_SPS']:.3f} |"
-        )
-        row_consume = (
-            f"| **Consume**  | -{row['cost_per_h_grain']:.3f} | -{row['cost_per_h_wood']:.3f} | "
-            f"-{row['cost_per_h_stone']:.3f} | -{row['cost_per_h_iron']:.3f} | 0 | 0 | 0 | "
-        )
-        row_net = (
-            f"| **Net**      | {color_cell(net_vals['grain'])} | {color_cell(net_vals['wood'])} | "
-            f"{color_cell(net_vals['stone'])} | {color_cell(net_vals['iron'])} | {color_cell(net_vals['research'])} | "
-            f"{color_cell(net_vals['aura'])} | {color_cell(net_vals['sps'])} |"
-        )
-
-        # Filter for current region
         region_df = amount_df[amount_df['region_uid'] == region]
-
-        # Build the markdown header with counts
-        header_row = "|              |"
-        sub_header_row = "|--------------|"
-        for res in PRODUCING_RESOURCES:
-            count = region_df[region_df['token_symbol'] == res]['count'].sum()
-            header_row += f" {res} ({count}) |"
-            sub_header_row += ":----:|"
-
-        markdown = f"""
-        ### Region {region}
-
-        {header_row}
-        {sub_header_row}
-        {row_produce}
-        {row_consume}
-        {row_net}
-        """
-        with cols[col_idx]:
+        markdown = build_region_markdown(row, region_df)
+        with cols[idx % max_cols]:
             with st.container():
                 st.markdown(markdown, unsafe_allow_html=True)
-
-    dec_net = total_section(amount_df, metrics_df, prices_df, summary)
-
-    add_self_sufficiency(dec_net, player)
 
 
 def add_self_sufficiency(dec_net, player):
@@ -180,9 +211,9 @@ def add_self_sufficiency(dec_net, player):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def total_section(amount_df, metrics_df, prices_df, summary):
+def total_section(summary_df, amount_df, metrics_df, prices_df):
     total_net = {
-        key.lower(): summary[f"adj_net_{key.lower()}"].sum()
+        key.lower(): summary_df[f"adj_net_{key.lower()}"].sum()
         for key in PRODUCING_RESOURCES
     }
     row_total_net = (
@@ -191,7 +222,7 @@ def total_section(amount_df, metrics_df, prices_df, summary):
         f"{color_cell(total_net['aura'])} | {color_cell(total_net['sps'])} |"
     )
     dec_net = {
-        key.lower(): get_price(metrics_df, prices_df, key, summary[f"adj_net_{key.lower()}"].sum())
+        key.lower(): get_price(metrics_df, prices_df, key, summary_df[f"adj_net_{key.lower()}"].sum())
         for key in PRODUCING_RESOURCES
     }
     dec_total_net = (

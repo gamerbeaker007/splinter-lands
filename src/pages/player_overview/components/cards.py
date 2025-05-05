@@ -33,11 +33,27 @@ card_display_style = """
     margin: 0;
 }
 
+.card-img-runi-container {
+    width: 75px;
+    height: 75px;
+    border: 3px solid gray;
+    border-radius: 10px;
+    background-color: #f5f5f5;
+    background-size: 150%;
+    background-repeat: no-repeat;
+    background-position: center -20px;
+    display: block;
+    line-height: 0;
+    padding: 0;
+    margin: -10;
+}
+
+
 .card-pp-info {
     margin-top: 1px;
     background-color: rgba(240, 240, 240, 0.85);
     color: #333;
-    font-size: 10pt;
+    font-size: 8pt;
     font-family: monospace;
     padding: 4px 6px;
     border-radius: 6px;
@@ -46,6 +62,12 @@ card_display_style = """
     vertical-align: middle;
     height: 12px;
     margin-right: 1px;
+}
+.card-runi-boost {
+    font-size: 10pt;
+    font-weight: bold;
+    font-family: monospace;
+    margin-top: 1px;
 }
 </style>
 """
@@ -84,12 +106,15 @@ def add_card_runi(cards):
     html = ""
     for card in cards:
         if 'runi' in card['name'].lower():
+            boost = float(card['runi_boost']) * 100
+
             base_pp = float(card['base_pp_after_cap'])
             boosted_pp = float(card['total_harvest_pp'])
             img = f'https://runi.splinterlands.com/cards/{card['uid']}.jpg'
             is_gold = "gold" if card['foil'] else ""
             html += f"""<div class="card-wrapper">
-                <div class="card-img-container {is_gold}" style="background-image: url('{img}');"></div>
+                <div class="card-runi-boost">{boost}%</div>
+                <div class="card-img-runi-container {is_gold}" style="background-image: url('{img}');"></div>
                 <div class="card-pp-info">
                     <img src="{land_hammer_icon_url}" alt="hammer"/> {base_pp:.0f}<br/>
                     <img src="{land_hammer_icon_url}" alt="hammer"/> {boosted_pp:.0f}
