@@ -81,20 +81,36 @@ def get_player_deed_overview(df: pd.DataFrame):
     tiles_html = ""
     for _, row in df.iterrows():
         deed_uid = row['deed_uid']
-        total_boost = int(float(row['total_boost']) * 100)
-
-        asset_info = spl.get_staked_assets(deed_uid)
-        items = asset_info['items']
-        cards = asset_info['cards']
-        items_html = add_items(items)
+        total_boost = row['total_boost']
+        deed_type = row['deed_type']
 
         card_html = add_deed_type(row)
-        biome_html = add_biome_boosts(row)
-        rarity_html = add_rarity_boost(row)
-        deed_type_html = add_deed_type_boost(row)
-        cards_html = add_card(cards)
-        runi_html = add_card_runi(cards)
         production_html = add_production(row, st.session_state.include_taxes_deeds)
+        if deed_type == 'Unsurveyed Deed':
+            total_boost = 0
+            biome_html = 'N/A'
+            items_html = '<div></div>'
+            rarity_html = '<div></div>'
+            deed_type_html = '<div></div>'
+            cards_html = 'N/A'
+            runi_html = '<div></div>'
+
+        else:
+            if pd.isna(total_boost):
+                total_boost = 0
+            total_boost = int(float(total_boost) * 100)
+
+            biome_html = add_biome_boosts(row)
+
+            asset_info = spl.get_staked_assets(deed_uid)
+            items = asset_info['items']
+            cards = asset_info['cards']
+            items_html = add_items(items)
+
+            rarity_html = add_rarity_boost(row)
+            deed_type_html = add_deed_type_boost(row)
+            cards_html = add_card(cards)
+            runi_html = add_card_runi(cards)
 
         tile = f"""<div class="deed-tile">
             {card_html}
