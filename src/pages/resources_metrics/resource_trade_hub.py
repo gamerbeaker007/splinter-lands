@@ -20,7 +20,7 @@ def add_section(df):
 
     st.warning(
         "Note: The cumulative DEC burned is an estimate based only on data collected by this tool. "
-        "It does not include untracked or external trades."
+        "e.g. if its missed a day its not counted and also not what has be done in the past."
     )
     df["dec_burned"] = df["dec_volume_1"] * burn_rate
 
