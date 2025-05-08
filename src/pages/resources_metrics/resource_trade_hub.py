@@ -33,8 +33,8 @@ def add_section(df):
     daily_df["cumulative_burn"] = daily_df["dec_burned"].cumsum()
 
     resources_graphs.add_trade_hub_daily_graphs(daily_df)
-    resources_graphs.add_trade_hub_dec_burned(df)
     resources_graphs.add_trade_hub_volume_graph(df)
+    resources_graphs.add_trade_hub_dec_burned(df)
 
     with st.expander("DATA", expanded=False):
         st.dataframe(df, hide_index=True)
