@@ -168,7 +168,13 @@ def add_trade_hub_daily_graphs(daily_df):
         title="Daily DEC Burn and Cumulative DEC Burn",
         xaxis_title="Date",
         yaxis=dict(title="Burned DEC"),
-        yaxis2=dict(title="Cumulative Burned DEC", overlaying="y", side="right"),
+        yaxis2=dict(
+            title="Cumulative Burned DEC",
+            overlaying="y",
+            side="right",
+            showgrid=False,
+            zeroline=False,
+        ),
         legend=dict(x=0.01, y=0.99)
     )
     st.plotly_chart(fig1, use_container_width=True)
