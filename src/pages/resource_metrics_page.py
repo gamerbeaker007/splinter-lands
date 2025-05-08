@@ -5,7 +5,7 @@ import streamlit as st
 from src.api import spl
 from src.api.db import resource_metrics
 from src.graphs import resources_graphs
-from src.pages.resources_metrics import resources_conversion, resource_total_overview
+from src.pages.resources_metrics import resources_conversion, resource_total_overview, resource_trade_hub
 
 
 def load_market_data():
@@ -28,12 +28,13 @@ def get_page():
     resources_conversion.get_container(metrics_df, prices_df)
 
     df = resource_metrics.get_historical_data()
-    tab1, tab2, tab3, tab4 = st.tabs(
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
             "Grain factor chart",
             "1000 Resource chart",
             "1000 DEC chart",
-            "Total Resource Overview"
+            "Total resource overview",
+            "Trade hub info",
         ]
     )
     with tab1:
@@ -53,3 +54,5 @@ def get_page():
         resources_graphs.create_land_resources_graph(df, True)
     with tab4:
         resource_total_overview.add_section()
+    with tab5:
+        resource_trade_hub.add_section(df)
