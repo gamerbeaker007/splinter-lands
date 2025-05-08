@@ -146,3 +146,51 @@ def create_active_graph(df, height):
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+
+def add_trade_hub_daily_graphs(daily_df):
+    fig1 = go.Figure()
+
+    fig1.add_bar(x=daily_df["date"], y=daily_df["dec_burned"], name="Daily DEC Burned", marker_color="purple")
+    fig1.add_trace(
+        go.Scatter(
+            x=daily_df["date"],
+            y=daily_df["cumulative_burn"],
+            name="Cumulative Burn",
+            yaxis="y2",
+            mode='lines',
+            line=dict(dash='dot'),
+            marker=dict(color='lightgray'),
+        )
+    )
+
+    fig1.update_layout(
+        title="Daily DEC Burn and Cumulative DEC Burn",
+        xaxis_title="Date",
+        yaxis=dict(title="Burned DEC"),
+        yaxis2=dict(title="Cumulative Burned DEC", overlaying="y", side="right"),
+        legend=dict(x=0.01, y=0.99)
+    )
+    st.plotly_chart(fig1, use_container_width=True)
+
+
+def add_trade_hub_dec_burned(df):
+    fig2 = px.line(
+        df, x="date", y="dec_burned", color="token_symbol",
+        color_discrete_map=RESOURCE_COLOR_MAP,
+        title="DEC Burned by Resource"
+    )
+
+    st.plotly_chart(fig2, use_container_width=True)
+
+
+def add_trade_hub_volume_graph(df):
+    fig3 = px.line(
+        df,
+        x="date",
+        y="dec_volume_1",
+        color="token_symbol",
+        color_discrete_map=RESOURCE_COLOR_MAP,
+        title="DEC Volume 24h by Resource"
+    )
+    st.plotly_chart(fig3, use_container_width=True)
