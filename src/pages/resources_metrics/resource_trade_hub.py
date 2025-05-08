@@ -13,15 +13,21 @@ def add_section(df):
     Here’s what you’ll find:
     - **Chart 1:** Daily DEC burned across all resource pools, along with a cumulative burn line for context.
     - **Chart 2:** 24-hour trade volume for each individual resource pool.
-    - **Chart 3:** Total DEC burned per day across all pools, based on 5% of the recorded 24h trade volume.
+    - **Chart 3:** Total DEC burned per day across all pools
 
-    💡 The DEC burn is estimated as 5% of the daily trade volume per resource.
+    💡 The DEC burn is estimated as 5% of the 24h trade volume per resource.
     """)
 
-    st.warning(
-        "Note: The cumulative DEC burned is an estimate based only on data collected by this tool. "
-        "e.g. if its missed a day its not counted and also not what has be done in the past."
-    )
+    st.warning("""
+    ⚠️ DEC Burn Disclaimer
+    
+    This chart shows estimated cumulative DEC burned,
+    based on daily snapshots of a 24-hour rolling trade volume. \n
+    Snapshots are taken once per day,
+    but the exact timing and update frequency of the source data are unknown.\n
+    As a result, some short-term activity may be missed,
+    and totals should be treated as indicative rather than exact.""")
+
     df["dec_burned"] = df["dec_volume_1"] * burn_rate
 
     daily_df = df.groupby("date").agg(
