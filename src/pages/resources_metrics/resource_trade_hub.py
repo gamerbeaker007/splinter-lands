@@ -20,7 +20,7 @@ def add_section(df):
 
     st.warning("""
     ⚠️ DEC Burn Disclaimer
-    
+
     This chart shows estimated cumulative DEC burned,
     based on daily snapshots of a 24-hour rolling trade volume. \n
     Snapshots are taken once per day,
