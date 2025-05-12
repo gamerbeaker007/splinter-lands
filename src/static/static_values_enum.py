@@ -188,3 +188,4 @@ class Edition(ExtendedEnum):
     soulbound = 10
     rebellion = 12
     soulboundrb = 13
+    conclave = 14
