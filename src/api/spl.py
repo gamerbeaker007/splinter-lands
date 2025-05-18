@@ -112,22 +112,6 @@ def get_prices():
     return pd.DataFrame()
 
 
-@st.cache_data(ttl="1h")
-def get_land_deeds_uid(plot_id):
-    result = fetch_api_data(f'{API_URLS['land']}land/deeds/{plot_id}', data_key='data')
-    if result:
-        return pd.DataFrame(result, index=[0])
-    return pd.DataFrame()
-
-
-@st.cache_data(ttl="1h")
-def get_land_stake_deed_details(deed_uid):
-    result = fetch_api_data(f'{API_URLS['land']}land/stake/deed/details/{deed_uid}', data_key='data')
-    if result:
-        return pd.DataFrame(result, index=[0])
-    return pd.DataFrame()
-
-
 def get_land_region_details_player(player):
     result = fetch_api_data(f'{API_URLS['land']}land/deeds', params={"player": player}, data_key='data')
 
