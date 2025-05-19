@@ -79,7 +79,8 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
 
     placeholder.markdown(f"""
     <div style='font-size: 1.5em; font-weight: bold; margin-bottom: 5px;'>
-        {icon_html(resource_icon_map['DEC'], width=75, height=75)}Total Net Positive DEC: {round(total_net_dec, 3)} /hr</div>
+        {icon_html(resource_icon_map['DEC'], width=75, height=75)}
+        Total Net Positive DEC: {round(total_net_dec, 3)} /hr</div>
     """, unsafe_allow_html=True)
 
 
