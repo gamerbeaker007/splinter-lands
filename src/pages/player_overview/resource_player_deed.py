@@ -61,7 +61,8 @@ def get_player_deed_overview(df: pd.DataFrame):
     st.session_state.include_taxes_deeds = st.checkbox(
         "Include taxes (10%)",
         value=st.session_state.include_taxes,
-        key="deed_overview_taxes"
+        help="10% Taxes are deducted from the produced amount",
+        key="deed_overview_taxes",
     )
 
     if df.index.size > 100:
