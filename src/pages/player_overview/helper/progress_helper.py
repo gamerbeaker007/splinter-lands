@@ -18,7 +18,7 @@ def get_progress_info(hours_since_last_op, projected_created_date, projected_end
         info_str = "No workers assigned"
     elif pd.notna(hours_since_last_op):
         percentage_done = production_percentage(hours_since_last_op)
-        info_str = f'{percentage_done}% Of The 7-Day Optimal Harvest Period'
+        info_str = f'{percentage_done}% Of The Way To The 7-Day Optimal Harvest Period'
     else:
         percentage_done = 0
         info_str = "Undeveloped"
