@@ -1,9 +1,6 @@
-import pandas as pd
-
 from src.static.icons import land_hammer_icon_url
 from src.static.static_values_enum import worksite_type_mapping, resource_icon_map
 from src.utils.resource_util import calc_costs
-from src.utils.time_util import time_until, calculate_progress, valid_date
 
 production_card_style = """
 <style>
@@ -118,12 +115,6 @@ production_card_style = """
 """
 
 
-def production_percentage(hours_since_last_op):
-    max_hours = 7 * 24  # 7 days = 168 hours
-    percent = (hours_since_last_op / max_hours) * 100
-    return min(round(percent, 2), 100.0)  # cap at 100%
-
-
 def calculate_taxes(tax_fee, amount):
     if tax_fee:
         amount = amount * 0.90  # there is a 10% tax fee
@@ -140,9 +131,6 @@ def add_production(row, include_tax):
     production_per_hour = row.get('rewards_per_hour', 0)
     extra_txt, production_per_hour = calculate_taxes(include_tax, production_per_hour)
     resource = row.get('resource_symbol', '')
-    projected_end_date = row.get('projected_end', None)
-    projected_created_date = row.get('project_created_date', None)
-    hours_since_last_op = row.get('hours_since_last_op', 0)
 
     image_url = worksite_type_mapping.get(worksite_type)
     cost = calc_costs(row)
@@ -150,12 +138,7 @@ def add_production(row, include_tax):
     hammer_icon = f'<img src="{land_hammer_icon_url}" alt="hammer" />'
     prod_icon = f'<img src="{resource_icon_map.get(resource, land_hammer_icon_url)}" alt="{resource}" />'
 
-    progress_html = get_progres_html(
-        hours_since_last_op,
-        projected_created_date,
-        projected_end_date,
-        boosted_pp
-    )
+    progress_html = get_progres_html(row)
 
     # Generate cost lines (skip zero)
     cost_html = ""
@@ -196,19 +179,9 @@ def add_production(row, include_tax):
     return html
 
 
-def get_progres_html(hours_since_last_op, projected_created_date, projected_end_date, boosted_pp):
-    if valid_date(projected_end_date):
-        info_str = f'Finished in: {time_until(projected_end_date)}'
-        percentage_done = calculate_progress(projected_created_date, projected_end_date)
-    elif boosted_pp <= 0:
-        percentage_done = 0
-        info_str = "No workers assigned"
-    elif pd.notna(hours_since_last_op):
-        percentage_done = production_percentage(hours_since_last_op)
-        info_str = f'{percentage_done}% Full'
-    else:
-        percentage_done = 0
-        info_str = "Undeveloped"
+def get_progres_html(row):
+    percentage_done = row['percentage_done']
+    info_str = row['info_str']
 
     progress_color = "red" if percentage_done >= 75 else "orange" if percentage_done >= 40 else "green"
     progress_fill_style = f"width: {percentage_done}%; background-color: {progress_color};"
