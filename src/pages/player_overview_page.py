@@ -76,10 +76,14 @@ def get_page():
 
     filtered_df = filter_section.get_page(df)
 
+    if filtered_df.empty:
+        st.warning("No Deeds found with current filter")
+        return
+
+
     # Add alert section for deeds that need attention:
     progress_info = filtered_df.apply(get_progress_info_row, axis=1)
     enriched_df = filtered_df.join(progress_info).copy()
-
     sorted_df = sorting_section.get_sorting_section(enriched_df)
 
     alert_section.get_section(sorted_df)
