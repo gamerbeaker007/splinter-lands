@@ -111,6 +111,40 @@ production_card_style = """
     pointer-events: none;  /* makes sure clicks go through to underlying div if needed */
 }
 
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-left: 6px;
+    cursor: pointer;
+    font-style: normal;
+    font-weight: bold;
+    color: #555;
+}
+
+.tooltip-box {
+    visibility: hidden;
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: normal;
+}
+
+.tooltip-wrapper:hover .tooltip-box {
+    visibility: visible;
+    opacity: 1;
+}
+
+
 </style>
 """
 
@@ -122,6 +156,17 @@ def calculate_taxes(tax_fee, amount):
     else:
         extra_txt = "<br>"
     return extra_txt, amount
+
+
+def get_tooltip_html(row):
+    tooltip = row['progress_tooltip']
+    if tooltip:
+        return f"""<span class="tooltip-wrapper">
+            <span>ℹ️</span>
+            <div class="tooltip-box">{tooltip}</div>
+        </span>"""
+    else:
+        return "<span/>"
 
 
 def add_production(row, include_tax):
@@ -139,6 +184,7 @@ def add_production(row, include_tax):
     prod_icon = f'<img src="{resource_icon_map.get(resource, land_hammer_icon_url)}" alt="{resource}" />'
 
     progress_html = get_progres_html(row)
+    tooltip_html = get_tooltip_html(row)
 
     # Generate cost lines (skip zero)
     cost_html = ""
@@ -171,7 +217,9 @@ def add_production(row, include_tax):
             </div>
         </div>
         <div class="production-progress">
-            <div class="line"><strong>Progress:</strong> </div>
+            <div class="line"><strong>Progress:</strong>
+            {tooltip_html}
+            </div>
             {progress_html}
         </div>
     </div>"""
