@@ -75,7 +75,8 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
                                                    prices_df,
                                                    st.session_state.taxes_fee,
                                                    st.session_state.conversion_fee)
-            total_net_dec += net_dec
+            if net_dec:
+                total_net_dec += net_dec
 
     placeholder.markdown(f"""
     <div style='font-size: 1.5em; font-weight: bold; margin-bottom: 5px;'>

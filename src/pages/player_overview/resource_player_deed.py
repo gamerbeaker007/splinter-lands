@@ -1,5 +1,8 @@
+import concurrent.futures
+
 import pandas as pd
 import streamlit as st
+from streamlit.runtime.scriptrunner_utils.script_run_context import add_script_run_ctx
 
 from src.api import spl
 from src.pages.player_overview.components.biome import add_biome_boosts, biome_style
@@ -52,6 +55,88 @@ deed_tile_wrapper_css = """
 """
 
 
+def process_deed_row(row, include_taxes):
+    deed_uid = row['deed_uid']
+    total_boost = row['total_boost']
+    deed_type = row['deed_type']
+
+    card_html = add_deed_type(row)
+    production_html = add_production(row, include_taxes)
+
+    if deed_type == 'Unsurveyed Deed':
+        return {
+            'tile': f"""<div class="deed-tile">
+                {card_html}
+                <div class="wrapper">
+                    <div>Boosts: <span style='color:gray'>(0%)</span><br></div>
+                    <div class="info-wrapper">
+                        <div class="boost-section" style="text-align: left;">N/A</div>
+                        <div class="boost-section" style="text-align: left;"><div></div></div>
+                        <div class="boost-section" style="text-align: left;"><div></div></div>
+                        <div class="boost-section" style="text-align: left;"><div></div></div>
+                        <div class="boost-section" style="text-align: left;"><div></div></div>
+                    </div>
+                </div>
+                <div class="wrapper">
+                    <p>Cards:</p>
+                    <div class="info-wrapper">
+                        <div class="cards-section" style="text-align: left;">N/A</div>
+                    </div>
+                </div>
+                <div class="wrapper">
+                    <p>Production:</p>
+                    <div class="info-wrapper">
+                        <div class="production-section" style="text-align: left;">
+                            {production_html}
+                        </div>
+                    </div>
+                </div>
+            </div>"""
+        }
+
+    if pd.isna(total_boost):
+        total_boost = 0
+    total_boost = int(float(total_boost) * 100)
+
+    biome_html = add_biome_boosts(row)
+    asset_info = spl.get_staked_assets(deed_uid)
+    items = asset_info['items']
+    cards = asset_info['cards']
+    items_html = add_items(items)
+    rarity_html = add_rarity_boost(row)
+    deed_type_html = add_deed_type_boost(row)
+    cards_html = add_card(cards)
+    runi_html = add_card_runi(cards)
+
+    return {
+        'tile': f"""<div class="deed-tile">
+            {card_html}
+            <div class="wrapper">
+                <div>Boosts: <span style='color:gray'>({total_boost}%)</span><br></div>
+                <div class="info-wrapper">
+                    <div class="boost-section" style="text-align: left;">{biome_html}</div>
+                    <div class="boost-section" style="text-align: left;">{items_html}</div>
+                    <div class="boost-section" style="text-align: left;">{rarity_html}</div>
+                    <div class="boost-section" style="text-align: left;">{deed_type_html}</div>
+                    <div class="boost-section" style="text-align: left;">{runi_html}</div>
+                </div>
+            </div>
+            <div class="wrapper">
+                <p>Cards:</p>
+                <div class="info-wrapper">
+                    <div class="cards-section" style="text-align: left;">{cards_html}</div>
+                </div>
+            </div>
+            <div class="wrapper">
+                <p>Production:</p>
+                <div class="info-wrapper">
+                    <div class="production-section" style="text-align: left;">{production_html}</div>
+                </div>
+            </div>
+        </div>"""
+    }
+
+
 def get_player_deed_overview(df: pd.DataFrame):
     st.markdown(f"## Deed Overview ({df.index.size})")
 
@@ -65,11 +150,13 @@ def get_player_deed_overview(df: pd.DataFrame):
         key="deed_overview_taxes",
     )
 
-    if df.index.size > 100:
-        st.warning("To many deeds displaying the first 100 (please use filters)")
-        df = df.head(100)
+    include_taxes_deeds = st.session_state.include_taxes_deeds
 
-    # add styles once
+    if df.index.size > 200:
+        st.warning("Too many deeds – displaying the first 200 (please use filters)")
+        df = df.head(200)
+
+    # Add styles once
     st.markdown(
         deed_tile_wrapper_css +
         deed_type_style +
@@ -77,82 +164,18 @@ def get_player_deed_overview(df: pd.DataFrame):
         item_boost_style +
         card_display_style +
         production_card_style,
-        unsafe_allow_html=True)
+        unsafe_allow_html=True
+    )
 
-    tiles_html = ""
-    for _, row in df.iterrows():
-        deed_uid = row['deed_uid']
-        total_boost = row['total_boost']
-        deed_type = row['deed_type']
+    # Process deeds concurrently
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        futures = []
+        for _, row in df.iterrows():
+            future = executor.submit(process_deed_row, row, include_taxes_deeds)
+            add_script_run_ctx(future)  # This attaches the Streamlit context to the thread
+            futures.append(future)
 
-        card_html = add_deed_type(row)
-        production_html = add_production(row, st.session_state.include_taxes_deeds)
-        if deed_type == 'Unsurveyed Deed':
-            total_boost = 0
-            biome_html = 'N/A'
-            items_html = '<div></div>'
-            rarity_html = '<div></div>'
-            deed_type_html = '<div></div>'
-            cards_html = 'N/A'
-            runi_html = '<div></div>'
+        results = [future.result() for future in futures]
 
-        else:
-            if pd.isna(total_boost):
-                total_boost = 0
-            total_boost = int(float(total_boost) * 100)
-
-            biome_html = add_biome_boosts(row)
-
-            asset_info = spl.get_staked_assets(deed_uid)
-            items = asset_info['items']
-            cards = asset_info['cards']
-            items_html = add_items(items)
-
-            rarity_html = add_rarity_boost(row)
-            deed_type_html = add_deed_type_boost(row)
-            cards_html = add_card(cards)
-            runi_html = add_card_runi(cards)
-
-        tile = f"""<div class="deed-tile">
-            {card_html}
-            <div class="wrapper">
-                <div>Boosts: <span style='color:gray'>({total_boost}%)</span><br></div>
-                <div class="info-wrapper">
-                    <div class="boost-section" style="text-align: left;">
-                        {biome_html}
-                    </div>
-                    <div class="boost-section" style="text-align: left;">
-                        {items_html}
-                    </div>
-                    <div class="boost-section" style="text-align: left;">
-                        {rarity_html}
-                    </div>
-                    <div class="boost-section" style="text-align: left;">
-                        {deed_type_html}
-                    </div>
-                    <div class="boost-section" style="text-align: left;">
-                        {runi_html}
-                    </div>
-                </div>
-            </div>
-            <div class="wrapper">
-                <p>Cards:</p>
-                <div class="info-wrapper">
-                    <div class="cards-section" style="text-align: left;">
-                        {cards_html}
-                    </div>
-                </div>
-            </div>
-            <div class="wrapper">
-                <p>Production:</p>
-                <div class="info-wrapper">
-                    <div class="production-section" style="text-align: left;">
-                        {production_html}
-                    </div>
-                </div>
-            </div>
-        </div>
-        """
-        tiles_html += tile
-
+    tiles_html = ''.join([res['tile'] for res in results])
     st.markdown(f'<div class="deed-tile-wrapper">{tiles_html}</div>', unsafe_allow_html=True)
