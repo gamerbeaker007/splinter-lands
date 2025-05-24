@@ -55,6 +55,7 @@ def add_deed_type(row):
     territory_name = row['territory']
     region_name = row['region_name']
     worksite_type = row['worksite_type']
+    plot_id = row['plot_id']
 
     if magical_type:
         card_img = f'{BASE_URL}/{deed_type.lower()}_{plot_status}_{magical_type}_{rarity}.jpg'
@@ -77,15 +78,19 @@ def add_deed_type(row):
     plot_img = f'<img src="{land_plot_icon_url}" alt="plot" {icon_style}>'
 
     # Inject dynamic background URL via inline style
-    return f"""<div class="deed-type-card" style="background-image: url('{card_img}');">
-        <div class="deed-overlay">
-            {image_html}
-            <div><strong>{deed_type}</strong></div>
-            <div>{territory_name} | {region_name}</div>
-            <div class="location">
-                {region_img} {region_number}
-                {tract_img} {tract_number}
-                {plot_img} {plot_number}
+    url = f"https://splinterlands.com/land/overview/praetoria/{int(tract_number)}/{int(plot_id)}"
+
+    return f"""<a href="{url}" target="_blank" style="text-decoration: none;">
+        <div class="deed-type-card" style="background-image: url('{card_img}');">
+            <div class="deed-overlay">
+                {image_html}
+                <div><strong>{deed_type}</strong></div>
+                <div>{territory_name} | {region_name}</div>
+                <div class="location">
+                    {region_img} {region_number}
+                    {tract_img} {tract_number}
+                    {plot_img} {plot_number}
+                </div>
             </div>
         </div>
-    </div>"""
+    </a>"""

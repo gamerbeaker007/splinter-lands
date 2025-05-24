@@ -6,8 +6,8 @@ from src.utils.resource_util import reorder_column, get_price
 
 log = configure_logger(__name__)
 
-transaction_fee = 0.90  # 10% fee
-taxes_fee = 0.90  # 10% fee
+conversion_fee = 0.90  # 10% conversion fee
+tax_fee = 0.90  # 10% fee
 
 # Initialize session state for selections
 for key in ['region_uid', 'tract_number', 'plot_number']:
@@ -28,6 +28,9 @@ def reset_on_change(_key):
 
 
 def get_resource_cost(df, resource_pool_metric, prices_df):
+    max_cols = 3
+    total_net_dec = 0
+
     st.markdown("## Calculate DEC cost/earnings")
 
     df = df.groupby(['token_symbol']).agg(
@@ -37,13 +40,23 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
             'rewards_per_hour': 'sum'
         }).reset_index()
 
-    max_cols = 3
-
-    taxes_fee_txt = "Include taxes(10%) and conversion fees (10%)"
     if 'taxes_fee' not in st.session_state:
         st.session_state.taxes_fee = True
+    st.session_state.taxes_fee = st.checkbox(
+        "Include taxes(10%)",
+        value=st.session_state.taxes_fee,
+        help="10% Taxes are deducted from the produced amount"
+    )
 
-    st.session_state.taxes_fee = st.checkbox(taxes_fee_txt, value=st.session_state.taxes_fee)
+    if 'conversion_fee' not in st.session_state:
+        st.session_state.conversion_fee = True
+    st.session_state.conversion_fee = st.checkbox(
+        "Conversion fees (10%)",
+        value=st.session_state.conversion_fee,
+        help="10% conversion fees are applied when converting the produced resource to DEC (Trade Hub fee)"
+    )
+
+    placeholder = st.empty()
 
     cols = st.columns(max_cols)
     df = reorder_column(df)
@@ -54,35 +67,44 @@ def get_resource_cost(df, resource_pool_metric, prices_df):
             base_pp = row['total_base_pp_after_cap']
             boosted_pp = row['total_harvest_pp']
             rewards_per_hour = row['rewards_per_hour']
-            add_research_production_cost(base_pp,
-                                         boosted_pp,
-                                         rewards_per_hour,
-                                         resource,
-                                         resource_pool_metric,
-                                         prices_df,
-                                         st.session_state.taxes_fee)
+            net_dec = add_research_production_cost(base_pp,
+                                                   boosted_pp,
+                                                   rewards_per_hour,
+                                                   resource,
+                                                   resource_pool_metric,
+                                                   prices_df,
+                                                   st.session_state.taxes_fee,
+                                                   st.session_state.conversion_fee)
+            if net_dec:
+                total_net_dec += net_dec
+
+    placeholder.markdown(f"""
+    <div style='font-size: 1.5em; font-weight: bold; margin-bottom: 5px;'>
+        {icon_html(resource_icon_map['DEC'], width=75, height=75)}
+        Total Net Positive DEC: {round(total_net_dec, 3)} /hr</div>
+    """, unsafe_allow_html=True)
 
 
-def calculate_fees(tax_fee, total_dec_earning):
-    if tax_fee:
-        total_dec_earning = total_dec_earning * transaction_fee
+def calculate_conversion_fees(include_conversion_fee, total_dec_earning):
+    if include_conversion_fee:
+        total_dec_earning = total_dec_earning * conversion_fee
         extra_txt = "<span style='color:gray'>(incl. fees)</span><br>"
     else:
         extra_txt = "<br>"
     return extra_txt, total_dec_earning
 
 
-def calculate_taxes(production, tax_fee):
-    if tax_fee:
-        production = production * taxes_fee
+def calculate_tax_fee(production, include_tax_fee):
+    if include_tax_fee:
+        production = production * tax_fee
         extra_txt = "<span style='color:gray'>(incl. taxes)</span><br>"
     else:
         extra_txt = "<br>"
     return extra_txt, production
 
 
-def icon_html(icon_url):
-    return f"<img src='{icon_url}' width='20' height='20' style='vertical-align:middle;'/>"
+def icon_html(icon_url, width=20, height=20):
+    return f"<img src='{icon_url}' width='{width}' height='{height}' style='vertical-align:middle;'/>"
 
 
 def add_research_production_cost(base_pp,
@@ -91,7 +113,8 @@ def add_research_production_cost(base_pp,
                                  resource,
                                  metrics_df,
                                  priced_df,
-                                 tax_fee):
+                                 include_tax_fee,
+                                 include_conversion_fee):
     consume_list = ['GRAIN']
     # There is always a grain cost
     costs = {
@@ -133,14 +156,14 @@ def add_research_production_cost(base_pp,
     # Total DEC
     total_dec_cost = sum(dec_costs.values())
     total_dec_earning = get_price(metrics_df, priced_df, resource, rewards_per_hour)
-    extra_txt, total_dec_earning = calculate_fees(tax_fee, total_dec_earning)
+    extra_txt, total_dec_earning = calculate_conversion_fees(include_conversion_fee, total_dec_earning)
 
     earning_txt = (f"<h8>{icon_html(resource_icon_map['DEC'])} DEC Earning: {round(total_dec_earning, 3)} /hr"
                    f"{extra_txt}</h8>")
 
     production_txt = ""
     if rewards_per_hour:
-        extra_txt, production = calculate_taxes(rewards_per_hour, tax_fee)
+        extra_txt, production = calculate_tax_fee(rewards_per_hour, include_tax_fee)
         production_txt = (f"<h8>{icon_html(resource_icon_map[resource])}"
                           f" {resource} Production {round(production, 3)} /hr"
                           f"{extra_txt}</h8>")
@@ -175,3 +198,4 @@ def add_research_production_cost(base_pp,
         <h8>{icon_html(resource_icon_map['DEC'])}Net Positive DEC: {round(total_dec_earning - total_dec_cost, 3)} /hr
         <span style='color:gray'>(earn-cost)</span><br></h8>
         """, unsafe_allow_html=True)
+    return total_dec_earning - total_dec_cost

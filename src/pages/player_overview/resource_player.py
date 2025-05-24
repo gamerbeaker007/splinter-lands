@@ -28,10 +28,12 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
     st.session_state.include_taxes = st.checkbox(
         "Include taxes (10%)",
         value=st.session_state.include_taxes,
+        help="10% Taxes are deducted from the produced amount",
         key="region_overview_taxes"
     )
     st.session_state.include_fee = st.checkbox(
         "Include transfer fees (12.5%)",
+        help="Negative DEC resources include a 12.5% fee to cover transfer costs.",
         value=st.session_state.include_fee
     )
 

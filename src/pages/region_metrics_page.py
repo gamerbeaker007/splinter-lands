@@ -1,6 +1,7 @@
 import streamlit as st
 
-from src.pages.region_metrics import overall_region_info, region_header, filter_section, main_container
+from src.pages.region_metrics import overall_region_info, region_header, main_container
+from src.pages.components import filter_section
 from src.utils.data_loader import load_cached_data, get_last_updated, merge_with_details
 from src.utils.log_util import configure_logger
 
