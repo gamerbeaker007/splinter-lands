@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 
 
+@st.cache_data(ttl='1h')
 def add_ranking_barchart(df, player, column_name):
     # Sort by the selected column
     df_sorted = df.sort_values(by=column_name, ascending=False).reset_index(drop=True)

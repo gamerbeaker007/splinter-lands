@@ -1,9 +1,9 @@
-import streamlit as st
 from src.graphs.land_ranking_graphs import add_ranking_barchart
 
 
-@st.cache_data(ttl='1h')
 def add_ranking_overview(df, player):
+    df = df[['player', 'deed_uid', 'total_harvest_pp', 'total_base_pp_after_cap', 'rewards_per_hour']].copy()
+
     df = df.groupby(['player']).agg(
         {
             'deed_uid': 'count',
