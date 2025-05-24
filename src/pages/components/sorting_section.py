@@ -6,7 +6,7 @@ SORT_OPTIONS = {
     "Plot Number": "plot_number",
     "RAW PP": "total_base_pp_after_cap",
     "BOOSTED  PP": "total_harvest_pp",
-    "Percentage complete": "percentage_done",
+    "Percentage full/complete": "percentage_done",
 }
 SORT_KEYS = ["sort_by", "sort_ascending"]
 
