@@ -4,3 +4,6 @@
 runOnSave = true
 headless = true
 fileWatcherType = "poll"
+
+[logger]
+level="error"

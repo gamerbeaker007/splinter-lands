@@ -2,7 +2,6 @@ import concurrent.futures
 
 import pandas as pd
 import streamlit as st
-from streamlit.runtime.scriptrunner_utils.script_run_context import add_script_run_ctx
 
 from src.api import spl
 from src.pages.player_overview.components.biome import add_biome_boosts, biome_style
@@ -169,13 +168,10 @@ def get_player_deed_overview(df: pd.DataFrame):
 
     # Process deeds concurrently
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-        futures = []
-        for _, row in df.iterrows():
-            future = executor.submit(process_deed_row, row, include_taxes_deeds)
-            add_script_run_ctx(future)  # This attaches the Streamlit context to the thread
-            futures.append(future)
-
-        results = [future.result() for future in futures]
+        results = list(executor.map(
+            lambda row: process_deed_row(row, include_taxes_deeds),
+            [row for _, row in df.iterrows()]
+        ))
 
     tiles_html = ''.join([res['tile'] for res in results])
     st.markdown(f'<div class="deed-tile-wrapper">{tiles_html}</div>', unsafe_allow_html=True)
