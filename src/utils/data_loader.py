@@ -1,14 +1,18 @@
 import asyncio
 import gc
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 import pandas as pd
 
 from src.api import spl
 from src.api.db import resource_tracking, resource_metrics, active_metrics
-from src.static.static_values_enum import LEADERBOARD_RESOURCES
+from src.pages.player_overview.resource_player import prepare_summary
+from src.static.static_values_enum import LEADERBOARD_RESOURCES, PRODUCING_RESOURCES
 from src.utils.log_util import configure_logger
+from src.utils.resource_util import get_price
 
 log = configure_logger(__name__)
 
@@ -22,6 +26,79 @@ def save_partial(category, df, suffix):
     os.makedirs(DATA_PARTIAL_DIR, exist_ok=True)
     filename = os.path.join(DATA_PARTIAL_DIR, f"{category}_{suffix}.parquet")
     df.to_parquet(filename, index=False)
+
+
+def process_player(player, temp_df, unit_prices):
+    summary_df = prepare_summary(temp_df, True, True)
+
+    dec_net = {}
+    total_dec = 0
+    for key in PRODUCING_RESOURCES:
+        k = key.lower()
+        amount = summary_df[f"adj_net_{k}"].sum()
+        dec_value = unit_prices[k] * amount
+        dec_net[f"dec_{k}"] = dec_value
+        total_dec += dec_value
+
+    harvest_sum = temp_df['total_harvest_pp'].sum()
+    base_sum = temp_df['total_base_pp_after_cap'].sum()
+    count_sum = temp_df['count'].sum()
+
+    return {
+        'player': player,
+        'total_harvest_pp': harvest_sum,
+        'total_base_pp_after_cap': base_sum,
+        'count': count_sum,
+        'total_dec': total_dec,
+        **dec_net
+    }
+
+
+def create_dec_earning_df(df, plt=None):
+    log.info(os.cpu_count())
+
+    log.info("Start Processing DEC...")
+
+    metrics_df = spl.get_land_resources_pools()
+    prices_df = spl.get_prices()
+
+    grouped_df = df.groupby(["region_uid", 'token_symbol', 'player']).agg(
+        {'total_harvest_pp': 'sum',
+         'total_base_pp_after_cap': 'sum',
+         'rewards_per_hour': 'sum'}
+    ).reset_index()
+
+    token_counts = (
+        df.groupby(['region_uid', 'token_symbol', 'player'])
+        .agg(count=('token_symbol', 'count'))
+        .reset_index()
+    )
+
+    grouped_df = grouped_df.merge(token_counts, on=["region_uid", 'token_symbol', 'player'], how='left')
+
+    unit_prices = {
+        key.lower(): get_price(metrics_df, prices_df, key, 1)
+        for key in PRODUCING_RESOURCES
+    }
+
+    log.info(f'unique land owners {len(df.player.unique().tolist())}')
+    df = df.loc[df.total_harvest_pp > 0]
+    log.info(f'unique active land owners {len(df.player.unique().tolist())}')
+
+    start_time = time.time()
+    summary_rows = []
+    log.info("Start Threads.....")
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = []
+        for player, temp_df in grouped_df.groupby("player"):
+            futures.append(executor.submit(process_player, player, temp_df, unit_prices))
+        for future in futures:
+            summary_rows.append(future.result())
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    log.info(f"Processing with Thread completed in {elapsed_time:.2f} seconds.")
+    return pd.DataFrame(summary_rows)
 
 
 async def fetch_all_region_data():
@@ -58,17 +135,20 @@ async def fetch_all_region_data():
         [pd.read_parquet(f"{DATA_PARTIAL_DIR}/resource_leaderboard_{res}.parquet") for res in LEADERBOARD_RESOURCES]
     )
 
-    data_dict = {
-        'deeds': deeds_df,
-        'worksite_details': worksite_df,
-        'staking_details': staking_df,
-        'resource_leaderboard': resource_leaderboards
-    }
-
     df = merge_with_details(deeds_df, worksite_df, staking_df)
     resource_tracking.upload_daily_resource_metrics(df, resource_leaderboards)
     resource_metrics.upload_land_resources_info()
     active_metrics.upload_daily_active_metrics(df)
+
+    dec_df = create_dec_earning_df(df)
+
+    data_dict = {
+        'deeds': deeds_df,
+        'worksite_details': worksite_df,
+        'staking_details': staking_df,
+        'resource_leaderboard': resource_leaderboards,
+        'resource_net_dec': dec_df
+    }
 
     save_data(data_dict)
 
