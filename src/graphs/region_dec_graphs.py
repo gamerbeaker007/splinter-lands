@@ -113,3 +113,69 @@ def add_plots_vs_dec(df):
     )
 
     st.plotly_chart(fig)
+
+
+def add_lpe_base_rank_plot(df, highlight_player=None):
+    highlight_enabled = highlight_player in df['player'].values
+
+    # Define fill colors and border logic
+    fill_colors = []
+    border_colors = []
+
+    for player in df['player']:
+        if not highlight_enabled:
+            fill_colors.append('steelblue')
+            border_colors.append('white')
+        else:
+            if player == highlight_player:
+                fill_colors.append('red')
+                border_colors.append('white')
+            else:
+                fill_colors.append('rgba(0,0,0,0)')  # Transparent
+                border_colors.append('white')
+
+    fig = go.Figure()
+
+    # Main bubble trace
+    fig.add_trace(go.Scatter(
+        x=df['LPE_ratio_base'],
+        y=df['LPE_base_rank'],
+        mode='markers',
+        marker=dict(
+            size=df['total_base_pp_after_cap'] / 1000000,
+            sizemode='area',
+            sizeref=2. * max(df['total_base_pp_after_cap'] / 1000000) / (100. ** 2),
+            sizemin=4,
+            color=fill_colors,
+            line=dict(width=2, color=border_colors)
+        ),
+        text=df['player'],
+        customdata=df[['total_base_pp_after_cap']],
+        hovertemplate="<b>%{text}</b><br>LPE_base: %{x:.2f}<br>Rank: %{y}<br>Base PP: %{customdata[0]:,.0f}",
+        name='Players'
+    ))
+
+    # Add bubble size legend (fake markers)
+    for label, value in zip(['1M', '5M', '10M'], [1_000_000, 5_000_000, 10_000_000]):
+        fig.add_trace(go.Scatter(
+            x=[None], y=[None],
+            mode='markers',
+            marker=dict(
+                size=value / 100000,
+                color='lightgray',
+                line=dict(width=2, color='white'),
+                sizemode='area',
+                sizeref=2. * max(df['total_base_pp_after_cap'] / 1000000) / (100. ** 2),
+            ),
+            showlegend=True,
+            name=f'{label} PP'
+        ))
+
+    fig.update_layout(
+        title='LPE Base vs Rank (Bubble = Base PP)',
+        xaxis_title='LPE_ratio_base',
+        yaxis_title='LPE_base_rank',
+        yaxis_autorange='reversed'  # So rank 1 is at the top
+    )
+
+    st.plotly_chart(fig)

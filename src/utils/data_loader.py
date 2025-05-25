@@ -54,13 +54,17 @@ def process_player(player, temp_df, unit_prices):
     }
 
 
-def create_dec_earning_df(df, plt=None):
+def create_dec_earning_df(df):
     log.info(os.cpu_count())
 
     log.info("Start Processing DEC...")
 
     metrics_df = spl.get_land_resources_pools()
     prices_df = spl.get_prices()
+
+    # filter out inactive deeds
+    df = df.loc[df.total_harvest_pp > 0]
+    log.info(f'unique active land owners {len(df.player.unique().tolist())}')
 
     grouped_df = df.groupby(["region_uid", 'token_symbol', 'player']).agg(
         {'total_harvest_pp': 'sum',
@@ -80,10 +84,6 @@ def create_dec_earning_df(df, plt=None):
         key.lower(): get_price(metrics_df, prices_df, key, 1)
         for key in PRODUCING_RESOURCES
     }
-
-    log.info(f'unique land owners {len(df.player.unique().tolist())}')
-    df = df.loc[df.total_harvest_pp > 0]
-    log.info(f'unique active land owners {len(df.player.unique().tolist())}')
 
     start_time = time.time()
     summary_rows = []
