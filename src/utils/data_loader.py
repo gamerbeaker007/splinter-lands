@@ -145,7 +145,10 @@ async def fetch_all_region_data():
             future.result()  # Ensures exceptions are raised
 
     with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = {executor.submit(process_leaderboard_resource, resource): resource for resource in LEADERBOARD_RESOURCES}
+        futures = {executor.submit(
+            process_leaderboard_resource,
+            resource
+        ): resource for resource in LEADERBOARD_RESOURCES}
 
         for future in as_completed(futures):
             result = future.result()
