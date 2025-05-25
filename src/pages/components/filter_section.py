@@ -1,33 +1,51 @@
+from enum import Enum
+
 import streamlit as st
 
 from src.utils.log_util import configure_logger
 
-FILTER_KEYS = [
-    "filter_regions", "filter_tracts", "filter_plots",
-    "filter_rarity", "filter_resources", "filter_worksites",
-    "filter_deed_type", "filter_plot_status", "filter_players",
-    "filter_developed", "filter_under_construction"
-]
+
+class FilterKey(str, Enum):
+    REGIONS = "filter_regions"
+    TRACTS = "filter_tracts"
+    PLOTS = "filter_plots"
+    RARITY = "filter_rarity"
+    RESOURCES = "filter_resources"
+    WORKSITES = "filter_worksites"
+    DEED_TYPE = "filter_deed_type"
+    PLOT_STATUS = "filter_plot_status"
+    PLAYERS = "filter_players"
+    DEVELOPED = "filter_developed"
+    UNDER_CONSTRUCTION = "filter_under_construction"
+
+# Mapping of filter keys to column names
+SESSION_FILTER_COLUMNS = {
+    FilterKey.REGIONS: "region_uid",
+    FilterKey.TRACTS: "tract_number",
+    FilterKey.PLOTS: "plot_number",
+    FilterKey.RARITY: "rarity",
+    FilterKey.RESOURCES: "token_symbol",
+    FilterKey.WORKSITES: "worksite_type",
+    FilterKey.DEED_TYPE: "deed_type",
+    FilterKey.PLOT_STATUS: "plot_status",
+    FilterKey.PLAYERS: "player",
+}
 
 log = configure_logger(__name__)
 
 
-def apply_filters(df):
-    df = filter_by_session(df, "filter_regions", "region_uid")
-    df = filter_by_session(df, "filter_tracts", "tract_number")
-    df = filter_by_session(df, "filter_plots", "plot_number")
-    df = filter_by_session(df, "filter_rarity", "rarity")
-    df = filter_by_session(df, "filter_resources", "token_symbol")
-    df = filter_by_session(df, "filter_worksites", "worksite_type")
-    df = filter_by_session(df, "filter_deed_type", "deed_type")
-    df = filter_by_session(df, "filter_plot_status", "plot_status")
-    df = filter_by_session(df, "filter_players", "player")
+def apply_filters(df, only: list[FilterKey] | None = None):
+    filters = set(only) if only is not None else set(FilterKey)
 
-    if st.session_state.get("filter_developed"):
+    for key, column in SESSION_FILTER_COLUMNS.items():
+        if key in filters:
+            df = filter_by_session(df, key.value, column)
+
+    if FilterKey.DEVELOPED in filters and st.session_state.get(FilterKey.DEVELOPED.value):
         df = df[(df["worksite_type"].isna() | (df["worksite_type"] == ""))]
 
-    if st.session_state.get("filter_under_construction"):
-        df = df[df["is_construction_worksite_details"].fillna(False).copy()]
+    if FilterKey.UNDER_CONSTRUCTION in filters and st.session_state.get(FilterKey.UNDER_CONSTRUCTION.value):
+        df = df[df["is_construction_worksite_details"].fillna(False)]
 
     return df
 
@@ -40,8 +58,8 @@ def filter_by_session(df, session_key, column_name):
 
 
 def reset_filters():
-    for key in FILTER_KEYS:
-        st.session_state.pop(key, None)
+    for key in FilterKey:
+        st.session_state.pop(key.value, None)
 
 
 def get_valid_session_values(key, valid_options):
