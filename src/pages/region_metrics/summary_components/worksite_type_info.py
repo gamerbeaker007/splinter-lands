@@ -5,9 +5,11 @@ from src.static.static_values_enum import worksite_type_mapping
 
 def print_worksite_types(df):
     worksite_types = df['worksite_type'].value_counts().reset_index()
+    worksite_types.columns = ['worksite_type', 'count']
 
     ordered_keys = list(worksite_type_mapping.keys())
-    worksite_types = worksite_types[worksite_types['worksite_type'].isin(ordered_keys)]
+    worksite_types = worksite_types[worksite_types['worksite_type'].isin(ordered_keys)].copy()
+
     worksite_types['sort_order'] = worksite_types['worksite_type'].apply(lambda x: ordered_keys.index(x))
     worksite_types = worksite_types.sort_values('sort_order')
 

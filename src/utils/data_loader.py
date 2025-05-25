@@ -97,7 +97,8 @@ def create_dec_earning_df(df):
         for i, future in enumerate(futures, start=1):
             result = future.result()
             summary_rows.append(result)
-            log.info(f"Progress: {i}/{total} players processed")
+            if i % 100 == 0 or i == total:
+                log.info(f"Progress: {i}/{total} players processed")
 
     end_time = time.time()
     elapsed_time = end_time - start_time

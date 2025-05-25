@@ -189,7 +189,6 @@ def create_tax_income_chart(df, title):
         title=title,
         xaxis_title="Token Symbol",
         yaxis_title="Tax Income",
-        template="plotly_white",
         legend=dict(
             orientation='h',
             yanchor='bottom',
