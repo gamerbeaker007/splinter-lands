@@ -78,7 +78,7 @@ def add_deed_type(row):
     plot_img = f'<img src="{land_plot_icon_url}" alt="plot" {icon_style}>'
 
     # Inject dynamic background URL via inline style
-    url = f"https://splinterlands.com/land/overview/praetoria/{int(tract_number)}/{int(plot_id)}"
+    url = f"https://splinterlands.com/land/overview/praetoria/{int(region_number)}/{int(plot_id)}"
 
     return f"""<a href="{url}" target="_blank" style="text-decoration: none;">
         <div class="deed-type-card" style="background-image: url('{card_img}');">
