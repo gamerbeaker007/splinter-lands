@@ -115,19 +115,28 @@ def add_plots_vs_dec(df):
     st.plotly_chart(fig)
 
 
-def add_lpe_base_rank_plot(df, highlight_player=None):
+def add_ratio_rank_plot(
+    df,
+    x_column: str,
+    y_column: str,
+    highlight_player: str = None,
+    title: str = "Ratio vs Rank (Bubble = Base PP)",
+    xaxis_title: str = "Ratio",
+    yaxis_title: str = "Rank",
+    hover_label: str = "Ratio",
+    customdata_column: str = "total_base_pp_after_cap"
+):
     highlight_enabled = highlight_player in df['player'].values
     if highlight_player and not highlight_enabled:
         st.warning(f"Hive name '{highlight_player}' not found (note only one name can be entered)")
 
-    # Replace inf with NaN and drop rows with invalid LPE
-    df['LPE_ratio_base'] = df['LPE_ratio_base'].replace([np.inf, -np.inf], np.nan)
-    df = df.dropna(subset=['LPE_ratio_base'])
+    # Clean up ratio column
+    df[x_column] = df[x_column].replace([np.inf, -np.inf], np.nan)
+    df = df.dropna(subset=[x_column])
 
-    # Define fill colors and border logic
+    # Define fill and border colors
     fill_colors = []
     border_colors = []
-
     for player in df['player']:
         if not highlight_enabled:
             fill_colors.append('steelblue')
@@ -140,70 +149,72 @@ def add_lpe_base_rank_plot(df, highlight_player=None):
                 fill_colors.append('rgba(0,0,0,0)')  # Transparent
                 border_colors.append('white')
 
+    # Plot setup
     fig = go.Figure()
+    size_column = df['total_base_pp_after_cap'] / 1_000_000
+    sizeref_val = 2. * max(size_column) / (100. ** 2)
 
-    # Main bubble trace
+    # Bubble trace
     fig.add_trace(go.Scatter(
-        x=df['LPE_ratio_base'],
-        y=df['LPE_base_rank'],
+        x=df[x_column],
+        y=df[y_column],
         mode='markers',
         marker=dict(
-            size=df['total_base_pp_after_cap'] / 1000000,
+            size=size_column,
             sizemode='area',
-            sizeref=2. * max(df['total_base_pp_after_cap'] / 1000000) / (100. ** 2),
+            sizeref=sizeref_val,
             sizemin=4,
             color=fill_colors,
             line=dict(width=2, color=border_colors)
         ),
         text=df['player'],
-        customdata=df[['total_base_pp_after_cap']],
-        hovertemplate="<b>%{text}</b><br>LPE_base: %{x:.2f}<br>Rank: %{y}<br>Base PP: %{customdata[0]:,.0f}",
+        customdata=df[[customdata_column]],
+        hovertemplate=f"<b>%{{text}}</b><br>{hover_label}: %{{x:.2f}}<br>Rank: %{{y}}<br>Base PP: %{{customdata[0]:,.0f}}",
         name='Players'
     ))
 
-    # Add bubble size legend (fake markers)
+    # Bubble size legend
     for label, value in zip(['1M', '5M', '10M'], [1_000_000, 5_000_000, 10_000_000]):
         fig.add_trace(go.Scatter(
             x=[None], y=[None],
             mode='markers',
             marker=dict(
-                size=value / 100000,
+                size=value / 100_000,
                 color='lightgray',
                 line=dict(width=2, color='white'),
                 sizemode='area',
-                sizeref=2. * max(df['total_base_pp_after_cap'] / 1000000) / (100. ** 2),
+                sizeref=sizeref_val,
             ),
             showlegend=True,
             name=f'{label} PP'
         ))
 
+    # Highlight player lines
     if highlight_enabled:
         player_row = df[df['player'] == highlight_player].iloc[0]
-        x_val = player_row['LPE_ratio_base']
-        y_val = player_row['LPE_base_rank']
+        x_val = player_row[x_column]
+        y_val = player_row[y_column]
 
-        # Add vertical line
         fig.add_shape(
             type="line",
             x0=x_val, x1=x_val,
-            y0=df['LPE_base_rank'].min(), y1=df['LPE_base_rank'].max(),
+            y0=df[y_column].min(), y1=df[y_column].max(),
             line=dict(color="red", width=2, dash="dash"),
             layer="below"
         )
 
-        # Add horizontal line
         fig.add_shape(
             type="line",
-            x0=df['LPE_ratio_base'].min(), x1=df['LPE_ratio_base'].max(),
+            x0=df[x_column].min(), x1=df[x_column].max(),
             y0=y_val, y1=y_val,
             line=dict(color="red", width=2, dash="dash"),
             layer="below"
         )
 
     fig.update_layout(
-        title='LPE Base vs Rank (Bubble = Base PP)',
-        xaxis_title='LPE_ratio_base',
-        yaxis_title='LPE_base_rank',
+        title=title,
+        xaxis_title=xaxis_title,
+        yaxis_title=yaxis_title,
     )
 
     st.plotly_chart(fig)
