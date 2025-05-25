@@ -63,6 +63,7 @@ def create_dec_earning_df(df):
     prices_df = spl.get_prices()
 
     # filter out inactive deeds
+    log.info(f'unique land owners {len(df.player.unique().tolist())}')
     df = df.loc[df.total_harvest_pp > 0]
     log.info(f'unique active land owners {len(df.player.unique().tolist())}')
 
