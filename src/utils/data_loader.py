@@ -2,7 +2,7 @@ import asyncio
 import gc
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
 import pandas as pd
@@ -55,8 +55,6 @@ def process_player(player, temp_df, unit_prices):
 
 
 def create_dec_earning_df(df):
-    log.info(os.cpu_count())
-
     log.info("Start Processing DEC...")
 
     metrics_df = spl.get_land_resources_pools()
@@ -89,12 +87,17 @@ def create_dec_earning_df(df):
     start_time = time.time()
     summary_rows = []
     log.info("Start Threads.....")
+
     with ThreadPoolExecutor(max_workers=20) as executor:
         futures = []
         for player, temp_df in grouped_df.groupby("player"):
             futures.append(executor.submit(process_player, player, temp_df, unit_prices))
-        for future in futures:
-            summary_rows.append(future.result())
+
+        total = len(futures)
+        for i, future in enumerate(futures, start=1):
+            result = future.result()
+            summary_rows.append(result)
+            log.info(f"Progress: {i}/{total} players processed")
 
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -102,8 +105,8 @@ def create_dec_earning_df(df):
     return pd.DataFrame(summary_rows)
 
 
-async def fetch_all_region_data():
-    for region_number in range(1, 151):
+def process_region(region_number):
+    try:
         log.info(f'fetching data for region: {region_number}')
         deed, worksite_details, staked_details = spl.get_land_region_details(region_number)
 
@@ -113,14 +116,40 @@ async def fetch_all_region_data():
 
         del deed, worksite_details, staked_details
         gc.collect()
+    except Exception as e:
+        log.error(f"Error processing region {region_number}: {e}")
 
-    for resource in LEADERBOARD_RESOURCES:
-        log.info(f'fetching leaderboard data for resource: {resource}')
+
+def process_leaderboard_resource(resource):
+    try:
+        log.info(f'Fetching leaderboard data for resource: {resource}')
         leaderboard_df = spl.get_resource_leaderboard(resource)
         leaderboard_df['resource'] = resource
+
         save_partial("resource_leaderboard", leaderboard_df, resource)
+
         del leaderboard_df
         gc.collect()
+
+        return f"Resource {resource} processed successfully"
+    except Exception as e:
+        log.error(f"Error processing resource {resource}: {e}")
+        return f"Resource {resource} failed: {e}"
+
+
+async def fetch_all_region_data():
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = [executor.submit(process_region, region_number) for region_number in range(1, 151)]
+
+        for future in as_completed(futures):
+            future.result()  # Ensures exceptions are raised
+
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = {executor.submit(process_leaderboard_resource, resource): resource for resource in LEADERBOARD_RESOURCES}
+
+        for future in as_completed(futures):
+            result = future.result()
+            log.info(result)
 
     # Concatenate only for final merge/processing
     deeds_df = pd.concat(

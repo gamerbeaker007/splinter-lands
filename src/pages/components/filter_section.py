@@ -17,6 +17,7 @@ class FilterKey(str, Enum):
     PLAYERS = "filter_players"
     DEVELOPED = "filter_developed"
     UNDER_CONSTRUCTION = "filter_under_construction"
+    HAS_PP = "filter_has_pp"
 
 
 # Mapping of filter keys to column names
@@ -48,6 +49,9 @@ def apply_filters(df, only: list[FilterKey] | None = None):
     if FilterKey.UNDER_CONSTRUCTION in filters and st.session_state.get(FilterKey.UNDER_CONSTRUCTION.value):
         df = df[df["is_construction_worksite_details"].fillna(False)]
 
+    if FilterKey.HAS_PP in filters and st.session_state.get(FilterKey.HAS_PP.value):
+        df = df[df["total_harvest_pp"] > 0]
+
     return df
 
 
@@ -75,15 +79,15 @@ def render_location_filters(df, only):
         all_plots = df.plot_number.dropna().unique().tolist()
 
         with st.expander("📍 Location Filters", expanded=False):
-            if FilterKey.REGIONS in (only or []):
+            if only is None or FilterKey.REGIONS in only:
                 st.multiselect("Regions", options=all_regions,
                                key="filter_regions",
                                default=get_valid_session_values("filter_regions", all_regions))
-            if FilterKey.TRACTS in (only or []):
+            if only is None or FilterKey.TRACTS in only:
                 st.multiselect("Tracts", options=all_tracts,
                                key="filter_tracts",
                                default=get_valid_session_values("filter_tracts", all_tracts))
-            if FilterKey.PLOTS in (only or []):
+            if only is None or FilterKey.PLOTS in only:
                 st.multiselect("Plots", options=all_plots,
                                key="filter_plots",
                                default=get_valid_session_values("filter_plots", all_plots))
@@ -93,7 +97,8 @@ def render_attribute_filters(df, only):
     if only is None or any(k in only for k in [
         FilterKey.RARITY, FilterKey.RESOURCES, FilterKey.WORKSITES,
         FilterKey.DEED_TYPE, FilterKey.PLOT_STATUS,
-        FilterKey.DEVELOPED, FilterKey.UNDER_CONSTRUCTION
+        FilterKey.DEVELOPED, FilterKey.UNDER_CONSTRUCTION,
+        FilterKey.HAS_PP,
     ]):
         all_rarity = df.rarity.dropna().unique().tolist()
         all_resources = df.token_symbol.dropna().unique().tolist()
@@ -102,41 +107,45 @@ def render_attribute_filters(df, only):
         all_plot_status = df.plot_status.dropna().unique().tolist()
 
         with st.expander("🔎 Attributes", expanded=False):
-            if FilterKey.RARITY in (only or []):
+            if only is None or FilterKey.RARITY in only:
                 st.multiselect("Rarity", options=all_rarity,
                                key="filter_rarity",
                                default=get_valid_session_values("filter_rarity", all_rarity))
-            if FilterKey.RESOURCES in (only or []):
+            if only is None or FilterKey.RESOURCES in only:
                 st.multiselect("Resources", options=all_resources,
                                key="filter_resources",
                                default=get_valid_session_values("filter_resources", all_resources))
-            if FilterKey.WORKSITES in (only or []):
+            if only is None or FilterKey.WORKSITES in only:
                 st.multiselect("Worksites", options=all_worksites,
                                key="filter_worksites",
                                default=get_valid_session_values("filter_worksites", all_worksites))
-            if FilterKey.DEED_TYPE in (only or []):
+            if only is None or FilterKey.DEED_TYPE in only:
                 st.multiselect("Deed Type", options=all_deed_type,
                                key="filter_deed_type",
                                default=get_valid_session_values("filter_deed_type", all_deed_type))
-            if FilterKey.PLOT_STATUS in (only or []):
+            if only is None or FilterKey.PLOT_STATUS in only:
                 st.multiselect("Plot Status", options=all_plot_status,
                                key="filter_plot_status",
                                default=get_valid_session_values("filter_plot_status", all_plot_status))
-            if FilterKey.DEVELOPED in (only or []):
+            if only is None or FilterKey.DEVELOPED in only:
                 st.checkbox("Undeveloped", key="filter_developed",
                             value=st.session_state.get("filter_developed", False))
-            if FilterKey.UNDER_CONSTRUCTION in (only or []):
+            if only is None or FilterKey.UNDER_CONSTRUCTION in only:
                 st.checkbox("Under Construction", key="filter_under_construction",
                             value=st.session_state.get("filter_under_construction", False))
+            if only is None or FilterKey.HAS_PP in only:
+                st.checkbox("Has PP", key="filter_has_pp",
+                            value=st.session_state.get("filter_has_pp", False))
 
 
 def render_player_filters(df, only):
     if only is None or FilterKey.PLAYERS in only:
         all_players = sorted(df.player.dropna().unique().tolist())
         with st.expander("🧑 Players", expanded=False):
-            st.multiselect("Players", options=all_players,
-                           key="filter_players",
-                           default=get_valid_session_values("filter_players", all_players))
+            if only is None or FilterKey.PLAYERS in only:
+                st.multiselect("Players", options=all_players,
+                               key="filter_players",
+                               default=get_valid_session_values("filter_players", all_players))
 
 
 def get_page(df, only: list[FilterKey] | None = None):

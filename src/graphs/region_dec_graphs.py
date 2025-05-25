@@ -169,7 +169,8 @@ def add_ratio_rank_plot(
         ),
         text=df['player'],
         customdata=df[[customdata_column]],
-        hovertemplate=f"<b>%{{text}}</b><br>{hover_label}: %{{x:.2f}}<br>Rank: %{{y}}<br>Base PP: %{{customdata[0]:,.0f}}",
+        hovertemplate=f"<b>%{{text}}</b><br>{hover_label}:"
+                      f" %{{x:.2f}}<br>Rank: %{{y}}<br>Base PP: %{{customdata[0]:,.0f}}",
         name='Players'
     ))
 

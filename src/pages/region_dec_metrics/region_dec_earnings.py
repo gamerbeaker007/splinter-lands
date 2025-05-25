@@ -6,7 +6,60 @@ from src.utils.log_util import configure_logger
 log = configure_logger(__name__)
 
 
+# Define display -> column mapping
+metric_options = {
+    "Amount of Plots": "count",
+    "Base PP": "total_base_pp_after_cap",
+    "Boosted PP": "total_harvest_pp"
+}
+
+limit_options = {
+    "Top 100": 100,
+    "Top 500": 500,
+    "Top 1000": 1000,
+    "All (Warning: might slow charts too much)": None
+}
+
+
+def filter_top(df):
+    # Initialize session state
+    if "selected_metric" not in st.session_state:
+        st.session_state.selected_metric = "Amount of Plots"
+    if "selected_limit" not in st.session_state:
+        st.session_state.selected_limit = "Top 500"
+
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        # Metric selector
+        selected_metric = st.selectbox(
+            "Select metric to sort by:",
+            options=list(metric_options.keys()),
+            index=list(metric_options.keys()).index(st.session_state.selected_metric),
+        )
+        st.session_state.selected_metric = selected_metric
+    with col2:
+        # Limit selector
+        selected_limit = st.radio(
+            "Select number of top entries:",
+            options=list(limit_options.keys()),
+            index=list(limit_options.keys()).index(st.session_state.selected_limit),
+            horizontal=True,
+        )
+        st.session_state.selected_limit = selected_limit
+
+    metric_col = metric_options[selected_metric]
+    limit_val = limit_options[selected_limit]
+
+    sorted_df = df.sort_values(by=metric_col, ascending=False)
+    if limit_val is not None:
+        sorted_df = sorted_df.head(limit_val)
+
+    return sorted_df
+
+
 def get_page(df):
+    df = filter_top(df)
+
     tab1, tab2, tab3 = st.tabs([
         "DEC",
         "LCE",
