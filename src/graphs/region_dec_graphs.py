@@ -200,7 +200,6 @@ def add_lpe_base_rank_plot(df, highlight_player=None):
             layer="below"
         )
 
-
     fig.update_layout(
         title='LPE Base vs Rank (Bubble = Base PP)',
         xaxis_title='LPE_ratio_base',
