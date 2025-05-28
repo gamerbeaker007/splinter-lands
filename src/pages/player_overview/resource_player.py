@@ -50,6 +50,9 @@ def prepare_data(df):
     grouped_df = df.groupby(["region_uid", 'token_symbol']).agg(
         {'total_harvest_pp': 'sum',
          'total_base_pp_after_cap': 'sum',
+         'total_dec_stake_needed': 'sum',
+         'total_dec_stake_in_use': 'sum',
+         'total_dec_staked': 'first',
          'rewards_per_hour': 'sum'}
     ).reset_index()
 

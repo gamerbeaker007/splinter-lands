@@ -42,6 +42,10 @@ def process_player(player, temp_df, unit_prices):
 
     harvest_sum = temp_df['total_harvest_pp'].sum()
     base_sum = temp_df['total_base_pp_after_cap'].sum()
+    dec_staked_needed = temp_df['total_dec_stake_needed'].sum()
+    dec_inuse = temp_df['total_dec_stake_in_use'].sum()
+    dec_staked = temp_df.drop_duplicates(subset='region_uid')['total_dec_staked'].sum()
+
     count_sum = temp_df['count'].sum()
 
     return {
@@ -49,6 +53,9 @@ def process_player(player, temp_df, unit_prices):
         'total_harvest_pp': harvest_sum,
         'total_base_pp_after_cap': base_sum,
         'count': count_sum,
+        'total_dec_stake_needed': dec_staked_needed,
+        'total_dec_stake_in_use': dec_inuse,
+        'total_dec_staked': dec_staked,
         'total_dec': total_dec,
         **dec_net
     }
@@ -68,6 +75,9 @@ def create_dec_earning_df(df):
     grouped_df = df.groupby(["region_uid", 'token_symbol', 'player']).agg(
         {'total_harvest_pp': 'sum',
          'total_base_pp_after_cap': 'sum',
+         'total_dec_stake_needed': 'sum',
+         'total_dec_stake_in_use': 'sum',
+         'total_dec_staked': 'first',
          'rewards_per_hour': 'sum'}
     ).reset_index()
 
