@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: spl
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  splinter-lands-app:
+    build: .
+    depends_on:
+      - db
+    volumes:
+      - ./app:/app/app
+      - ./secrets.toml:/app/.streamlit/secrets.toml  # Mount secrets.toml
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+volumes:
+  db_data:
