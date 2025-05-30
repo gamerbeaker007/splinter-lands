@@ -1,11 +1,8 @@
-import os
 import tracemalloc
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from alembic import command
-from alembic.config import Config
 
 from src.utils.log_util import configure_logger
 
@@ -14,26 +11,17 @@ log = configure_logger(__name__)
 project_root = Path.cwd()
 
 
-def run_migrations():
-    alembic_cfg = Config("alembic.ini")
-    os.environ["DATABASE_URL"] = db_url
-    os.environ["DISABLE_ALEMBIC_LOGGING"] = "1"
-
-    log.info("Running Alembic ....")
-    command.upgrade(alembic_cfg, "head")
-
-
 def show_dev_warning():
-    if db_url == "sqlite:///app.db":
-        run_migrations()
+    if st.secrets.get("settings", {}).get("dev_mode", False):
         st.warning("""
-        You're visiting a development version of the site.
+        **You're viewing a development version of the site.**
 
-        Historical data will be reset on each reboot, and test data may be present.
+        This environment is used for experimenting and testing new features.
 
-        Feel free to explore here, but for accurate and persistent data,
-        visit the main page: https://splinter-lands.streamlit.app/
-    """)
+        Feel free to explore, but please note that things may be unstable or change frequently.
+        For the stable experience, visit the main site:
+        https://splinter-lands.streamlit.app/
+        """)
 
 
 def show_memory_output(placeholder):

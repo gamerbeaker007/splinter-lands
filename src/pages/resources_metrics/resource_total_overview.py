@@ -1,9 +1,9 @@
 import pandas as pd
 import streamlit as st
 
-from src.api.db import resource_tracking
 from src.graphs import resources_supply_graphs
 from src.static.static_values_enum import resource_icon_map, NATURAL_RESOURCE
+from src.utils import data_helper
 from src.utils.large_number_util import format_large_number
 from src.utils.resource_util import reorder_column
 
@@ -15,7 +15,14 @@ def add_section():
 
 def add_daily_overview_section():
     st.subheader("Daily Production / Consumption Overview")
-    df = resource_tracking.get_latest_resources()
+    resource_df = data_helper.get_latest_resource_tracking_data()
+    supply_df = data_helper.get_latest_resource_total_supply()
+    df = pd.merge(
+        resource_df,
+        supply_df,
+        left_on=['date', 'token_symbol'],
+        right_on=['date', 'resource']
+    )
     df = filter_rows(df)
 
     if df.empty:
@@ -42,7 +49,15 @@ def add_daily_overview_section():
 
 
 def add_historical_section():
-    df = resource_tracking.get_historical_data()
+    resource_df = data_helper.get_historical_resource_tracking_data()
+    supply_df = data_helper.get_historical_resource_supply_data()
+    df = pd.merge(
+        resource_df,
+        supply_df,
+        left_on=['date', 'token_symbol'],
+        right_on=['date', 'resource']
+    )
+
     df = filter_rows(df)
 
     if df.empty:

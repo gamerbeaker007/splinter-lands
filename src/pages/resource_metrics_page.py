@@ -3,9 +3,9 @@ import datetime
 import streamlit as st
 
 from src.api import spl
-from src.api.db import resource_metrics
 from src.graphs import resources_graphs
 from src.pages.resources_metrics import resources_conversion, resource_total_overview, resource_trade_hub
+from src.utils import data_helper
 
 
 def load_market_data():
@@ -27,7 +27,7 @@ def get_page():
 
     resources_conversion.get_container(metrics_df, prices_df)
 
-    df = resource_metrics.get_historical_data()
+    df = data_helper.get_historical_resource_hub_data()
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
             "Grain factor chart",

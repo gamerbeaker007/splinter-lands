@@ -2,11 +2,11 @@ import pandas as pd
 import streamlit as st
 
 from src.api import spl
+from src.pages.components import filter_section, sorting_section
 from src.pages.player_overview import resources_cost_earning, resource_player, resource_player_deed, rankings, \
     alert_section
-from src.pages.components import filter_section, sorting_section
 from src.pages.player_overview.helper.progress_helper import get_progress_info
-from src.utils.data_loader import merge_with_details, load_cached_data
+from src.utils import data_helper
 from src.utils.log_util import configure_logger
 
 log = configure_logger(__name__)
@@ -25,20 +25,9 @@ def prepare_data(player):
             """)
 
         else:
-            df = merge_with_details(deeds, worksite_details, staking_details)
+            df = data_helper.merge_land_deed_with_details(deeds, worksite_details, staking_details)
             return df
     return pd.DataFrame()
-
-
-@st.cache_data(ttl='1h')
-def prepare_daily_data():
-    deeds = load_cached_data('deeds')
-    worksite_details = load_cached_data('worksite_details')
-    staking_details = load_cached_data('staking_details')
-    if not deeds.empty and not worksite_details.empty and not staking_details.empty:
-        return merge_with_details(deeds, worksite_details, staking_details)
-    else:
-        return pd.DataFrame()
 
 
 def get_progress_info_row(row):
@@ -52,7 +41,7 @@ def get_progress_info_row(row):
 def get_page():
     metrics_df = spl.get_land_resources_pools()
     prices_df = spl.get_prices()
-    all_daily_df = prepare_daily_data()
+    all_daily_df = data_helper.get_land_data_merged()
 
     # Text input with default from session
     player_input = st.text_input("Enter account name", value=st.session_state.get("account", ""))
