@@ -14,11 +14,6 @@ COPY .streamlit/config.toml /app/.streamlit/config.toml
 COPY .streamlit/pages.toml /app/.streamlit/pages.toml
 COPY main.py /app/main.py
 
-# temporary
-COPY alembic /app/alembic
-COPY alembic.ini /app/alembic.ini
-
-
 # Define a build-arg for APP_VERSION
 ARG APP_VERSION
 
