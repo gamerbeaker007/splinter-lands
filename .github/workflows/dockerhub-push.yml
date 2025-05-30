@@ -9,7 +9,7 @@ on:
       - 'push_*'
 
 env:
-  DOCKER_REPO: gamerbeaker/splinter-land
+  DOCKER_REPO: gamerbeaker/splinter-lands
 
 jobs:
   docker:
