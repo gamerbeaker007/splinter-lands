@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 from src.pages.components import filter_section
@@ -9,10 +10,27 @@ from src.utils.log_util import configure_logger
 log = configure_logger(__name__)
 
 
+def add_dec_columns(land_df, player_df):
+    df = land_df.groupby('player').agg({
+        'total_dec_stake_needed': 'sum',
+        'total_dec_stake_in_use': 'sum',
+    }).reset_index()
+    player_df = pd.merge(player_df, df, on='player')
+    df1 = (
+        land_df.groupby(['region_uid', 'player'], as_index=False)
+        .agg({'total_dec_staked': 'first'})
+        .groupby('player', as_index=False)
+        .agg({'total_dec_staked': 'sum'})
+    )
+    return pd.merge(player_df, df1, on=['player'])
+
+
 def get_page():
     date_str = data_helper.get_last_updated()
     if date_str:
+        land_df = data_helper.get_land_data_merged()
         player_summary_df = data_helper.get_player_summary_data()
+        player_summary_df = add_dec_columns(land_df, player_summary_df)
         if not player_summary_df.empty:
             st.subheader(f'Data is created at: {date_str.strftime('%Y-%m-%d %H:%M:%S')}')
 
