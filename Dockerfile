@@ -4,24 +4,26 @@ FROM python:3.12-slim-bullseye
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+# Create .streamlit folder to avoid mount issue
+RUN mkdir -p /app/.streamlit
+
+# Install dependencies
+COPY requirements.txt ./
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
+# Copy app files
 COPY src /app/src
 COPY .streamlit/config.toml /app/.streamlit/config.toml
 COPY .streamlit/pages.toml /app/.streamlit/pages.toml
 COPY main.py /app/main.py
 
-# Define a build-arg for APP_VERSION
+# Optional: APP_VERSION build argument and env var
 ARG APP_VERSION
-
-# Set the environment variable for the app version
 ENV APP_VERSION=$APP_VERSION
 ENV PYTHONUNBUFFERED=1
 
-# Expose port
+# Expose Streamlit port
 EXPOSE 8501
 
 # Run Streamlit
