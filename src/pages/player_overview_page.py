@@ -35,8 +35,10 @@ def prepare_daily_data():
     deeds = load_cached_data('deeds')
     worksite_details = load_cached_data('worksite_details')
     staking_details = load_cached_data('staking_details')
-    df = merge_with_details(deeds, worksite_details, staking_details)
-    return df
+    if not deeds.empty and not worksite_details.empty and not staking_details.empty:
+        return merge_with_details(deeds, worksite_details, staking_details)
+    else:
+        return pd.DataFrame()
 
 
 def get_progress_info_row(row):

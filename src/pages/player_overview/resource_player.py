@@ -32,8 +32,8 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
         key="region_overview_taxes"
     )
     st.session_state.include_fee = st.checkbox(
-        "Include transfer fees (12.5%)",
-        help="Negative DEC resources include a 12.5% fee to cover transfer costs.",
+        "Include transfer fees (10%)",
+        help="Negative DEC resources include a 10% fee to cover transfer costs.",
         value=st.session_state.include_fee
     )
 
@@ -42,7 +42,7 @@ def get_resource_region_overview(df, player, metrics_df, prices_df):
 
     render_regions(summary_df, amount_df)
 
-    dec_net = total_section(summary_df, amount_df, metrics_df, prices_df,)
+    dec_net = total_section(summary_df, amount_df, metrics_df, prices_df)
     add_self_sufficiency(dec_net, player)
 
 
@@ -50,6 +50,9 @@ def prepare_data(df):
     grouped_df = df.groupby(["region_uid", 'token_symbol']).agg(
         {'total_harvest_pp': 'sum',
          'total_base_pp_after_cap': 'sum',
+         'total_dec_stake_needed': 'sum',
+         'total_dec_stake_in_use': 'sum',
+         'total_dec_staked': 'first',
          'rewards_per_hour': 'sum'}
     ).reset_index()
 
@@ -125,7 +128,7 @@ def color_cell(val):
 
 
 def adjust_fee(val):
-    return val * 1.125 if val < 0 else val
+    return val * 1.10 if val < 0 else val
 
 
 def build_region_markdown(row, region_df):

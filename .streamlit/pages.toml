@@ -8,6 +8,10 @@ path = 'src/pages/region_metrics_page.py'
 name = 'Region Metrics'
 icon = ':bar_chart:'
 
+[[pages]]
+path = 'src/pages/region_dec_metrics_page.py'
+name = 'Region DEC Metrics'
+icon = ':bar_chart:'
 
 [[pages]]
 path = 'src/pages/player_overview_page.py'

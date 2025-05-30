@@ -4,7 +4,7 @@ import sys
 import streamlit as st
 from st_pages import get_nav_from_toml, add_page_title
 
-from src.pages import resource_metrics_page, region_metrics_page, player_overview_page
+from src.pages import resource_metrics_page, region_metrics_page, player_overview_page, region_dec_metrics_page
 from src.utils import dev_mode
 from src.utils.data_loader import is_data_stale, is_refreshing, safe_refresh_data
 from src.utils.log_util import configure_logger
@@ -46,7 +46,6 @@ elif is_data_stale():
 else:
     st.sidebar.markdown(":large_green_circle: Data Ready")
 
-
 placeholder = st.empty()
 
 # Dynamically call the page-specific function based on the selected page
@@ -56,9 +55,11 @@ if pg.title == "Resource Metrics":
 if pg.title == "Region Metrics":
     with placeholder.container():
         region_metrics_page.get_page()
+if pg.title == "Region DEC Metrics":
+    with placeholder.container():
+        region_dec_metrics_page.get_page()
 if pg.title == "Player Overview":
     with placeholder.container():
         player_overview_page.get_page()
-
 
 dev_mode.show_memory_output(mem_placeholder)

@@ -15,7 +15,7 @@ def get_page(filtered_all_data, date_str):
             'Compare',
             'Summary',
             'Castle/Keeps',
-            'Region Production Overview'
+            'Region Production Overview',
         ]
     )
     with tab1:
