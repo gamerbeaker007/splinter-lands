@@ -1,3 +1,4 @@
+import os
 import tracemalloc
 from pathlib import Path
 
@@ -83,3 +84,11 @@ def check_offline():
         )
 
         st.stop()
+
+
+def get_version():
+    if os.getenv('APP_VERSION'):
+        version = os.getenv('APP_VERSION')
+    else:
+        version = "SNAPSHOT"
+    return version

@@ -13,7 +13,7 @@ from src.pages import (
 )
 from src.utils import dev_mode, data_helper, data_loader_new
 from src.utils.data_loader_new import safe_refresh_data
-from src.utils.dev_mode import check_offline
+from src.utils.dev_mode import check_offline, get_version
 from src.utils.log_util import configure_logger
 
 
@@ -76,13 +76,15 @@ if not last_updated:
 else:
     formatted_time = last_updated.strftime("%Y-%m-%d %H:%M:%S")
 
+version = get_version()
 # --- Sidebar Summary ---
 st.sidebar.markdown(f"""
 **ℹ️ Data Info**
 
 {status_icon} <b>{status_text}</b><br>
 📦 Cached as of <code>{formatted_time}</code></br>
-⚡ Player overview fetched on demand
+⚡ Player overview fetched on demand </br>
+🔖 Version: {version}
 """, unsafe_allow_html=True)
 # Render selected page
 with st.empty().container():
