@@ -13,6 +13,7 @@ from src.pages import (
 )
 from src.utils import dev_mode, data_helper, data_loader_new
 from src.utils.data_loader_new import safe_refresh_data
+from src.utils.dev_mode import check_offline
 from src.utils.log_util import configure_logger
 
 
@@ -31,6 +32,8 @@ log = configure_logger(__name__)
 
 # Page setup
 st.set_page_config(page_title="SplinterLands", layout="wide")
+
+check_offline()
 
 # Load navigation
 nav = get_nav_from_toml('.streamlit/pages.toml')
@@ -65,6 +68,7 @@ last_updated = data_helper.get_last_updated()
 if not last_updated:
     st.warning("""
     **No data found yet.**
+
     The application may still be fetching new data. Please refresh in a few minutes.
     You can also check the sidebar for data status information.
     """)

@@ -20,7 +20,7 @@ def show_dev_warning():
 
         Feel free to explore, but please note that things may be unstable or change frequently.
         For the stable experience, visit the main site:
-        https://splinter-lands.streamlit.app/
+        [https://land.spl-stats.com/](https://land.spl-stats.com/)
         """)
 
 
@@ -61,3 +61,25 @@ def show_memory_output(placeholder):
 def start_memory_measurements():
     if st.secrets.get("settings", {}).get("debug_memory", False):
         tracemalloc.start()
+
+
+def check_offline():
+    if st.secrets.get("settings", {}).get("offline", False):
+        st.warning("""
+        **⚠️ This page is offline...**
+
+        But don’t worry — we’re just moving to a better home (with fewer *Oh No!* screens 🤞😄).
+
+        👉 Visit the new site here: [https://land.spl-stats.com/](https://land.spl-stats.com/)
+        """)
+
+        st.markdown(
+            """
+            <div style="text-align: center;">
+                <img width="100px" src="https://media.tenor.com/YCM_QtL_MV8AAAAi/14.gif" alt="Don't be sad" width="300">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.stop()

@@ -86,6 +86,18 @@ def safe_refresh_data(force=False):
         start_time = time.time()
         log.info("Start reload of data.....")
 
+        st.warning("""
+        **⚠️ You're the first to trigger the reload process for today — the community thanks you! 🙌**
+
+        The latest data is being refreshed and should be ready in a few minutes.
+
+        You have two options:
+        - ⏳ **Wait** a bit and you'll automatically see the freshest data.
+        - 🔄 **Refresh the page (F5)** to load yesterday's data — the update will continue running in the background.
+
+        Thanks for your patience, and sorry for the inconvenience!
+        """)
+
         set_refresh_lock()
         asyncio.run(fetch_all())
 
