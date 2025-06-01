@@ -60,10 +60,11 @@ def filter_top(df):
 def get_page(df):
     df = filter_top(df)
 
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4 = st.tabs([
         "DEC",
         "LCE",
         "LPE",
+        "LDE"
     ])
     with tab1:
         add_dec(df)
@@ -75,7 +76,10 @@ def get_page(df):
         df['LCE_base_rank'] = df['LCE_ratio_base'].rank(method='min', ascending=False).astype(int)
         df['LCE_boosted_rank'] = df['LCE_ratio_boosted'].rank(method='min', ascending=False).astype(int)
 
+        st.info("Land Card Efficiency (LCE) = Total PP Employed (Raw PP) / Total DEC earned per hour")
+
         name = st.text_input("Enter hive name to highlight", key="LCE_name")
+
         add_ratio_rank_plot(
             df,
             x_column='LCE_ratio_base',
@@ -91,7 +95,10 @@ def get_page(df):
         df['LPE_ratio'] = df.total_dec / df['count']
         df['LPE_rank'] = df['LPE_ratio'].rank(method='min', ascending=False).astype(int)
 
+        st.info("Land Plot Efficiency (LPE) = Total DEC earned per hour / Number of Active Plots")
+
         name = st.text_input("Enter hive name to highlight", key="LPE_name")
+
         add_ratio_rank_plot(
             df,
             x_column='LPE_ratio',
@@ -112,6 +119,25 @@ def get_page(df):
             xaxis_title='Amount of Plots',
             yaxis_title='Total DEC',
             hover_label='DEC',
+            customdata_column='total_base_pp_after_cap'
+        )
+    with tab4:
+        df['LDE_ratio'] = df.total_dec_stake_in_use / (df.total_dec * 24)
+        df['LDE_rank'] = df['LDE_ratio'].rank(method='min', ascending=False).astype(int)
+
+        st.info("Land DEC Efficiency (LDE) = Total DEC Staked in Use / (DEC earned per hour * 24)")
+
+        name = st.text_input("Enter hive name to highlight", key="LDE_name")
+
+        add_ratio_rank_plot(
+            df,
+            x_column='LDE_ratio',
+            y_column='LDE_rank',
+            highlight_player=name,
+            title='LDE Ratio vs Rank (Bubble = Base PP)',
+            xaxis_title='LDE_ratio',
+            yaxis_title='LDE_rank',
+            hover_label='LDE_ratio',
             customdata_column='total_base_pp_after_cap'
         )
 
