@@ -103,7 +103,7 @@ def get_production(df):
                 pivot_df["active"] = pivot_df["active"].fillna(0).astype(int)
                 return pivot_df
             else:
-                log.warning("emnpty filtering check what todo with it?")
+                log.warning("empty filtering check what todo with it?")
     return pd.DataFrame()
 
 

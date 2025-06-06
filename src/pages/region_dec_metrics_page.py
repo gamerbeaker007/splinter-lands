@@ -32,7 +32,7 @@ def get_page():
         player_summary_df = data_helper.get_player_summary_data()
         player_summary_df = add_dec_columns(land_df, player_summary_df)
         if not player_summary_df.empty:
-            st.subheader(f'Data is created at: {date_str.strftime('%Y-%m-%d %H:%M:%S')}')
+            st.subheader(f'Data snapshot is from: {date_str.strftime('%Y-%m-%d %H:%M:%S')}')
 
             filtered_df = filter_section.get_page(player_summary_df, only=[FilterKey.PLAYERS])
             if not filtered_df.empty:
