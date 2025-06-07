@@ -6,7 +6,6 @@ urllib3==2.2.2
 st-pages==1.0.1
 pandas~=2.2.3
 plotly~=5.24.1
-alembic~=1.15.2
 psycopg2-binary~=2.9.10
 sqlalchemy~=2.0.40
 toml~=0.10.2

@@ -4,8 +4,6 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from alembic import command
-from alembic.config import Config
 
 from src.utils.log_util import configure_logger
 
@@ -14,26 +12,17 @@ log = configure_logger(__name__)
 project_root = Path.cwd()
 
 
-def run_migrations():
-    alembic_cfg = Config("alembic.ini")
-    os.environ["DATABASE_URL"] = db_url
-    os.environ["DISABLE_ALEMBIC_LOGGING"] = "1"
-
-    log.info("Running Alembic ....")
-    command.upgrade(alembic_cfg, "head")
-
-
 def show_dev_warning():
-    if db_url == "sqlite:///app.db":
-        run_migrations()
+    if st.secrets.get("settings", {}).get("dev_mode", False):
         st.warning("""
-        You're visiting a development version of the site.
+        **You're viewing a development version of the site.**
 
-        Historical data will be reset on each reboot, and test data may be present.
+        This environment is used for experimenting and testing new features.
 
-        Feel free to explore here, but for accurate and persistent data,
-        visit the main page: https://splinter-lands.streamlit.app/
-    """)
+        Feel free to explore, but please note that things may be unstable or change frequently.
+        For the stable experience, visit the main site:
+        [https://land.spl-stats.com/](https://land.spl-stats.com/)
+        """)
 
 
 def show_memory_output(placeholder):
@@ -73,3 +62,33 @@ def show_memory_output(placeholder):
 def start_memory_measurements():
     if st.secrets.get("settings", {}).get("debug_memory", False):
         tracemalloc.start()
+
+
+def check_offline():
+    if st.secrets.get("settings", {}).get("offline", False):
+        st.warning("""
+        **⚠️ This page is offline...**
+
+        But don’t worry — we’re just moving to a better home (with fewer *Oh No!* screens 🤞😄).
+
+        👉 Visit the new site here: [https://land.spl-stats.com/](https://land.spl-stats.com/)
+        """)
+
+        st.markdown(
+            """
+            <div style="text-align: center;">
+                <img width="100px" src="https://media.tenor.com/YCM_QtL_MV8AAAAi/14.gif" alt="Don't be sad" width="300">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.stop()
+
+
+def get_version():
+    if os.getenv('APP_VERSION'):
+        version = os.getenv('APP_VERSION')
+    else:
+        version = "SNAPSHOT"
+    return version

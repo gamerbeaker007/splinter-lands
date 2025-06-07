@@ -17,7 +17,8 @@ def create_land_region_active_graph(df, date_str, group_by_label):
 
     fig.update_layout(
         barmode='stack',
-        title=f'Active vs Inactive Deeds per {"Tract" if "tract" in group_by_label else "Region"} (as of {date_str})',
+        title=f'Active vs Inactive Deeds per {"Tract" if "tract" in group_by_label else "Region"} '
+              f'(as of {date_str.strftime("%Y-%m-%d %H:%M:%S")})',
         xaxis_title=group_by_label.replace("_", " ").title(),
         yaxis_title='Deeds',
         xaxis_tickangle=45,

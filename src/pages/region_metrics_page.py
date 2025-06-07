@@ -2,27 +2,19 @@ import streamlit as st
 
 from src.pages.components import filter_section
 from src.pages.region_metrics import overall_region_info, region_header, main_container
-from src.utils.data_loader import load_cached_data, get_last_updated, merge_with_details
+from src.utils import data_helper
 from src.utils.log_util import configure_logger
 
 transaction_fee = 0.90  # 10% fee
 log = configure_logger(__name__)
 
 
-def prepare_data():
-    deeds = load_cached_data('deeds')
-    worksite_details = load_cached_data('worksite_details')
-    staking_details = load_cached_data('staking_details')
-    df = merge_with_details(deeds, worksite_details, staking_details)
-    return df
-
-
 def get_page():
-    date_str = get_last_updated()
+    date_str = data_helper.get_last_updated()
     if date_str:
         st.title(f"Region from: {date_str.strftime('%Y-%m-%d')}")
 
-        all_df = prepare_data()
+        all_df = data_helper.get_land_data_merged()
         region_header.get_page()
         overall_region_info.get_page(all_df)
 

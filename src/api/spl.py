@@ -85,17 +85,6 @@ def get_nested_value(response_dict: dict, key_path: str) -> Any:
     return response_dict
 
 
-def get_land_region_details(region):
-    result = fetch_api_data(f'{API_URLS['land']}land/deeds', params={"region_number": region}, data_key='data')
-
-    if result:
-        worksite_details = pd.DataFrame(result["worksite_details"])
-        staking_details = pd.DataFrame(result["staking_details"])
-        deeds = pd.DataFrame(result["deeds"])
-        return deeds, worksite_details, staking_details
-    return pd.DataFrame()
-
-
 @st.cache_data(ttl="1h")
 def get_land_resources_pools():
     result = fetch_api_data(f'{API_URLS['land']}land/liquidity/landpools', data_key='data')
@@ -129,21 +118,6 @@ def get_staked_assets(deed_uid):
     if result:
         return result
     return None
-
-
-def get_resource_leaderboard(resource):
-    params = {
-        'territory': '',
-        'region': '',
-        'resource': resource,
-        'player': '',
-        'limit': 150000
-    }
-    result = fetch_api_data(f'{API_URLS['land']}land/resources/leaderboards', params=params, data_key='data')
-
-    if result:
-        return pd.DataFrame(result)
-    return pd.DataFrame()
 
 
 @st.cache_data(ttl='1h')

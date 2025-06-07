@@ -1,8 +1,7 @@
 import streamlit as st
 
-from src.api.db import active_metrics
 from src.graphs import resources_graphs
-
+from src.utils import data_helper
 
 height = 600
 
@@ -10,10 +9,10 @@ height = 600
 def get_page():
     col1, col2 = st.columns([3, 2])
     with col1:
-        df = active_metrics.get_historical_data()
+        df = data_helper.get_historical_active_data()
         resources_graphs.create_active_graph(df, height)
     with col2:
-        df = active_metrics.get_latest_active()
+        df = data_helper.get_latest_active_data()
         if df.empty:
             st.warning("No data available to display the Active Land graph.")
             return

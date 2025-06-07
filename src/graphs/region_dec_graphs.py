@@ -131,7 +131,8 @@ def add_ratio_rank_plot(
         st.warning(f"Hive name '{highlight_player}' not found (note only one name can be entered)")
 
     # Clean up ratio column
-    df[x_column] = df[x_column].replace([np.inf, -np.inf], np.nan)
+    df = df.copy()
+    df.loc[:, x_column] = df[x_column].replace([np.inf, -np.inf], np.nan)
     df = df.dropna(subset=[x_column])
 
     # Define fill and border colors
