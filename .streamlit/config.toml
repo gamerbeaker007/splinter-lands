@@ -5,5 +5,8 @@ runOnSave = true
 headless = true
 fileWatcherType = "poll"
 
+[theme]
+base = "dark"
+
 [logger]
 level="error"
