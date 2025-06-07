@@ -33,30 +33,31 @@ def show_memory_output(placeholder):
             st.write(f"Peak memory usage: {peak / 1024 / 1024:.2f} MB")
 
         with placeholder.container():
-            if st.button("🔍 Debug Memory"):
-                snapshot = tracemalloc.take_snapshot()
-                stats = snapshot.statistics("lineno")[:10]
-                data = []
-                for stat in stats:
-                    full_path = Path(stat.traceback[0].filename)
-                    try:
-                        # Try to make the path relative to your project root
-                        short_path = full_path.relative_to(project_root)
-                    except ValueError:
-                        # If it's not inside the project folder, just use the file name
-                        short_path = full_path.name
-                    data.append({
-                        "File": f"{short_path}:{stat.traceback[0].lineno}",
-                        "Size (MiB)": f"{stat.size / 1024 / 1024:.2f}",
-                        "Count": stat.count,
-                        "Average (KiB)": f"{stat.size / stat.count / 1024:.2f}" if stat.count > 0 else "-"
-                    })
+            if st.secrets.get("settings", {}).get("debug_snapshot", False):
+                if st.button("🔍 Debug Memory"):
+                    snapshot = tracemalloc.take_snapshot()
+                    stats = snapshot.statistics("lineno")[:10]
+                    data = []
+                    for stat in stats:
+                        full_path = Path(stat.traceback[0].filename)
+                        try:
+                            # Try to make the path relative to your project root
+                            short_path = full_path.relative_to(project_root)
+                        except ValueError:
+                            # If it's not inside the project folder, just use the file name
+                            short_path = full_path.name
+                        data.append({
+                            "File": f"{short_path}:{stat.traceback[0].lineno}",
+                            "Size (MiB)": f"{stat.size / 1024 / 1024:.2f}",
+                            "Count": stat.count,
+                            "Average (KiB)": f"{stat.size / stat.count / 1024:.2f}" if stat.count > 0 else "-"
+                        })
 
-                df = pd.DataFrame(data)
+                    df = pd.DataFrame(data)
 
-                # Show it in a nice Streamlit table
-                st.markdown("### 🔍 Top Memory Usage")
-                st.dataframe(df, use_container_width=True)
+                    # Show it in a nice Streamlit table
+                    st.markdown("### 🔍 Top Memory Usage")
+                    st.dataframe(df, use_container_width=True)
 
 
 def start_memory_measurements():
