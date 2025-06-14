@@ -6,7 +6,7 @@ from src.pages.player_overview.components.deed_type import deed_type_style, add_
 
 def get_section(df):
     # Filter plots that are done or full
-    alert_df = df[df['percentage_done'] >= 100]
+    alert_df = df[(df['percentage_done'] >= 100) & (df.resource_symbol != "TAX")]
 
     if not alert_df.empty:
         with st.expander("🚨 Attention Needed – Full or Finished Plots"):

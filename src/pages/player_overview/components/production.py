@@ -231,11 +231,19 @@ def get_progres_html(row):
     percentage_done = row['percentage_done']
     info_str = row['info_str']
 
-    progress_color = "red" if percentage_done >= 75 else "orange" if percentage_done >= 40 else "green"
-    progress_fill_style = f"width: {percentage_done}%; background-color: {progress_color};"
+    if row['resource_symbol'] == "TAX":
+        progress_fill_style = f"width: 0%; background-color: green;"
 
-    progress_html = f"""<div class="progress-bar-container">
-        <div class="progress-bar-fill" style="{progress_fill_style}"></div>
-        <div class="progress-bar-text">{info_str}</div>
-    </div>"""
+        progress_html = f"""<div class="progress-bar-container">
+            <div class="progress-bar-fill" style="{progress_fill_style}"></div>
+            <div class="progress-bar-text">N/A</div>
+        </div>"""
+    else:
+        progress_color = "red" if percentage_done >= 75 else "orange" if percentage_done >= 40 else "green"
+        progress_fill_style = f"width: {percentage_done}%; background-color: {progress_color};"
+
+        progress_html = f"""<div class="progress-bar-container">
+            <div class="progress-bar-fill" style="{progress_fill_style}"></div>
+            <div class="progress-bar-text">{info_str}</div>
+        </div>"""
     return progress_html
