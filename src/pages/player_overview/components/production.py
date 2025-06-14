@@ -232,8 +232,7 @@ def get_progres_html(row):
     info_str = row['info_str']
 
     if row['resource_symbol'] == "TAX":
-        progress_fill_style = f"width: 0%; background-color: green;"
-
+        progress_fill_style = "width: 0%; background-color: green;"
         progress_html = f"""<div class="progress-bar-container">
             <div class="progress-bar-fill" style="{progress_fill_style}"></div>
             <div class="progress-bar-text">N/A</div>
