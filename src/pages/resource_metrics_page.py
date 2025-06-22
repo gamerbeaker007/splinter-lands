@@ -46,12 +46,19 @@ def get_page():
     * Iron: 0.0005 1 Iron = 40 Grain
     """)
         resources_graphs.create_land_resources_factor_graph(df, False)
+        with st.expander("DATA", expanded=False):
+            st.dataframe(df, hide_index=True)
+
     with tab2:
         st.markdown("Below a chart that represent how much resources you will receive for 1000 DEC (1$)")
         resources_graphs.create_land_resources_dec_graph(df, True)
+        with st.expander("DATA", expanded=False):
+            st.dataframe(df, hide_index=True)
     with tab3:
         st.markdown("Below a chart that represent how much it cost (DEC) to get 1000 of the resource.")
         resources_graphs.create_land_resources_graph(df, True)
+        with st.expander("DATA", expanded=False):
+            st.dataframe(df, hide_index=True)
     with tab4:
         resource_total_overview.add_section()
     with tab5:
