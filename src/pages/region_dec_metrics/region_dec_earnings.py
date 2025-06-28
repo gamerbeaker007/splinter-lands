@@ -153,12 +153,13 @@ def add_leaderboard_section(df, player_name=None):
                 # elif title == "LCE Boosted PP":
                 #     value = player_data['LCE_ratio_boosted']
                 #     rank = player_data['LCE_boosted_rank']
-                #     st.markdown(f"<h5 style='color:red;'>{player_data['player']} LCE: {value:.2f} (Rank #{rank})</h5>",
+                #    st.markdown(f"<h5 style='color:red;'>{player_data['player']} LCE: {value:.2f} (Rank #{rank})</h5>",
                 #                 unsafe_allow_html=True)
                 elif title == "DEC Staked":
                     value = player_data['total_dec_staked']
                     rank = player_data['total_dec_staked_rank']
-                    st.markdown(f"<h5 style='color:red;'>{player_data['player']} DEC Staked: {format_large_number(value)} (Rank #{rank})</h5>",
+                    st.markdown(f"<h5 style='color:red;'>{player_data['player']} "
+                                f"DEC Staked: {format_large_number(value)} (Rank #{rank})</h5>",
                                 unsafe_allow_html=True)
                 elif title == "LPE":
                     value = player_data['LPE_ratio']
