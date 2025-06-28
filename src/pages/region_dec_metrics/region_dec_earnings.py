@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from src.graphs.region_dec_graphs import add_total_dec, add_plots_vs_dec, add_dec, add_ratio_rank_plot
+from src.utils.large_number_util import format_large_number
 from src.utils.log_util import configure_logger
 
 log = configure_logger(__name__)
@@ -67,6 +68,7 @@ def add_ratios(df):
     df['LPE_rank'] = df['LPE_ratio'].rank(method='min', ascending=False).astype(int)
     df['LDE_ratio'] = df.total_dec_stake_in_use / (df.total_dec * 24)
     df['LDE_rank'] = df['LDE_ratio'].rank(method='min', ascending=False).astype(int)
+    df['total_dec_staked_rank'] = df['total_dec_staked'].rank(method='min', ascending=False).astype(int)
     df['total_dec_rank'] = df['total_dec'].rank(ascending=False, method='min').astype(int)
     df['count_rank'] = df['count'].rank(ascending=False, method='min').astype(int)
     df['total_harvest_pp_rank'] = df['total_harvest_pp'].rank(ascending=False, method='min').astype(int)
@@ -91,10 +93,14 @@ def add_leaderboard_section(df, player_name=None):
         .head(200)
         .rename(columns={'total_harvest_pp_rank': 'Rank', 'player': 'Player', 'total_harvest_pp': 'BOOSTED PP'}),
 
-        "LCE Boosted PP": df[['LCE_boosted_rank', 'player', 'LCE_ratio_boosted']]
-        .sort_values(by='LCE_ratio_boosted', ascending=False)
+        # "LCE Boosted PP": df[['LCE_boosted_rank', 'player', 'LCE_ratio_boosted']]
+        # .sort_values(by='LCE_ratio_boosted', ascending=False)
+        # .head(200)
+        # .rename(columns={'LCE_boosted_rank': 'Rank', 'player': 'Player', 'LCE_ratio_boosted': 'LCE'}),
+        "DEC Staked": df[['total_dec_staked_rank', 'player', 'total_dec_staked']]
+        .sort_values(by='total_dec_staked', ascending=False)
         .head(200)
-        .rename(columns={'LCE_boosted_rank': 'Rank', 'player': 'Player', 'LCE_ratio_boosted': 'LCE'}),
+        .rename(columns={'total_dec_staked_rank': 'Rank', 'player': 'Player', 'total_dec_staked': 'DEC Staked'}),
 
         "LPE": df[['LPE_rank', 'player', 'LPE_ratio']]
         .sort_values(by='LPE_ratio', ascending=False)
@@ -144,10 +150,15 @@ def add_leaderboard_section(df, player_name=None):
                     st.markdown(
                         f"<h5 style='color:red;'>{player_data['player']} BOOSTED PP: {value:,.0f} (Rank #{rank})</h5>",
                         unsafe_allow_html=True)
-                elif title == "LCE Boosted PP":
-                    value = player_data['LCE_ratio_boosted']
-                    rank = player_data['LCE_boosted_rank']
-                    st.markdown(f"<h5 style='color:red;'>{player_data['player']} LCE: {value:.2f} (Rank #{rank})</h5>",
+                # elif title == "LCE Boosted PP":
+                #     value = player_data['LCE_ratio_boosted']
+                #     rank = player_data['LCE_boosted_rank']
+                #     st.markdown(f"<h5 style='color:red;'>{player_data['player']} LCE: {value:.2f} (Rank #{rank})</h5>",
+                #                 unsafe_allow_html=True)
+                elif title == "DEC Staked":
+                    value = player_data['total_dec_staked']
+                    rank = player_data['total_dec_staked_rank']
+                    st.markdown(f"<h5 style='color:red;'>{player_data['player']} DEC Staked: {format_large_number(value)} (Rank #{rank})</h5>",
                                 unsafe_allow_html=True)
                 elif title == "LPE":
                     value = player_data['LPE_ratio']
